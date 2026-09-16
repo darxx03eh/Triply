@@ -1,6 +1,7 @@
 services:
   triply:
     container_name: triply-api
+    restart: unless-stopped
     build:
       context: ./src
       dockerfile: Dockerfile
@@ -23,6 +24,7 @@ services:
   triply-db:
     image: mcr.microsoft.com/mssql/server:2025-latest
     container_name: triply-db
+    restart: unless-stopped
     environment:
       ACCEPT_EULA: ${ACCEPT_EULA}
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
@@ -41,6 +43,24 @@ services:
       retries: 10
       start_period: 30s
 
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: triply-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
   triply-migrations:
     build:
       context: ./src
@@ -54,3 +74,4 @@ services:
         condition: service_healthy
 volumes:
   triply-data:
+  rabbitmq-data:

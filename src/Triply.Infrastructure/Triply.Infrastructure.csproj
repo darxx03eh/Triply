@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Triply.Application\Triply.Application.csproj" />
       <ProjectReference Include="..\Triply.Domain\Triply.Domain.csproj" />
+      <ProjectReference Include="..\..\libraries\MessageQueue\MessageQueue.csproj" />
     </ItemGroup>
 
     <ItemGroup>
