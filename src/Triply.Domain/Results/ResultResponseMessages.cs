@@ -6,6 +6,8 @@ public static class ResultResponseMessages
     {
         public static class Validation
         {
+            public static readonly ResultMessage TokenRequired
+                = new("TOKEN_REQUIRED", "Token is required.");
             public static readonly ResultMessage FirstNameRequired
                 = new("FIRST_NAME_REQUIRED", "First name is required.");
 
@@ -32,6 +34,9 @@ public static class ResultResponseMessages
 
             public static readonly ResultMessage EmailAlreadyExists
                 = new("EMAIL_ALREADY_EXISTS", "A user with this email already exists.");
+
+            public static readonly ResultMessage EmailNotExists
+                = new("EMAIL_NOT_EXISTS", "A user with this email not exists.");
 
             public static readonly ResultMessage PasswordRequired
                 = new("PASSWORD_REQUIRED", "Password is required.");
@@ -80,6 +85,9 @@ public static class ResultResponseMessages
 
             public static readonly ResultMessage RegisterSucceeded
                 = new("REGISTER_SUCCEEDED", "Register new user Succeeded.");
+
+            public static readonly ResultMessage ConfirmationSucceeded
+                = new("EMAIL_CONFIRMED", "Email confirmed successfully.");
         }
     }
     public static class Success

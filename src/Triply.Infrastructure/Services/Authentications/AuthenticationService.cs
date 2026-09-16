@@ -4,6 +4,7 @@ using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
 using MessageQueue.IRabbitMQ;
+using Microsoft.AspNetCore.Http;
 
 namespace Triply.Infrastructure.Services.Authentications;
 
@@ -13,7 +14,8 @@ public partial class AuthenticationService(
     UserManager<TriplyUser> userManager,
     SignInManager<TriplyUser> signInManager,
     RoleManager<TriplyRole> roleManager,
-    IMessagePublisher publisher
+    IMessagePublisher publisher,
+    IHttpContextAccessor httpContextAccessor
     ) : IAuthenticationService
 {
     private const string DefaultRole = Roles.User;

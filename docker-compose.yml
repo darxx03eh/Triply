@@ -88,6 +88,15 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
+      JwtSettings__Issuer: ${ISSUER}
+      JwtSettings__Audience: ${AUDIENCE}
+      JwtSettings__SecretKey: ${SECRETKEY}
+      JwtSettings__ValidateAudience: ${VALIDATE_AUDIENCE}
+      JwtSettings__ValidateIssuer: ${VALIDATE_ISSUER}
+      JwtSettings__ValidateLifetime: ${VALIDATE_LIFETIME}
+      JwtSettings__ValidateIssuerSigningKey: ${VALIDATE_ISSUER_SIGNING_KEY}
+      JwtSettings__ExpiryMinutes: ${EXPIRE_MINUTES}
+      JwtSettings__RefreshTokenExpiryDays: ${REFRESH_TOKEN_EXPIRY_DAYS}
     depends_on:
       triply-db:
         condition: service_healthy
