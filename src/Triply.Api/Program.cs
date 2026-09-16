@@ -4,7 +4,7 @@ namespace Triply.Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         
@@ -25,6 +25,8 @@ public class Program
 
         var app = builder.Build();
 
+        await app.Services.SeedAsync();
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -35,6 +37,6 @@ public class Program
         app.MapHealthChecks("/health");
         app.UseAuthorization();
 
-        app.Run();
+        await app.RunAsync();
     }
 }
