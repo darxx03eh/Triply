@@ -1,10 +1,20 @@
+using System.Text;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using Triply.Application.Interfaces.Repositories.General;
+using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
 using Triply.Infrastructure.Db;
+using Triply.Infrastructure.Repositories;
+using Triply.Infrastructure.Repositories.General;
 using Triply.Infrastructure.Seeders;
+using Triply.Infrastructure.Settings;
 
 namespace Triply.Infrastructure.DependencyInjection;
 
@@ -44,6 +54,62 @@ public static class InfrastructureServiceCollectionExtensions
                         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._";
                 }).AddEntityFrameworkStores<TriplyDbContext>()
                 .AddDefaultTokenProviders();
+            return services;
+        }
+        
+        public IServiceCollection AddJwtAuthentication(IConfiguration configuration)
+        {
+            services.AddOptions<JwtSettings>()
+                .Bind(configuration.GetSection(nameof(JwtSettings)))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            var jwtSettings = configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>()
+                              ?? throw new InvalidOperationException(
+                                  $"{nameof(JwtSettings)} section is missing from configuration.");
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.MapInboundClaims = false;
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = jwtSettings.ValidateIssuer,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidateAudience = jwtSettings.ValidateAudience,
+                    ValidAudience = jwtSettings.Audience,
+                    ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+                    ValidateLifetime = jwtSettings.ValidateLifetime,
+                    RoleClaimType = TokenClaims.Role,
+                    NameClaimType = TokenClaims.Username,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+            return services;
+        }
+        
+        public IServiceCollection AddInfrastructureDependencies()
+        {
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.Scan(scan => scan
+                .FromAssemblyOf<RefreshTokenRepository>()
+                .AddClasses(@class 
+                    => @class.Where(type => type.Name.EndsWith("Repository") && !type.IsGenericType))
+                .AsMatchingInterface()
+                .WithScopedLifetime());
+
+            services.Scan(scan => scan
+                .FromAssemblyOf<AuthenticationService>()
+                .AddClasses(@class 
+                    => @class.Where(type => type.Name.EndsWith("Service") && !type.IsGenericType))
+                .AsMatchingInterface()
+                .WithScopedLifetime());
+            
             return services;
         }
     }

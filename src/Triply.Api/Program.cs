@@ -11,8 +11,14 @@ public class Program
         // Add Car Rental DbContext
         builder.Services.AddTriplyDbContext(builder.Configuration);
         
+        // Add Dependencies
+        builder.Services.AddInfrastructureDependencies();
+        
         // Add Identity Settings
         builder.Services.AddIdentityServices();
+        
+        // Add JWT Authentication Settings
+        builder.Services.AddJwtAuthentication(builder.Configuration);
         
         // Add Health Checks Service
         builder.Services.AddHealthChecks();
