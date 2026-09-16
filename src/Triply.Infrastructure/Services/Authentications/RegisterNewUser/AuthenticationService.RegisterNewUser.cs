@@ -1,6 +1,8 @@
 using Triply.Application.DTOs.Authentications;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Authentications.Commands.Register;
+using Triply.Domain.Contracts;
+using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Exceptions;
 using Triply.Domain.Results;
 using Triply.Domain.Results.Enums;
@@ -44,6 +46,17 @@ public partial class AuthenticationService
             }
 
             await transaction.CommitAsync(cancellationToken);
+            
+            await publisher.PublishAsync("email.send", new EmailMessage
+            {
+                Type = EmailType.ConfirmationEmail,
+                To = user.Email,
+                TemplateData = new Dictionary<string, string>
+                {
+                    ["user_name"] = user.UserName,
+                    ["confirmation_link"] = "link"
+                }
+            });
             var response = new RegisterUserResponse(
                 $"{user.FirstName} {user.LastName}",
                 user.Id, user.Email, user.UserName);
