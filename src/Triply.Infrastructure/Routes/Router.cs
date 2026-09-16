@@ -1,4 +1,4 @@
-namespace Triply.Api.Routes;
+namespace Triply.Infrastructure.Routes;
 
 public static class Router
 {
@@ -9,5 +9,6 @@ public static class Router
     {
         private const string Prefix = $"{Rule}/auth";
         public const string Register = $"{Prefix}/register";
+        public const string EmailConfirmation = $"{Prefix}/confirm-email";
     }
 }

@@ -6,6 +6,7 @@ using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Exceptions;
 using Triply.Domain.Results;
 using Triply.Domain.Results.Enums;
+using Triply.Infrastructure.Routes;
 
 namespace Triply.Infrastructure.Services.Authentications;
 public partial class AuthenticationService
@@ -47,6 +48,11 @@ public partial class AuthenticationService
 
             await transaction.CommitAsync(cancellationToken);
             
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var httpRequest = httpContextAccessor.HttpContext.Request;
+            var link =
+                $"{httpRequest.Scheme}://{httpRequest.Host}/{Router.AuthenticationRoutes.EmailConfirmation}?email={user.Email}&token={Uri.EscapeDataString(token)}";
+            
             await publisher.PublishAsync("email.send", new EmailMessage
             {
                 Type = EmailType.ConfirmationEmail,
@@ -54,7 +60,7 @@ public partial class AuthenticationService
                 TemplateData = new Dictionary<string, string>
                 {
                     ["user_name"] = user.UserName,
-                    ["confirmation_link"] = "link"
+                    ["confirmation_link"] = link
                 }
             });
             var response = new RegisterUserResponse(

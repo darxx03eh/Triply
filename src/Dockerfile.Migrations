@@ -8,6 +8,6 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN dotnet restore "src/Triply.Api/Triply.Api.csproj"
+RUN dotnet restore src/Triply.sln
 
-CMD ["dotnet","ef","database","update","--project","src/Triply.Infrastructure","--startup-project","src/Triply.Api"]
+CMD ["dotnet", "ef", "database", "update", "--project", "src/Triply.Infrastructure", "--startup-project", "src/Triply.Api"]
