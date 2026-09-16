@@ -4,10 +4,10 @@ RUN dotnet tool install --global dotnet-ef
 
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
-WORKDIR /src
+WORKDIR /workspace
 
 COPY . .
 
-RUN dotnet restore "Triply.Api/Triply.Api.csproj"
+RUN dotnet restore "src/Triply.Api/Triply.Api.csproj"
 
-CMD ["dotnet", "ef", "database", "update", "--project", "Triply.Infrastructure", "--startup-project", "Triply.Api"]
+CMD ["dotnet","ef","database","update","--project","src/Triply.Infrastructure","--startup-project","src/Triply.Api"]
