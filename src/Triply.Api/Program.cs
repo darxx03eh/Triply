@@ -1,6 +1,8 @@
 using Triply.Api.DependencyInjection;
 using Triply.Api.Middlewares;
 using Triply.Infrastructure.DependencyInjection;
+using MessageQueue.DependencyInjection;
+using Triply.Api.Endpoints;
 
 namespace Triply.Api;
 
@@ -15,6 +17,12 @@ public class Program
         
         // Add Dependencies
         builder.Services.AddInfrastructureDependencies();
+        
+        // Add Decorators
+        builder.Services.ApplyDecorators();
+        
+        // Add RabbitMqMessaging Service
+        builder.Services.AddRabbitMqMessaging(builder.Configuration);
         
         // Add Identity Settings
         builder.Services.AddIdentityServices();
@@ -57,6 +65,7 @@ public class Program
         app.MapHealthChecks("/health");
         app.UseAuthorization();
 
+        app.MapAuthenticationEndpoints();
         app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }

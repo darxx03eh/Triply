@@ -1,19 +1,22 @@
 using System.Text;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Application.Interfaces.Repositories.General;
+using Triply.Application.Interfaces.Services;
+using Triply.Application.Services;
 using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
 using Triply.Infrastructure.Repositories.General;
 using Triply.Infrastructure.Seeders;
+using Triply.Infrastructure.Services.Authentications;
 using Triply.Infrastructure.Settings;
 
 namespace Triply.Infrastructure.DependencyInjection;
@@ -110,6 +113,14 @@ public static class InfrastructureServiceCollectionExtensions
                 .AsMatchingInterface()
                 .WithScopedLifetime());
             
+            return services;
+        }
+
+        public IServiceCollection ApplyDecorators()
+        {
+            services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
+            
+            services.Decorate<IAuthenticationService, ValidatedAuthenticationService>();
             return services;
         }
     }
