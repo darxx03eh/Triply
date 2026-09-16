@@ -1,3 +1,5 @@
+using Triply.Api.DependencyInjection;
+using Triply.Api.Middlewares;
 using Triply.Infrastructure.DependencyInjection;
 
 namespace Triply.Api;
@@ -25,7 +27,10 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
-
+        
+        // Add Swagger
+        builder.Services.AddSwagger();
+        
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
@@ -37,12 +42,22 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Triply API v1");
+                options.RoutePrefix = "swagger";
+                options.DisplayRequestDuration();
+            });
         }
 
         app.UseHttpsRedirection();
+        app.UseMiddleware<ErrorHandlerMiddleware>();
+        
         app.MapHealthChecks("/health");
         app.UseAuthorization();
 
+        app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }
 }
