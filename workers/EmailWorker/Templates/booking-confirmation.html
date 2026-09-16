@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking confirmed</title>
+    <style>
+        @media screen and (max-width: 600px) {
+            .email-shell { width: 100% !important; }
+            .content { padding: 36px 24px !important; }
+            .booking-row td { display:block; width:100% !important; padding:6px 0 !important; }
+            .footer { padding:24px !important; }
+        }
+    </style>
+</head>
+<body style="margin:0; padding:0; background-color:#eef3f1; color:#18342f; font-family:Arial, Helvetica, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#eef3f1;">
+        <tr>
+            <td align="center" style="padding:32px 16px;">
+                <table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px; max-width:600px; background-color:#ffffff; border-radius:16px; overflow:hidden;">
+                    <tr>
+                        <td style="padding:26px 40px; background-color:#18342f;">
+                            <span style="color:#b8e6d5; font-size:22px; font-weight:700; letter-spacing:1px;">TRIPLY</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content" style="padding:48px 56px 44px;">
+                            <div style="display:inline-block; padding:8px 12px; border-radius:20px; background-color:#dff5ec; color:#16805f; font-size:12px; font-weight:700; letter-spacing:.8px; text-transform:uppercase;">Confirmed</div>
+                            <h1 style="margin:20px 0 12px; color:#18342f; font-size:32px; line-height:1.2; font-weight:700;">Your stay is booked.</h1>
+                            <p style="margin:0 0 28px; color:#5b706b; font-size:16px; line-height:1.7;">Hi {{ user_name }}, your reservation at <strong style="color:#18342f;">{{ hotel_name }}</strong> is confirmed. Keep this email handy for your trip.</p>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border:1px solid #dce8e3; border-radius:10px;">
+                                <tr class="booking-row">
+                                    <td width="33%" style="padding:18px 16px; border-bottom:1px solid #dce8e3; color:#7b8d88; font-size:12px;">CHECK-IN<br><strong style="display:block; padding-top:6px; color:#18342f; font-size:15px;">{{ check_in }}</strong></td>
+                                    <td width="33%" style="padding:18px 16px; border-bottom:1px solid #dce8e3; color:#7b8d88; font-size:12px;">CHECK-OUT<br><strong style="display:block; padding-top:6px; color:#18342f; font-size:15px;">{{ check_out }}</strong></td>
+                                    <td width="34%" style="padding:18px 16px; border-bottom:1px solid #dce8e3; color:#7b8d88; font-size:12px;">TOTAL<br><strong style="display:block; padding-top:6px; color:#18342f; font-size:15px;">{{ total_price }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="padding:18px 16px; color:#5b706b; font-size:13px; line-height:1.5;">We hope you have a wonderful trip. Your destination is waiting.</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer" style="padding:24px 56px; background-color:#f7faf9; color:#7b8d88; font-size:12px; line-height:1.6;">Triply &middot; Your journey, thoughtfully planned.</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

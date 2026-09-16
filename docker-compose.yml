@@ -20,6 +20,16 @@ services:
       JwtSettings__ValidateIssuerSigningKey: ${VALIDATE_ISSUER_SIGNING_KEY}
       JwtSettings__ExpiryMinutes: ${EXPIRE_MINUTES}
       JwtSettings__RefreshTokenExpiryDays: ${REFRESH_TOKEN_EXPIRY_DAYS}
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__HostName: ${RABBITMQ_HOSTNAME}
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__ExchangeName: ${RABBITMQ_EXCHANGE}
+      RabbitMq__QueueName: ${RABBITMQ_EMAIL_QUEUE}
+      RabbitMq__MaxRetryCount: ${RABBITMQ_EMAIL_MAX_RETRY_COUNT}
+      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_EMAIL_RETRY_DELAY}
+      RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
+      RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
     depends_on:
       triply-db:
         condition: service_healthy
@@ -81,6 +91,38 @@ services:
     depends_on:
       triply-db:
         condition: service_healthy
+
+  email-worker:
+    build:
+      context: .
+      dockerfile: workers/EmailWorker/Dockerfile
+    container_name: email-worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      triply-db:
+        condition: service_healthy
+      triply:
+        condition: service_healthy
+    environment:
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__HostName: ${RABBITMQ_HOSTNAME}
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__ExchangeName: ${RABBITMQ_EXCHANGE}
+      RabbitMq__QueueName: ${RABBITMQ_EMAIL_QUEUE}
+      RabbitMq__MaxRetryCount: ${RABBITMQ_EMAIL_MAX_RETRY_COUNT}
+      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_EMAIL_RETRY_DELAY}
+      RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
+      RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
+      Smtp__Host: ${SMTP_HOST}
+      Smtp__Port: ${SMTP_PORT}
+      Smtp__UserName: ${SMTP_USER}
+      Smtp__Password: ${SMTP_PASSWORD}
+      Smtp__FromAddress: ${SMTP_FROM_ADDRESS}
+      Smtp__FromName: ${SMTP_FROM_NAME}
+      Smtp__UseSsl: ${SMTP_USE_SSL}
+        
 volumes:
   triply-data:
   rabbitmq-data:
