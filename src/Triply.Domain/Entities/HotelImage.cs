@@ -2,7 +2,8 @@ namespace Triply.Domain.Entities;
 
 public sealed class HotelImage
 {
-    public Guid ImageId { get; set; } = Guid.NewGuid();
+    public HotelImage() => ImageId = Guid.NewGuid();
+    public Guid ImageId { get; set; }
 
     public Guid HotelId { get; set; }
 
