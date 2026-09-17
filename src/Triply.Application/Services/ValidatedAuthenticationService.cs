@@ -2,6 +2,7 @@ using FluentValidation;
 using Triply.Application.DTOs.Authentications;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Authentications.Commands.EmailConfirmation;
+using Triply.Application.Features.Authentications.Commands.Login;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Results;
@@ -11,7 +12,8 @@ namespace Triply.Application.Services;
 public class ValidatedAuthenticationService(
     IAuthenticationService inner,
     IEnumerable<IValidator<RegisterUserRequest>> registerValidator,
-    IEnumerable<IValidator<ConfirmEmailRequest>> confirmEmailValidator) : IAuthenticationService
+    IEnumerable<IValidator<ConfirmEmailRequest>> confirmEmailValidator,
+    IEnumerable<IValidator<LoginRequest>> loginValidator) : IAuthenticationService
 {
     public async Task<Result<RegisterUserResponse>> RegisterNewUserAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
     {
@@ -24,5 +26,11 @@ public class ValidatedAuthenticationService(
     {
         await confirmEmailValidator.ValidateAndThrowAsync(request, cancellationToken);
         return await inner.ConfirmationEmailAsync(request, cancellationToken);
+    }
+
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    {
+        await loginValidator.ValidateAndThrowAsync(request, cancellationToken);
+        return await inner.LoginAsync(request, cancellationToken);
     }
 }

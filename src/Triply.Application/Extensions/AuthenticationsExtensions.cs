@@ -1,3 +1,4 @@
+using Triply.Application.DTOs.Authentications;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Domain.Entities.Identity;
 
@@ -15,4 +16,7 @@ public static class AuthenticationsExtensions
             PhoneNumber = request.PhoneNumber,
             DateOfBirth = request.DateOfBirth,
         };
+
+    public static LoginApiResponse ToLoginApiResponse(this LoginResponse response)
+        => new(response.Name, response.Access);
 }
