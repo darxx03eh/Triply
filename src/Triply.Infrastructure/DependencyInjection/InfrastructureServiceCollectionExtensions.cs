@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -91,6 +92,21 @@ public static class InfrastructureServiceCollectionExtensions
                     RoleClaimType = TokenClaims.Role,
                     NameClaimType = TokenClaims.Username,
                     ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents()
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var blacklistService = context.HttpContext.RequestServices
+                            .GetRequiredService<ITokenBlacklistService>();
+
+                        string? jti = context.Principal?.FindFirstValue(TokenClaims.Jti);
+
+                        if (string.IsNullOrEmpty(jti) ||
+                            await blacklistService.IsBlacklistedAsync(jti, context.HttpContext.RequestAborted))
+                            context.Fail("Token has been revoked.");
+                    }
                 };
             });
             return services;

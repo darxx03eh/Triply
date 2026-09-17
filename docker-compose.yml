@@ -30,8 +30,11 @@ services:
       RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_EMAIL_RETRY_DELAY}
       RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
       RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
+      Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD}
     depends_on:
       triply-db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -61,6 +64,22 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: triply-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   rabbitmq:
     image: rabbitmq:management
@@ -135,3 +154,4 @@ services:
 volumes:
   triply-data:
   rabbitmq-data:
+  redis-data:

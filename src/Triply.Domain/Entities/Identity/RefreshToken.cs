@@ -10,6 +10,7 @@ public sealed class RefreshToken
         AddedDate = DateTime.UtcNow;
     }
     public Guid RefreshId { get; set; }
+    public string Jti { get; set; }
     public Guid UserId { get; set; }
     public string Token { get; set; }
     public bool IsActive { get; set; }

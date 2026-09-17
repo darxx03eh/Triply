@@ -15,13 +15,14 @@ public partial class TokenService
             ExpiryDate = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
             IsActive = true,
             IsRevoked = false,
-            Token = refresh,
+            Token = refresh.Token,
+            Jti = refresh.Jti,
             UserId = user.Id
         };
         
         await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
         await refreshTokenRepository.SaveChangesAsync(cancellationToken);
 
-        return new TokenResponse(access, refresh);
+        return new TokenResponse(access, refresh.Token);
     }
 }

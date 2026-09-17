@@ -1,6 +1,8 @@
 using System.Reflection;
 using Microsoft.OpenApi;
 using Triply.Api.Responses;
+using Triply.Application.Interfaces.Services;
+using Triply.Infrastructure.Services.Blacklist;
 
 namespace Triply.Api.DependencyInjection;
 
@@ -51,6 +53,18 @@ public static class PresentationServiceCollectionExtensions
                     c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
                 c.OrderActionsBy(apiDesc => apiDesc.RelativePath);
             });
+            return services;
+        }
+
+        public IServiceCollection AddRedisService(IConfiguration configuration)
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration["Redis:ConnectionString"];
+                options.InstanceName = "hotelbooking:";
+            });
+
+            services.AddScoped<ITokenBlacklistService, RedisTokenBlacklistService>();
             return services;
         }
     }

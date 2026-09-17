@@ -34,6 +34,7 @@ public partial class TokenService
         var claims = new List<Claim>()
         {
             new(TokenClaims.Type, "access"),
+            new(TokenClaims.Jti, Guid.NewGuid().ToString()),
             new(TokenClaims.Id, user.Id.ToString()),
             new(TokenClaims.Username,  user.UserName!),
             new(TokenClaims.Email, user.Email!)
