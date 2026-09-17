@@ -12,6 +12,7 @@ namespace Triply.Infrastructure.Services.Authentications;
 
 public partial class AuthenticationService
 {
+    /// <inheritdoc />
     public async Task<Result<LoginResponse>> GenerateAccessTokenFromRefreshToken(string refresh,
         ClaimsPrincipal userClaims,
         CancellationToken cancellationToken = default)

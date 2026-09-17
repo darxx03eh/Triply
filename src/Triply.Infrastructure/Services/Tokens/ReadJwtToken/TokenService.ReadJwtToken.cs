@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 namespace Triply.Infrastructure.Services.Tokens;
 public partial class TokenService
 {
+    /// <inheritdoc />
     public async Task<JwtSecurityToken> ReadJwtTokenAsync(string token, CancellationToken cancellationToken = default)
     {
 

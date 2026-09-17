@@ -7,6 +7,7 @@ using Triply.Infrastructure.Settings;
 
 namespace Triply.Infrastructure.Services.Tokens;
 
+/// <summary>Creates and parses the application's JWT access and refresh tokens.</summary>
 public partial class TokenService(
     IOptions<JwtSettings> options,
     IRefreshTokenRepository refreshTokenRepository,

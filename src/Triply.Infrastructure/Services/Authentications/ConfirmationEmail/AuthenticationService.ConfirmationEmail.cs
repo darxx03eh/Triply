@@ -7,6 +7,7 @@ namespace Triply.Infrastructure.Services.Authentications;
 
 public partial class AuthenticationService
 {
+    /// <inheritdoc />
     public async Task<Result<string>> ConfirmationEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default)
     {
         try

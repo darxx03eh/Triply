@@ -9,6 +9,7 @@ using Triply.Domain.Results.Enums;
 namespace Triply.Infrastructure.Services.Authentications;
 public partial class AuthenticationService
 {
+    /// <inheritdoc />
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var user = await FindUserByIdentifierAsync(request.Identifier, cancellationToken);
