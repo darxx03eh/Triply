@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Triply.Api.Extensions;
@@ -16,10 +15,12 @@ using Triply.Infrastructure.Settings;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the authentication endpoints to the application's route builder.</summary>
 public static class AuthenticationEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps registration, confirmation, login, refresh, and logout endpoints.</summary>
         public void MapAuthenticationEndpoints()
         {
             var group = app.MapGroup("")

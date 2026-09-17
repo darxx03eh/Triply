@@ -4,6 +4,7 @@ namespace Triply.Infrastructure.Services.Blacklist;
 
 public partial class RedisTokenBlacklistService
 {
+    /// <inheritdoc />
     public async Task BlacklistTokenAsync(string jti, DateTime expiryUtc, CancellationToken cancellationToken = default)
     {
         var remaining = expiryUtc - DateTime.UtcNow;

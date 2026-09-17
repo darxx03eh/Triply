@@ -4,8 +4,13 @@ using Triply.Domain.Results.Enums;
 
 namespace Triply.Api.Extensions;
 
+/// <summary>Converts domain results into Minimal API HTTP responses.</summary>
 public static class ResultExtensions
 {
+    /// <summary>Maps a domain result to its corresponding HTTP response.</summary>
+    /// <typeparam name="T">The result value type.</typeparam>
+    /// <param name="result">The domain result to map.</param>
+    /// <returns>A Minimal API result with the appropriate status code and response body.</returns>
     public static IResult ToMinimalApiResult<T>(this Result<T> result)
     {
         if (result.IsSuccess)
