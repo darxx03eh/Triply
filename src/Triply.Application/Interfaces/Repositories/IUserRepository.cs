@@ -5,6 +5,7 @@ namespace Triply.Application.Interfaces.Repositories;
 
 public interface IUserRepository : IGenericRepository<TriplyUser>
 {
-    public Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default);
-    public Task<bool> IsUsernameExistsAsync(string username, CancellationToken cancellationToken = default);
+    Task<bool> IsEmailExistsAsync(string email, CancellationToken cancellationToken = default);
+    Task<bool> IsUsernameExistsAsync(string username, CancellationToken cancellationToken = default);
+    Task<TriplyUser?> GetByPhoneNumberAsync(string phoneNumber,  CancellationToken cancellationToken = default);
 }

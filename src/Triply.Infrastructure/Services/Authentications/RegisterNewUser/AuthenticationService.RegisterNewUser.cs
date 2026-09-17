@@ -3,6 +3,7 @@ using Triply.Application.Extensions;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Domain.Contracts;
 using Triply.Domain.Contracts.Enums;
+using Triply.Domain.Entities.Identity;
 using Triply.Domain.Exceptions;
 using Triply.Domain.Results;
 using Triply.Domain.Results.Enums;
@@ -47,22 +48,8 @@ public partial class AuthenticationService
             }
 
             await transaction.CommitAsync(cancellationToken);
+            await PublishConfirmationEmail(user);
             
-            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-            var httpRequest = httpContextAccessor.HttpContext.Request;
-            var link =
-                $"{httpRequest.Scheme}://{httpRequest.Host}/{Router.AuthenticationRoutes.EmailConfirmation}?email={user.Email}&token={Uri.EscapeDataString(token)}";
-            
-            await publisher.PublishAsync("email.send", new EmailMessage
-            {
-                Type = EmailType.ConfirmationEmail,
-                To = user.Email,
-                TemplateData = new Dictionary<string, string>
-                {
-                    ["user_name"] = user.UserName,
-                    ["confirmation_link"] = link
-                }
-            });
             var response = new RegisterUserResponse(
                 $"{user.FirstName} {user.LastName}",
                 user.Id, user.Email, user.UserName);
@@ -75,5 +62,28 @@ public partial class AuthenticationService
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    private async Task<string> GenerateConfirmationLink(TriplyUser user)
+    {
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var httpRequest = httpContextAccessor.HttpContext.Request;
+        var link =
+            $"{httpRequest.Scheme}://{httpRequest.Host}/{Router.AuthenticationRoutes.EmailConfirmation}?email={user.Email}&token={Uri.EscapeDataString(token)}";
+        return link;
+    }
+
+    private async Task PublishConfirmationEmail(TriplyUser user)
+    {
+        await publisher.PublishAsync("email.send", new EmailMessage
+        {
+            Type = EmailType.ConfirmationEmail,
+            To = user.Email,
+            TemplateData = new Dictionary<string, string>
+            {
+                ["user_name"] = user.UserName,
+                ["confirmation_link"] = await GenerateConfirmationLink(user)
+            }
+        });
     }
 }
