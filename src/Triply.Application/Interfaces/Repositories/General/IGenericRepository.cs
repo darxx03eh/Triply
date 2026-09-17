@@ -10,8 +10,8 @@ public interface IGenericRepository<TEntity> where TEntity : class
 {
     /// <summary>Gets all entities.</summary>
     Task<ICollection<TEntity>> GetAllAsync();
-    /// <summary>Gets an entity by numeric identifier.</summary>
-    Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken);
+    /// <summary>Gets an entity by uuid identifier.</summary>
+    Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     /// <summary>Adds an entity to the current unit of work.</summary>
     Task<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken);
     /// <summary>Adds a collection of entities.</summary>

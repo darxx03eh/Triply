@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Sieve.Models;
+using Sieve.Services;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Application.Interfaces.Repositories.General;
 using Triply.Application.Interfaces.Services;
@@ -14,10 +16,12 @@ using Triply.Application.Services;
 using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
 using Triply.Infrastructure.Db;
+using Triply.Infrastructure.Filtering;
 using Triply.Infrastructure.Repositories;
 using Triply.Infrastructure.Repositories.General;
 using Triply.Infrastructure.Seeders;
 using Triply.Infrastructure.Services.Authentications;
+using Triply.Infrastructure.Services;
 using Triply.Infrastructure.Settings;
 
 namespace Triply.Infrastructure.DependencyInjection;
@@ -26,6 +30,13 @@ public static class InfrastructureServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        public IServiceCollection AddSieveService(IConfiguration configuration)
+        {
+            services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
+            services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
+
+            return services;
+        }
         public IServiceCollection AddTriplyDbContext(IConfiguration configuration)
         {
             services.AddDbContext<TriplyDbContext>(options =>
@@ -115,6 +126,7 @@ public static class InfrastructureServiceCollectionExtensions
         public IServiceCollection AddInfrastructureDependencies()
         {
             services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.Scan(scan => scan
                 .FromAssemblyOf<RefreshTokenRepository>()
@@ -138,6 +150,7 @@ public static class InfrastructureServiceCollectionExtensions
             services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
             
             services.Decorate<IAuthenticationService, ValidatedAuthenticationService>();
+            services.Decorate<ICityService, ValidatedCityService>();
             return services;
         }
     }
