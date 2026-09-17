@@ -8,6 +8,7 @@ namespace Triply.Infrastructure.Services.Authentications;
 
 public partial class AuthenticationService
 {
+    /// <inheritdoc />
     public async Task<Result<string>> Logout(ClaimsPrincipal user,
         string refresh,
         CancellationToken cancellationToken = default)

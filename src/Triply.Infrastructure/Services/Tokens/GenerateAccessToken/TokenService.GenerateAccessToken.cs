@@ -4,6 +4,7 @@ using Triply.Domain.Entities.Identity;
 namespace Triply.Infrastructure.Services.Tokens;
 public partial class TokenService
 {
+    /// <inheritdoc />
     public async Task<TokenResponse> GenerateAccessTokenAsync(TriplyUser user, bool flag = true,
         CancellationToken cancellationToken = default)
 

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Triply.Infrastructure.Services.Authentications;
 
+/// <summary>Implements the application's authentication workflows.</summary>
 public partial class AuthenticationService(
     IUserRepository userRepository,
     IRefreshTokenRepository refreshTokenRepository,

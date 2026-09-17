@@ -12,6 +12,7 @@ using Triply.Infrastructure.Routes;
 namespace Triply.Infrastructure.Services.Authentications;
 public partial class AuthenticationService
 {
+    /// <inheritdoc />
     public async Task<Result<RegisterUserResponse>> RegisterNewUserAsync(RegisterUserRequest request,
         CancellationToken cancellationToken = default)
     {
