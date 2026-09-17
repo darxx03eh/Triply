@@ -35,6 +35,12 @@ public class ValidatedAuthenticationService(
         return await inner.LoginAsync(request, cancellationToken);
     }
 
-    public async Task<Result<string>> Logout(ClaimsPrincipal user, CancellationToken cancellationToken = default)
-        => await inner.Logout(user, cancellationToken);
+    public async Task<Result<string>> Logout(ClaimsPrincipal user,
+        string refresh, CancellationToken cancellationToken = default)
+        => await inner.Logout(user, refresh, cancellationToken);
+
+    public async Task<Result<LoginResponse>> GenerateAccessTokenFromRefreshToken(string refresh,
+        ClaimsPrincipal userClaims,
+        CancellationToken cancellationToken = default)
+            => await inner.GenerateAccessTokenFromRefreshToken(refresh, userClaims, cancellationToken);
 }

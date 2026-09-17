@@ -6,6 +6,7 @@ namespace Triply.Application.Interfaces.Services;
 
 public interface ITokenService
 {
-    Task<TokenResponse> GenerateAccessTokenAsync(TriplyUser user, CancellationToken cancellationToken = default);
+    Task<TokenResponse> GenerateAccessTokenAsync(TriplyUser user, bool flag = true,
+        CancellationToken cancellationToken = default);
     Task<JwtSecurityToken> ReadJwtTokenAsync(string token, CancellationToken cancellationToken = default);
 }

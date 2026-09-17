@@ -49,7 +49,7 @@ public partial class AuthenticationService
                 "ACCOUNT_NOT_ACTIVE",
                 "Your account is not active. Please contact support for assistance.",
                 ResultErrorType.Forbidden);
-        var tokens = await tokenService.GenerateAccessTokenAsync(user, cancellationToken);
+        var tokens = await tokenService.GenerateAccessTokenAsync(user, flag: true, cancellationToken);
 
         user.LastLoginAt = DateTime.UtcNow;
         await userManager.UpdateAsync(user);
