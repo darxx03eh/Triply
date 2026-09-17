@@ -6,6 +6,7 @@ public static class Router
     private const string Root = "api";
     private const string Version = "v1";
     private const string Rule = $"{Root}/{Version}";
+    private const string Id = "{id:guid}";
     /// <summary>Defines authentication route paths.</summary>
     public static class AuthenticationRoutes
     {
@@ -20,5 +21,15 @@ public static class Router
         public const string Refresh = $"{Prefix}/refresh";
         /// <summary>Route for email confirmation.</summary>
         public const string EmailConfirmation = $"{Prefix}/confirm-email";
+    }
+
+    public static class CityRoutes
+    {
+        private const string Prefix = $"{Rule}/cities";
+        public const string Create = Prefix;
+        public const string GetAll = Prefix;
+        public const string GetById = $"{Prefix}/{Id}";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
     }
 }

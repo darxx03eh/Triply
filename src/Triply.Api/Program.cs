@@ -18,6 +18,9 @@ public class Program
         // Add Redis Service
         builder.Services.AddRedisService(builder.Configuration);
         
+        // Add Sieve Service
+        builder.Services.AddSieveService(builder.Configuration);
+        
         // Add Dependencies
         builder.Services.AddInfrastructureDependencies();
         
@@ -69,6 +72,7 @@ public class Program
         app.UseAuthorization();
 
         app.MapAuthenticationEndpoints();
+        app.MapCityEndpoints();
         app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }

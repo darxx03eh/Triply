@@ -15,7 +15,7 @@ public class GenericRepository<TEntity>(
     public virtual async Task<ICollection<TEntity>> GetAllAsync()
         => await context.Set<TEntity>().ToListAsync();
 
-    public virtual async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public virtual async Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         => await context.Set<TEntity>().FindAsync(id, cancellationToken);
 
     public virtual async Task<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken)
