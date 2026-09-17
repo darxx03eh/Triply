@@ -16,8 +16,8 @@ public partial class AuthenticationService(
     SignInManager<TriplyUser> signInManager,
     RoleManager<TriplyRole> roleManager,
     IMessagePublisher publisher,
-    IHttpContextAccessor httpContextAccessor,
-    ITokenBlacklistService tokenBlacklistService
+    ITokenBlacklistService tokenBlacklistService,
+    IHttpContextAccessor httpContextAccessor
     ) : IAuthenticationService
 {
     private const string DefaultRole = Roles.User;

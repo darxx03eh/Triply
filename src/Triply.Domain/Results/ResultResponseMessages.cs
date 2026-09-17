@@ -88,6 +88,9 @@ public static class ResultResponseMessages
 
             public static readonly ResultMessage ConfirmationSucceeded
                 = new("EMAIL_CONFIRMED", "Email confirmed successfully.");
+
+            public static readonly ResultMessage TokenRegenerated
+                = new("TOKEN_REGENERATED", "Token Regenerated successfully.");
         }
     }
     public static class Success
