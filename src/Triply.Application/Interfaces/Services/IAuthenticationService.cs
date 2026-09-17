@@ -15,5 +15,11 @@ public interface IAuthenticationService
     Task<Result<string>> ConfirmationEmailAsync(ConfirmEmailRequest request,
         CancellationToken cancellationToken = default);
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
-    Task<Result<string>> Logout(ClaimsPrincipal user, CancellationToken cancellationToken = default);
+    Task<Result<string>> Logout(ClaimsPrincipal user,
+        string refresh, 
+        CancellationToken cancellationToken = default);
+
+    Task<Result<LoginResponse>> GenerateAccessTokenFromRefreshToken(string refresh,
+        ClaimsPrincipal userClaims,
+        CancellationToken cancellationToken = default);
 }

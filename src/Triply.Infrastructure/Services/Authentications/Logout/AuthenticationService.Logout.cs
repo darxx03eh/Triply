@@ -8,7 +8,9 @@ namespace Triply.Infrastructure.Services.Authentications;
 
 public partial class AuthenticationService
 {
-    public async Task<Result<string>> Logout(ClaimsPrincipal user, CancellationToken cancellationToken = default)
+    public async Task<Result<string>> Logout(ClaimsPrincipal user,
+        string refresh,
+        CancellationToken cancellationToken = default)
     {
         string? jti = user.FindFirstValue(TokenClaims.Jti);
         string? expClaim = user.FindFirstValue("exp");
@@ -20,7 +22,7 @@ public partial class AuthenticationService
 
         await tokenBlacklistService.BlacklistTokenAsync(jti, expiryUtc, cancellationToken);
         
-        var refresh = httpContextAccessor.HttpContext?.Request.Cookies["refresh"];
+        
         if (string.IsNullOrWhiteSpace(refresh))
             return Result<string>.Failure(
                 "REFRESH_TOKEN_MISSING",
@@ -51,11 +53,11 @@ public partial class AuthenticationService
                 ResultResponseMessages.Success.NoContent.Message));
     }
 
-    private async Task<(bool Success, string Reason)> RevokeRefreshTokenAsync(
+    private async Task<(bool Success, string? Reason)> RevokeRefreshTokenAsync(
         string refresh,
         CancellationToken cancellationToken)
     {
-        var jwtToken = await tokenService.ReadJwtTokenAsync(refresh);
+        var jwtToken = await tokenService.ReadJwtTokenAsync(refresh, cancellationToken);
         if (jwtToken is null)
             return (false, "EXPIRED");
 

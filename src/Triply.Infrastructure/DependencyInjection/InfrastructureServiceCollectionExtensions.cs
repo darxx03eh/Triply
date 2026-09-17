@@ -114,6 +114,7 @@ public static class InfrastructureServiceCollectionExtensions
         
         public IServiceCollection AddInfrastructureDependencies()
         {
+            services.AddHttpContextAccessor();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.Scan(scan => scan
                 .FromAssemblyOf<RefreshTokenRepository>()

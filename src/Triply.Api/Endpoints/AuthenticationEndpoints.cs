@@ -98,6 +98,37 @@ public static class AuthenticationEndpoints
                                  returns a JWT access token to be used for authenticating subsequent requests.
                                  """)
                 .Produces(StatusCodes.Status200OK);
+            
+            group.MapPost(Router.AuthenticationRoutes.Refresh, async (
+                IAuthenticationService authenticationService,
+                HttpContext context,
+                ClaimsPrincipal user,
+                CancellationToken cancellationToken
+                ) =>
+            {
+                var refresh = context?.Request.Cookies["refresh"];
+                var result =
+                    await authenticationService.GenerateAccessTokenFromRefreshToken(refresh, user, cancellationToken);
+                if (!result.IsSuccess)
+                    return result.ToMinimalApiResult();
+                
+                var response = result.Value!.ToLoginApiResponse();
+                return Results.Ok(new ApiResponse<LoginApiResponse>()
+                {
+                    Data = response,
+                    Message = ResultResponseMessages.Authentication.Api.TokenRegenerated.Message,
+                    Code =  ResultResponseMessages.Authentication.Api.TokenRegenerated.Code
+                });
+            }).RequireAuthorization()
+                .WithName("Refresh")
+                .WithDisplayName("Refresh Access Token")
+                .WithSummary("Generates a new access token using the refresh token")
+                .WithDescription("""
+                                 Generates a new access token using the refresh token stored
+                                 in the client's HTTP-only cookie. The refresh token is validated
+                                 before issuing a new access token.
+                                 """)
+                .Produces(StatusCodes.Status200OK);
 
             group.MapDelete(Router.AuthenticationRoutes.Logout, async (
                 HttpContext context,
@@ -106,7 +137,8 @@ public static class AuthenticationEndpoints
                 CancellationToken cancellationToken
             ) =>
             {
-                var result = await authenticationService.Logout(user, cancellationToken);
+                var refresh = context?.Request.Cookies["refresh"];
+                var result = await authenticationService.Logout(user, refresh, cancellationToken);
                 if (!result.IsSuccess)
                     return result.ToMinimalApiResult();
 
@@ -118,7 +150,8 @@ public static class AuthenticationEndpoints
             .WithDisplayName("User Logout")
             .WithSummary("Logs out the authenticated user")
             .WithDescription("""
-                             Invalidates the authenticated user's refresh token and removes
+                             Invalidates the authenticated user's refresh token and access token
+                             with blacklist redis and removes
                              the refresh token cookie from the client.
                              """)
             .Produces(StatusCodes.Status204NoContent);
