@@ -9,10 +9,11 @@ namespace Triply.Infrastructure.Services.Tokens;
 
 public partial class TokenService
 {
-    private async Task<string> GenerateRefreshTokenAsync(TriplyUser user,
+    private async Task<(string Token, string Jti)> GenerateRefreshTokenAsync(TriplyUser user,
         CancellationToken cancellationToken = default)
     {
-        var claims = await GenerateRefreshTokenClaimsAsync(user, cancellationToken);
+        var jti = Guid.NewGuid().ToString();
+        var claims = await GenerateRefreshTokenClaimsAsync(user, jti, cancellationToken);
         
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
@@ -27,14 +28,16 @@ public partial class TokenService
         
         var tokenHandler = new JwtSecurityTokenHandler();
         var token =  tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        return (tokenHandler.WriteToken(token), jti);
     }
 
     private async Task<List<Claim>> GenerateRefreshTokenClaimsAsync(TriplyUser user,
+        string jti,
         CancellationToken cancellationToken = default)
     {
         return
         [
+            new(TokenClaims.Jti, jti),
             new(TokenClaims.Id, user.Id.ToString()),
             new(TokenClaims.Type, "refresh")
         ];

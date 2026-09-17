@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Triply.Infrastructure.Db;
 
@@ -11,9 +12,11 @@ using Triply.Infrastructure.Db;
 namespace Triply.Infrastructure.Migrations
 {
     [DbContext(typeof(TriplyDbContext))]
-    partial class TriplyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260917083907_AddJtiFieldToRefreshToken")]
+    partial class AddJtiFieldToRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

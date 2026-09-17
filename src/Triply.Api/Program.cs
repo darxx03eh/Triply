@@ -15,6 +15,9 @@ public class Program
         // Add Car Rental DbContext
         builder.Services.AddTriplyDbContext(builder.Configuration);
         
+        // Add Redis Service
+        builder.Services.AddRedisService(builder.Configuration);
+        
         // Add Dependencies
         builder.Services.AddInfrastructureDependencies();
         
