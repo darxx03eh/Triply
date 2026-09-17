@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Triply.Application.DTOs.Authentications;
 using Triply.Application.Features.Authentications.Commands.EmailConfirmation;
 using Triply.Application.Features.Authentications.Commands.Login;
@@ -14,4 +15,5 @@ public interface IAuthenticationService
     Task<Result<string>> ConfirmationEmailAsync(ConfirmEmailRequest request,
         CancellationToken cancellationToken = default);
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
+    Task<Result<string>> Logout(ClaimsPrincipal user, CancellationToken cancellationToken = default);
 }

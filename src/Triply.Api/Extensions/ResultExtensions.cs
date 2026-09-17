@@ -52,6 +52,7 @@ public static class ResultExtensions
         {
             ResultErrorType.NotFound => Results.NotFound(errorResponse),
             ResultErrorType.Conflict => Results.Conflict(errorResponse),
+            ResultErrorType.BusinessRule => Results.BadRequest(errorResponse),
             ResultErrorType.Unauthorized => Results.Json(errorResponse, statusCode: StatusCodes.Status401Unauthorized),
             ResultErrorType.Forbidden => Results.StatusCode(StatusCodes.Status403Forbidden),
             _ => Results.UnprocessableEntity(errorResponse)

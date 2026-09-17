@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Triply.Api.Extensions;
@@ -96,8 +98,37 @@ public static class AuthenticationEndpoints
                                  returns a JWT access token to be used for authenticating subsequent requests.
                                  """)
                 .Produces(StatusCodes.Status200OK);
+
+            group.MapDelete(Router.AuthenticationRoutes.Logout, async (
+                HttpContext context,
+                IAuthenticationService authenticationService,
+                ClaimsPrincipal user,
+                CancellationToken cancellationToken
+            ) =>
+            {
+                var result = await authenticationService.Logout(user, cancellationToken);
+                if (!result.IsSuccess)
+                    return result.ToMinimalApiResult();
+
+                RemoveRefreshTokenCookie(context);
+
+                return Results.NoContent();
+            }).RequireAuthorization()
+            .WithName("Logout")
+            .WithDisplayName("User Logout")
+            .WithSummary("Logs out the authenticated user")
+            .WithDescription("""
+                             Invalidates the authenticated user's refresh token and removes
+                             the refresh token cookie from the client.
+                             """)
+            .Produces(StatusCodes.Status204NoContent);
         }
-        
+
+        private static void RemoveRefreshTokenCookie(HttpContext context)
+        {
+            context.Response.Cookies.Delete("refresh",
+                new CookieOptions { Path = Router.AuthenticationRoutes.Refresh });
+        }
         private static void SetRefreshTokenCookie(
             HttpContext context,
             string refresh,

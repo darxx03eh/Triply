@@ -82,4 +82,6 @@ public class GenericRepository<TEntity>(
         foreach (var entity in entities)
             await LoadCollectionAsync(entity, navigationProperty);
     }
+    public IQueryable<TEntity> GetTableNoTracking()
+        => context.Set<TEntity>().AsNoTracking().AsQueryable();
 }

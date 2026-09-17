@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FluentValidation;
 using Triply.Application.DTOs.Authentications;
 using Triply.Application.Extensions;
@@ -33,4 +34,7 @@ public class ValidatedAuthenticationService(
         await loginValidator.ValidateAndThrowAsync(request, cancellationToken);
         return await inner.LoginAsync(request, cancellationToken);
     }
+
+    public async Task<Result<string>> Logout(ClaimsPrincipal user, CancellationToken cancellationToken = default)
+        => await inner.Logout(user, cancellationToken);
 }

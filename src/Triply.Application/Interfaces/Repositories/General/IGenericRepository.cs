@@ -32,4 +32,5 @@ public interface IGenericRepository<TEntity> where TEntity : class
         IEnumerable<TEntity> entities,
         Expression<Func<TEntity, IEnumerable<TProperty>>> navigationProperty)
         where TProperty : class;
+    public IQueryable<TEntity> GetTableNoTracking();
 }

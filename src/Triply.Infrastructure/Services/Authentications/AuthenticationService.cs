@@ -10,12 +10,14 @@ namespace Triply.Infrastructure.Services.Authentications;
 
 public partial class AuthenticationService(
     IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
     ITokenService tokenService,
     UserManager<TriplyUser> userManager,
     SignInManager<TriplyUser> signInManager,
     RoleManager<TriplyRole> roleManager,
     IMessagePublisher publisher,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    ITokenBlacklistService tokenBlacklistService
     ) : IAuthenticationService
 {
     private const string DefaultRole = Roles.User;
