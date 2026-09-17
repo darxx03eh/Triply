@@ -93,6 +93,49 @@ public static class ResultResponseMessages
                 = new("TOKEN_REGENERATED", "Token Regenerated successfully.");
         }
     }
+
+    public static class Cities
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage NameRequired
+                = new("CITY_NAME_REQUIRED", "City name is required.");
+
+            public static readonly ResultMessage NameMaxLength
+                = new("CITY_NAME_MAX_LENGTH", "City name must not exceed 100 characters.");
+
+            public static readonly ResultMessage NameWhitespace
+                = new("CITY_NAME_WHITESPACE", "City name cannot contain only whitespace.");
+
+            public static readonly ResultMessage CountryRequired
+                = new("CITY_COUNTRY_REQUIRED", "Country is required.");
+
+            public static readonly ResultMessage CountryMaxLength
+                = new("CITY_COUNTRY_MAX_LENGTH", "Country must not exceed 100 characters.");
+
+            public static readonly ResultMessage CountryWhitespace
+                = new("CITY_COUNTRY_WHITESPACE", "Country cannot contain only whitespace.");
+
+            public static readonly ResultMessage PostOfficeMaxLength
+                = new("CITY_POST_OFFICE_MAX_LENGTH", "Post office must not exceed 20 characters.");
+
+            public static readonly ResultMessage RowVersionRequired
+                = new("CITY_ROW_VERSION_REQUIRED", "RowVersion is required to detect concurrent edits.");
+
+            public static readonly ResultMessage RowVersionInvalidLength
+                = new("CITY_ROW_VERSION_INVALID_LENGTH", "RowVersion must contain exactly 8 bytes.");
+
+            public static readonly ResultMessage PageInvalid
+                = new("CITY_PAGE_INVALID", "Page must be greater than or equal to 1.");
+
+            public static readonly ResultMessage PageSizeInvalid
+                = new("CITY_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+
+            public static readonly ResultMessage CityAlreadExistsInThisCountry
+                = new("CITY_ALREADY_EXISTS", "This city already exists int this specific country.");
+        }
+    }
+
     public static class Success
     {
         public static readonly ResultMessage Created = new("CREATED", "Resource created successfully.");

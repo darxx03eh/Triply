@@ -31,6 +31,9 @@ services:
       RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
       RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
       Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD}
+      Sieve__CaseSensitive: ${SIEVE_CASE_SENSITIVE:-false}
+      Sieve__DefaultPageSize: ${SIEVE_DEFAULT_PAGE_SIZE:-10}
+      Sieve__MaxPageSize: ${SIEVE_MAX_PAGE_SIZE:-50}
     depends_on:
       triply-db:
         condition: service_healthy
