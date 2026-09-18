@@ -151,6 +151,7 @@ public static class InfrastructureServiceCollectionExtensions
             
             services.Decorate<IAuthenticationService, ValidatedAuthenticationService>();
             services.Decorate<ICityService, ValidatedCityService>();
+            services.Decorate<IHotelService, ValidatedHotelService>();
             return services;
         }
     }

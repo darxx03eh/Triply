@@ -34,6 +34,9 @@ public class CityRepository(TriplyDbContext context, ISieveProcessor sieveProces
             && c.Country.ToUpper() == country.ToUpper()
             , cancellationToken);
 
+    public async Task<bool> IsCityIdExistsAsync(Guid cityId, CancellationToken cancellationToken = default)
+        => await context.Cities.AnyAsync(c => c.CityId == cityId, cancellationToken);
+
     public async Task<bool> IsCityExistsExcludeId(string name, string country, Guid cityId,
         CancellationToken cancellationToken = default)
         => await context.Cities.AnyAsync(c =>

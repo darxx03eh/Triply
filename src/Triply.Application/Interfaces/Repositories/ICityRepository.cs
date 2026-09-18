@@ -11,6 +11,7 @@ public interface ICityRepository : IGenericRepository<City>
         CancellationToken cancellationToken = default);
 
     Task<bool> IsCityExistsAsync(string name, string country, CancellationToken cancellationToken = default);
+    Task<bool> IsCityIdExistsAsync(Guid cityId, CancellationToken cancellationToken = default);
 
     Task<bool> IsCityExistsExcludeId(string name, string country, Guid cityId,
         CancellationToken cancellationToken = default);

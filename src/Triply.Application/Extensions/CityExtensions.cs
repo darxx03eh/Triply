@@ -14,6 +14,6 @@ public static class CityExtensions
             PostOffice = city.PostOffice,
             IsDeleted =  city.IsDeleted,
             CreatedAt = city.CreatedAt,
-            ModifiedAt = city.ModifiedAt
+            ModifiedAt = city.ModifiedAt,
         };
 }

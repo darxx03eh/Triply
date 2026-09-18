@@ -17,6 +17,6 @@ public partial class CityService
                 ResultErrorType.NotFound);
 
         return Result<CityResponse>.Success(city.ToCityResponse(), success: new(
-            "CITY_FOUND", "The requested city was found."));
+            "CITY_FOUND", $"The requested city with id: {cityId} was found."));
     }
 }
