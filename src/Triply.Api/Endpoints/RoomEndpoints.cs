@@ -46,7 +46,7 @@ public static class RoomEndpoints
                 {
                     var result = await roomService.GetPagedAsync(request, user.IsAdmin, cancellationToken);
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
                 .WithName("GetAllRooms")
                 .WithDisplayName("Get All Rooms")
                 .WithSummary("Retrieves a paginated list of rooms")
@@ -54,7 +54,6 @@ public static class RoomEndpoints
                                  Retrieves a paginated list of rooms across all hotels based on the provided
                                  filtering, sorting, and pagination parameters (e.g. filters=HotelId==...).
                                  Deleted rooms are included for administrators.
-                                 This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status200OK);
 

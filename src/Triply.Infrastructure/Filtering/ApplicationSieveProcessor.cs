@@ -22,11 +22,21 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
 
         mapper.Property<Room>(r => r.Number).CanFilter().CanSort();
         mapper.Property<Room>(r => r.HotelId).CanFilter();
-        mapper.Property<Room>(r => r.RoomType).CanFilter().CanSort();
-        mapper.Property<Room>(r => r.AdultCapacity).CanFilter().CanSort();
-        mapper.Property<Room>(r => r.ChildCapacity).CanFilter().CanSort();
-        mapper.Property<Room>(r => r.PricePerNight).CanFilter().CanSort();
-        mapper.Property<Room>(r => r.IsAvailable).CanFilter();
+        mapper.Property<Room>(r => r.RoomType)
+            .CanFilter().CanSort()
+            .HasName("room");
+        mapper.Property<Room>(r => r.AdultCapacity)
+            .CanFilter().CanSort()
+            .HasName("adults");
+        mapper.Property<Room>(r => r.ChildCapacity)
+            .CanFilter().CanSort()
+            .HasName("childes");
+        mapper.Property<Room>(r => r.PricePerNight)
+            .CanFilter().CanSort()
+            .HasName("price");
+        mapper.Property<Room>(r => r.IsAvailable)
+            .CanFilter()
+            .HasName("available");
         mapper.Property<Room>(r => r.CreatedAt).CanSort();
         mapper.Property<Room>(r => r.ModifiedAt).CanSort();
 
