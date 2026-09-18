@@ -73,6 +73,7 @@ public class Program
 
         app.MapAuthenticationEndpoints();
         app.MapCityEndpoints();
+        app.MapHotelEndpoints();
         app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }
