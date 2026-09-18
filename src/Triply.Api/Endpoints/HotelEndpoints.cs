@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Triply.Api.Extensions;
 using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Application.Features.Hotels.Commands.UpdateHotel;
+using Triply.Application.Features.Hotels.Commands.UploadImage;
 using Triply.Application.Features.Hotels.Queries.GetHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
@@ -109,6 +111,46 @@ public static class HotelEndpoints
                                  Deletes an existing hotel using its unique identifier. 
                                  Returns a not found response when the specified hotel 
                                  does not exist.
+                                 """)
+                .Produces(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+            
+            group.MapPost(Router.HotelRoutes.AddImage, async (
+                    Guid id, [FromForm] UploadHotelImageRequest request,
+                    IHotelService hotelService, CancellationToken cancellationToken) =>
+                {
+                    var result = await hotelService.InitiateUploadAsync(id, request, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .DisableAntiforgery()
+                .WithName("UploadHotelImage")
+                .WithDisplayName("Upload Hotel Image")
+                .WithSummary("Queues an image upload for a hotel")
+                .WithDescription("""
+                                 Accepts a JPG, PNG or WEBP image as multipart/form-data and queues it
+                                 for background upload to cloud storage. The image is created with the
+                                 Pending status and becomes Uploaded (or Failed) once processed.
+                                 When no display order is given, the image is appended to the gallery.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Accepts<UploadHotelImageRequest>("multipart/form-data")
+                .Produces(StatusCodes.Status202Accepted)
+                .Produces(StatusCodes.Status404NotFound)
+                .ProducesValidationProblem();
+
+            group.MapGet(Router.HotelRoutes.GetImages, async (
+                    Guid id, IHotelService hotelService, CancellationToken cancellationToken) =>
+                {
+                    var result = await hotelService.GetImagesAsync(id, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .WithName("GetHotelImages")
+                .WithDisplayName("Get Hotel Images")
+                .WithSummary("Lists all images of a hotel with their upload status")
+                .WithDescription("""
+                                 Returns every image of the hotel, including Pending and Failed ones,
+                                 ordered by display order. Use it to track background uploads.
+                                 This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);

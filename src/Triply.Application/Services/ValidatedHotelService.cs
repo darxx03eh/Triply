@@ -4,6 +4,7 @@ using Triply.Application.DTOs.Hotels;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Application.Features.Hotels.Commands.UpdateHotel;
+using Triply.Application.Features.Hotels.Commands.UploadImage;
 using Triply.Application.Features.Hotels.Queries.GetHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Results;
@@ -14,7 +15,8 @@ public class ValidatedHotelService(
     IHotelService inner,
     IEnumerable<IValidator<CreateHotelRequest>> createValidators,
     IEnumerable<IValidator<UpdateHotelRequest>> updateValidators,
-    IEnumerable<IValidator<GetHotelsRequest>> getHotelsValidators) : IHotelService
+    IEnumerable<IValidator<GetHotelsRequest>> getHotelsValidators,
+    IEnumerable<IValidator<UploadHotelImageRequest>> uploadImageValidators) : IHotelService
 {
     public async Task<Result<HotelResponse>> CreateAsync(CreateHotelRequest request, Guid ownerId,
         CancellationToken cancellationToken = default)
@@ -42,4 +44,14 @@ public class ValidatedHotelService(
 
     public async Task<Result<bool>> DeleteAsync(Guid hotelId, CancellationToken cancellationToken = default)
         => await inner.DeleteAsync(hotelId, cancellationToken);
+
+    public async Task<Result<HotelImageResponse>> InitiateUploadAsync(Guid hotelId, UploadHotelImageRequest request, CancellationToken cancellationToken = default)
+    {
+        await uploadImageValidators.ValidateAndThrowAsync(request, cancellationToken);
+        return await  inner.InitiateUploadAsync(hotelId, request, cancellationToken);
+    }
+
+    public async Task<Result<IReadOnlyList<HotelImageResponse>>> GetImagesAsync(
+        Guid hotelId, CancellationToken cancellationToken = default)
+        => await inner.GetImagesAsync(hotelId, cancellationToken);
 }

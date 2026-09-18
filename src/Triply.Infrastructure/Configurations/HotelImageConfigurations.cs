@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Triply.Domain.Entities;
+using Triply.Domain.Enums.HotleImages;
 
 namespace Triply.Infrastructure.Configurations;
 
@@ -16,6 +17,10 @@ public class HotelImageConfigurations : IEntityTypeConfiguration<HotelImage>
         {
             x.HasCheckConstraint("CK_DisplayOrder_Positive",
                 $"[{nameof(HotelImage.DisplayOrder)}] > 0");
+
+            var statuses = string.Join(", ", Enum.GetNames<HotelImageStatus>().Select(status => $"'{status}'"));
+            x.HasCheckConstraint("CK_Images_Status",
+                $"[{nameof(HotelImage.Status)}] IN ({statuses})");
         });
         
         builder.HasIndex(x => x.HotelId)
@@ -31,9 +36,13 @@ public class HotelImageConfigurations : IEntityTypeConfiguration<HotelImage>
         
         builder.Property(x => x.Url)
             .HasMaxLength(1000)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property(x => x.DisplayOrder)
+            .IsRequired();
+
+        builder.Property(x => x.Status)
+            .HasConversion<string>()
             .IsRequired();
     }
 }
