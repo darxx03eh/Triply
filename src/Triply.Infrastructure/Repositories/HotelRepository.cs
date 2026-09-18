@@ -27,6 +27,18 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
     public async Task<bool> IsHotelIdExistsAsync(Guid hotelId, CancellationToken cancellationToken = default)
         => await context.Hotels.AnyAsync(h => h.HotelId == hotelId, cancellationToken);
 
+    public async Task<Dictionary<Guid, string>> GetThumbnailsAsync(IEnumerable<Guid> hotelIds,
+        CancellationToken cancellationToken = default)
+        => await context.HotelImages
+            .Where(i => hotelIds.Contains(i.HotelId) && i.Status == HotelImageStatus.Uploaded && i.Url != null)
+            .GroupBy(i => i.HotelId)
+            .Select(g => new
+            {
+                HotelId = g.Key,
+                Url = g.OrderBy(i => i.DisplayOrder).Select(i => i.Url).First()
+            })
+            .ToDictionaryAsync(x => x.HotelId, x => x.Url!, cancellationToken);
+
     public async Task<Dictionary<Guid, int>> GetRoomsCountAsync(IEnumerable<Guid> hotelIds,
         CancellationToken cancellationToken = default)
         => await context.Rooms
@@ -52,6 +64,8 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
         .Include(h => h.Images
             .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
             .OrderBy(i => i.DisplayOrder))
+        .Include(h => h.HotelAmenities)
+            .ThenInclude(ha => ha.Amenity)
         .FirstOrDefaultAsync(h => h.HotelId == id, cancellationToken);
 
     public async Task<(List<Hotel> Hotels, int TotalCount)> GetPagedAsync(SieveModel sieveModel,

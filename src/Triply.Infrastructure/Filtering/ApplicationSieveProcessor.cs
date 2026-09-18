@@ -17,6 +17,9 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Hotel>(h => h.Name).CanFilter().CanSort();
         mapper.Property<Hotel>(h => h.StarRating).CanFilter().CanSort();
         mapper.Property<Hotel>(h => h.CityId).CanFilter();
+        mapper.Property<Hotel>(h => h.HotelType)
+            .CanFilter().CanSort()
+            .HasName("type");
         mapper.Property<Hotel>(h => h.CreatedAt).CanSort();
         mapper.Property<Hotel>(h => h.ModifiedAt).CanSort();
 
@@ -30,7 +33,7 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
             .HasName("adults");
         mapper.Property<Room>(r => r.ChildCapacity)
             .CanFilter().CanSort()
-            .HasName("childes");
+            .HasName("children");
         mapper.Property<Room>(r => r.PricePerNight)
             .CanFilter().CanSort()
             .HasName("price");

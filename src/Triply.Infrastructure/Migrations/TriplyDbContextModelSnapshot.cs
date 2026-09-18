@@ -258,6 +258,14 @@ namespace Triply.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
+                    b.Property<string>("ThumbnailPublicId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.HasKey("CityId");
 
                     b.HasIndex("Name", "Country")
@@ -274,6 +282,10 @@ namespace Triply.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<Guid>("CityId")
                         .HasColumnType("uniqueidentifier");
 
@@ -285,6 +297,13 @@ namespace Triply.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("HotelType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Budget");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -324,6 +343,9 @@ namespace Triply.Infrastructure.Migrations
                     b.HasIndex("CityId")
                         .HasDatabaseName("IX_Hotels_CityId");
 
+                    b.HasIndex("HotelType")
+                        .HasDatabaseName("IX_Hotels_HotelType");
+
                     b.HasIndex("OwnerId")
                         .HasDatabaseName("IX_Hotels_OwnerId");
 
@@ -332,6 +354,8 @@ namespace Triply.Infrastructure.Migrations
 
                     b.ToTable("Hotels", null, t =>
                         {
+                            t.HasCheckConstraint("CK_Hotels_HotelType", "[HotelType] IN ('Budget', 'Boutique', 'Luxury')");
+
                             t.HasCheckConstraint("CK_Hotels_StarRating", "[StarRating] BETWEEN 1 AND 5");
                         });
                 });
@@ -352,7 +376,9 @@ namespace Triply.Infrastructure.Migrations
 
                     b.HasIndex("AmenityId");
 
-                    b.HasIndex("HotelId");
+                    b.HasIndex("HotelId", "AmenityId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_HotelAmenities_Hotel_Amenity");
 
                     b.ToTable("HotelAmenities", (string)null);
                 });

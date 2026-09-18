@@ -14,6 +14,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddRabbitMqMessaging(builder.Configuration);
 builder.Services.AddTriplyDbContext(builder.Configuration);
+builder.Services.AddSieveService(builder.Configuration);
 
 builder.Services.AddOptions<CloudinaryOptions>()
     .Bind(builder.Configuration.GetSection("Cloudinary"))
@@ -25,6 +26,7 @@ builder.Services.AddOptions<CloudinaryOptions>()
 
 builder.Services.AddSingleton<ICloudinaryUploader, CloudinaryUploader>();
 builder.Services.AddScoped<IHotelImageRepository, HotelImageRepository>();
+builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddHostedService<ImageUploadConsumerHostedService>();
 
 // Deletions get a dedicated consumer and queue, derived from the main RabbitMq settings

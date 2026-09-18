@@ -13,6 +13,7 @@ public static class CityExtensions
             Country = city.Country,
             PostOffice = city.PostOffice,
             HotelsCount = hotelsCount,
+            ThumbnailUrl = city.ThumbnailUrl,
             IsDeleted =  city.IsDeleted,
             CreatedAt = city.CreatedAt,
             ModifiedAt = city.ModifiedAt,

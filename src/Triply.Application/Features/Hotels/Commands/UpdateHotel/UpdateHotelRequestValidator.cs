@@ -24,6 +24,13 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
         RuleFor(x => x.StarRating)
             .InclusiveBetween((byte)1, (byte)5)
             .WithMessage(ResultResponseMessages.Hotels.Validation.StarRatingInvalid.Message);
+
+        RuleFor(x => x.HotelType)
+            .IsInEnum().WithMessage(ResultResponseMessages.Hotels.Validation.HotelTypeInvalid.Message);
+
+        RuleFor(x => x.Address)
+            .NotEmpty().WithMessage(ResultResponseMessages.Hotels.Validation.AddressRequired.Message)
+            .MaximumLength(300).WithMessage(ResultResponseMessages.Hotels.Validation.AddressMaxLength.Message);
         
         RuleFor(x => x.Description)
             .MaximumLength(2000).WithMessage(ResultResponseMessages.Hotels.Validation.DescriptionMaxLength.Message)
