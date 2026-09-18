@@ -35,6 +35,8 @@ public partial class HotelService
         hotel.CityId = request.CityId;
         hotel.OwnerId = request.OwnerId;
         hotel.StarRating = request.StarRating;
+        hotel.HotelType = request.HotelType;
+        hotel.Address = request.Address.Trim();
         hotel.Description = request.Description;
         hotel.Latitude = request.Latitude;
         hotel.Longitude = request.Longitude;

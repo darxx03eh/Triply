@@ -8,6 +8,8 @@ public interface IHotelRepository : IGenericRepository<Hotel>
 {
     Task<bool> IsLocationsExistsAsync(decimal? latitude, decimal? longitude, CancellationToken cancellationToken);
     Task<bool> IsHotelIdExistsAsync(Guid hotelId, CancellationToken cancellationToken = default);
+    Task<Dictionary<Guid, string>> GetThumbnailsAsync(IEnumerable<Guid> hotelIds,
+        CancellationToken cancellationToken = default);
     Task<Dictionary<Guid, int>> GetRoomsCountAsync(IEnumerable<Guid> hotelIds,
         CancellationToken cancellationToken = default);
     Task<bool> IsHotelExistsAsync(string name, Guid cityId, CancellationToken cancellationToken);

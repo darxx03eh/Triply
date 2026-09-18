@@ -1,5 +1,6 @@
 using Triply.Domain.Entities.Base;
 using Triply.Domain.Entities.Identity;
+using Triply.Domain.Enums.Hotels;
 
 namespace Triply.Domain.Entities;
 
@@ -22,6 +23,10 @@ public sealed class Hotel : BaseEntity
     public Guid? OwnerId { get; set; }
 
     public byte StarRating { get; set; }
+
+    public HotelType HotelType { get; set; }
+
+    public string? Address { get; set; }
 
     public string? Description { get; set; }
 

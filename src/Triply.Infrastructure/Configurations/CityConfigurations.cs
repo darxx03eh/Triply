@@ -35,6 +35,12 @@ public class CityConfigurations : IEntityTypeConfiguration<City>
         builder.Property(x => x.PostOffice)
             .HasMaxLength(20);
 
+        builder.Property(x => x.ThumbnailUrl)
+            .HasMaxLength(1000);
+
+        builder.Property(x => x.ThumbnailPublicId)
+            .HasMaxLength(255);
+
         builder.Property(x => x.IsDeleted)
             .HasDefaultValue(false)
             .IsRequired();

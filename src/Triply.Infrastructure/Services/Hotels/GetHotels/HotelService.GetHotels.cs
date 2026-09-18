@@ -14,11 +14,13 @@ public partial class HotelService
         // An empty page is a valid result (e.g. a search with no matches or scrolling past the end),
         // so it returns 200 with no items instead of 404.
         var (hotels, totalCount) = await hotelRepository.GetPagedAsync(request, isAdmin, cancellationToken);
-        var roomsCount = await hotelRepository.GetRoomsCountAsync(hotels.Select(h => h.HotelId), cancellationToken);
+        var hotelIds = hotels.Select(h => h.HotelId).ToList();
+        var roomsCount = await hotelRepository.GetRoomsCountAsync(hotelIds, cancellationToken);
+        var thumbnails = await hotelRepository.GetThumbnailsAsync(hotelIds, cancellationToken);
         var pagedResult = new PagedResult<HotelSummaryResponse>
         {
             Items = hotels.Select(h => h.ToHotelSummaryResponse(h.City.Name,
-                roomsCount.GetValueOrDefault(h.HotelId))).ToList(),
+                roomsCount.GetValueOrDefault(h.HotelId), thumbnails.GetValueOrDefault(h.HotelId))).ToList(),
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10,
             TotalCount = totalCount
