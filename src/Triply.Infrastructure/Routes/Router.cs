@@ -44,5 +44,16 @@ public static class Router
         public const string AddImage = $"{Prefix}/{Id}/images";
         public const string GetImages = $"{Prefix}/{Id}/images";
         public const string DeleteImage = $"{Prefix}/{Id}/images/{{imageId:guid}}";
+        public const string GetRooms = $"{Prefix}/{Id}/rooms";
+    }
+
+    public static class RoomRoutes
+    {
+        private const string Prefix = $"{Rule}/rooms";
+        public const string Create = Prefix;
+        public const string GetAll = Prefix;
+        public const string GetById = $"{Prefix}/{Id}";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
     }
 }

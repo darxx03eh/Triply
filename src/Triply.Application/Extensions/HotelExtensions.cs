@@ -23,15 +23,20 @@ public static class HotelExtensions
             StarRating =  hotel.StarRating,
         };
 
-    public static HotelSummaryResponse ToHotelSummaryResponse(this Hotel hotel, string cityName)
+    public static HotelSummaryResponse ToHotelSummaryResponse(this Hotel hotel, string cityName,
+        int roomsCount = 0)
         => new HotelSummaryResponse()
         {
             HotelId =  hotel.HotelId,
             Name = hotel.Name,
             CityName =  cityName,
+            OwnerId = hotel.OwnerId,
+            OwnerName = hotel.Owner is null ? null : $"{hotel.Owner.FirstName} {hotel.Owner.LastName}",
+            RoomsCount = roomsCount,
             Latitude =  hotel.Latitude,
             Longitude =  hotel.Longitude,
             CreatedAt =  hotel.CreatedAt,
+            ModifiedAt = hotel.ModifiedAt,
             StarRating = hotel.StarRating
         };
 

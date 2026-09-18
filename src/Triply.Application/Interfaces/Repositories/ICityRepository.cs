@@ -15,5 +15,7 @@ public interface ICityRepository : IGenericRepository<City>
 
     Task<bool> IsCityExistsExcludeId(string name, string country, Guid cityId,
         CancellationToken cancellationToken = default);
+    Task<Dictionary<Guid, int>> GetHotelsCountAsync(IEnumerable<Guid> cityIds,
+        CancellationToken cancellationToken = default);
     void SetOriginalRowVersion(City city, byte[] rowVersion);
 }

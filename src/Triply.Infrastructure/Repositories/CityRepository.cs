@@ -45,6 +45,14 @@ public class CityRepository(TriplyDbContext context, ISieveProcessor sieveProces
                 && c.CityId != cityId
             , cancellationToken);
 
+    public async Task<Dictionary<Guid, int>> GetHotelsCountAsync(IEnumerable<Guid> cityIds,
+        CancellationToken cancellationToken = default)
+        => await context.Hotels
+            .Where(h => cityIds.Contains(h.CityId))
+            .GroupBy(h => h.CityId)
+            .Select(g => new { CityId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.CityId, x => x.Count, cancellationToken);
+
     public void SetOriginalRowVersion(City city, byte[] rowVersion)
         => context.Entry(city).Property(c => c.RowVersion).OriginalValue = rowVersion;
 }

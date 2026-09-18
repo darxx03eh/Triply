@@ -14,6 +14,7 @@ public sealed record CityResponse
     public string Name { get; init; }
     public string Country { get; init; }
     public string? PostOffice { get; init; }
+    public int HotelsCount { get; init; }
     public bool IsDeleted { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? ModifiedAt { get; init; }

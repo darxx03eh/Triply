@@ -1,0 +1,57 @@
+using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
+using Triply.Application.Interfaces.Repositories;
+using Triply.Domain.Entities;
+using Triply.Infrastructure.Db;
+using Triply.Infrastructure.Repositories.General;
+
+namespace Triply.Infrastructure.Repositories;
+
+public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProcessor)
+    : GenericRepository<Room>(context),
+    IRoomRepository
+{
+    public async Task<Room?> GetByIdWithHotelAsync(Guid roomId, CancellationToken cancellationToken = default)
+        => await context.Rooms
+            .Include(r => r.Hotel)
+            .FirstOrDefaultAsync(r => r.RoomId == roomId, cancellationToken);
+
+    public async Task<(List<Room> Rooms, int TotalCount)> GetPagedAsync(SieveModel sieveModel,
+        bool isAdmin,
+        Guid? hotelId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = context.Rooms.Include(r => r.Hotel).AsQueryable();
+
+        if (isAdmin) query = query.IgnoreQueryFilters();
+        if (hotelId.HasValue) query = query.Where(r => r.HotelId == hotelId.Value);
+
+        query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        query = sieveProcessor.Apply(sieveModel, query, applyFiltering: false, applySorting: false);
+        var rooms = await query.ToListAsync(cancellationToken);
+
+        return (rooms, totalCount);
+    }
+
+    public async Task<bool> IsRoomNumberExistsAsync(Guid hotelId, string number,
+        CancellationToken cancellationToken = default)
+        => await context.Rooms.AnyAsync(r =>
+            r.HotelId == hotelId && r.Number.ToUpper() == number.ToUpper(), cancellationToken);
+
+    public async Task<bool> IsRoomNumberExistsExcludeIdAsync(string number, Guid roomId,
+        CancellationToken cancellationToken = default)
+        => await context.Rooms.AnyAsync(r =>
+                r.Number.ToUpper() == number.ToUpper()
+                && r.RoomId != roomId
+                && r.HotelId == context.Rooms
+                    .Where(x => x.RoomId == roomId)
+                    .Select(x => x.HotelId)
+                    .FirstOrDefault(),
+            cancellationToken);
+
+    public void SetOriginalRowVersion(Room room, byte[] rowVersion)
+        => context.Entry(room).Property(r => r.RowVersion).OriginalValue = rowVersion;
+}

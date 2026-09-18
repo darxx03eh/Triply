@@ -39,8 +39,9 @@ public partial class CityService
                 ResultErrorType.Conflict);
         }
 
+        var hotelsCount = await cityRepository.GetHotelsCountAsync([cityId], cancellationToken);
         return Result<CityResponse>.Success(
-            city.ToCityResponse(), 
+            city.ToCityResponse(hotelsCount.GetValueOrDefault(cityId)), 
             ResultSuccessType.Ok, 
             new ("CITY_UPDATED", "City updated successfully."));
     }
