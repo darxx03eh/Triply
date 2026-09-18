@@ -15,5 +15,6 @@ public static class CityExtensions
             IsDeleted =  city.IsDeleted,
             CreatedAt = city.CreatedAt,
             ModifiedAt = city.ModifiedAt,
+            RowVersion = city.RowVersion,
         };
 }

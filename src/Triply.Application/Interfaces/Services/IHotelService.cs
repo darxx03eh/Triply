@@ -27,4 +27,6 @@ public interface IHotelService
 
     Task<Result<IReadOnlyList<HotelImageResponse>>> GetImagesAsync(
         Guid hotelId, CancellationToken cancellationToken = default);
+
+    Task<Result<bool>> DeleteImageAsync(Guid hotelId, Guid imageId, CancellationToken cancellationToken = default);
 }

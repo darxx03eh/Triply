@@ -38,6 +38,10 @@ public class HotelImageConfigurations : IEntityTypeConfiguration<HotelImage>
             .HasMaxLength(1000)
             .IsRequired(false);
 
+        builder.Property(x => x.PublicId)
+            .HasMaxLength(255)
+            .IsRequired(false);
+
         builder.Property(x => x.DisplayOrder)
             .IsRequired();
 

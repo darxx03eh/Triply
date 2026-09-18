@@ -14,4 +14,6 @@ public record HotelResponse()
     public IReadOnlyList<string> ImageUrls { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? ModifiedAt { get; init; }
+    /// <summary>Concurrency token (base64 in JSON); send it back unchanged when updating the hotel.</summary>
+    public byte[] RowVersion { get; init; } = [];
 }

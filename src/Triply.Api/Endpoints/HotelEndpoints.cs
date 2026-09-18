@@ -80,6 +80,7 @@ public static class HotelEndpoints
                     IHotelService hotelService, 
                     CancellationToken cancellationToken) =>
                 {
+                    request.HotelId = id;
                     var result = await hotelService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -153,6 +154,24 @@ public static class HotelEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapDelete(Router.HotelRoutes.DeleteImage, async (
+                    Guid id, Guid imageId, IHotelService hotelService, CancellationToken cancellationToken) =>
+                {
+                    var result = await hotelService.DeleteImageAsync(id, imageId, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .WithName("DeleteHotelImage")
+                .WithDisplayName("Delete Hotel Image")
+                .WithSummary("Deletes an image from a hotel's gallery")
+                .WithDescription("""
+                                 Removes the image from the hotel's gallery immediately and queues
+                                 the removal of the stored file from cloud storage.
+                                 Returns a not found response when the image does not belong to the hotel.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
         }
     }

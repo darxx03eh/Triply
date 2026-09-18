@@ -54,4 +54,8 @@ public class ValidatedHotelService(
     public async Task<Result<IReadOnlyList<HotelImageResponse>>> GetImagesAsync(
         Guid hotelId, CancellationToken cancellationToken = default)
         => await inner.GetImagesAsync(hotelId, cancellationToken);
+
+    public async Task<Result<bool>> DeleteImageAsync(Guid hotelId, Guid imageId,
+        CancellationToken cancellationToken = default)
+        => await inner.DeleteImageAsync(hotelId, imageId, cancellationToken);
 }

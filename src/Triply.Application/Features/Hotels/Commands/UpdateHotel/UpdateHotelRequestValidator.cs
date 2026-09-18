@@ -6,6 +6,12 @@ namespace Triply.Application.Features.Hotels.Commands.UpdateHotel;
 
 public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
 {
+    public UpdateHotelRequestValidator(IHotelRepository hotelRepository, ICityRepository cityRepository)
+    {
+        ApplyValidationRules();
+        ApplyCustomValidationRules(hotelRepository, cityRepository);
+    }
+
     private void ApplyValidationRules()
     {
         RuleFor(x => x.Name)
@@ -32,7 +38,10 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
             .When(x => x.Longitude.HasValue);
 
         RuleFor(x => x.RowVersion)
-            .NotEmpty().WithMessage(ResultResponseMessages.Hotels.Validation.RowVersionRequired.Message);
+            .NotEmpty().WithMessage(ResultResponseMessages.Hotels.Validation.RowVersionRequired.Message)
+            .Must(rowVersion => rowVersion.Length == 8)
+            .WithMessage(ResultResponseMessages.Hotels.Validation.RowVersionInvalidLength.Message)
+            .When(x => x.RowVersion is { Length: > 0 });
     }
 
     private void ApplyCustomValidationRules(IHotelRepository hotelRepository, ICityRepository cityRepository)
@@ -47,15 +56,15 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
         RuleFor(x => x)
             .MustAsync(async (hotel, cancellationToken) =>
             {
-                return !await hotelRepository.IsLocationsExistsAsync(hotel.Latitude, hotel.Longitude,
-                    cancellationToken);
+                return !await hotelRepository.IsLocationExistsExcludeIdAsync(
+                    hotel.Latitude, hotel.Longitude, hotel.HotelId, cancellationToken);
             }).WithMessage(ResultResponseMessages.Hotels.Validation.LocationAlreadyExists.Message)
             .When(x => x.Latitude.HasValue && x.Longitude.HasValue);
 
         RuleFor(x => x.CityId)
             .MustAsync(async (cityId, cancellationToken) =>
             {
-                return !await cityRepository.IsCityIdExistsAsync(cityId, cancellationToken);
+                return await cityRepository.IsCityIdExistsAsync(cityId, cancellationToken);
             }).WithMessage(ResultResponseMessages.Cities.Validation.CityNotFound.Message);
     }
 }
