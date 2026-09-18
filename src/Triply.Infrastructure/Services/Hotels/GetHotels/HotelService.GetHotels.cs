@@ -3,7 +3,6 @@ using Triply.Application.DTOs.Hotels;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Hotels.Queries.GetHotels;
 using Triply.Domain.Results;
-using Triply.Domain.Results.Enums;
 
 namespace Triply.Infrastructure.Services.Hotels;
 
@@ -12,11 +11,9 @@ public partial class HotelService
     public async Task<Result<PagedResult<HotelSummaryResponse>>> GetPagedAsync(GetHotelsRequest request, bool isAdmin,
         CancellationToken cancellationToken = default)
     {
+        // An empty page is a valid result (e.g. a search with no matches or scrolling past the end),
+        // so it returns 200 with no items instead of 404.
         var (hotels, totalCount) = await hotelRepository.GetPagedAsync(request, isAdmin, cancellationToken);
-        if (!hotels.Any())
-            return Result<PagedResult<HotelSummaryResponse>>.Failure(
-                "HOTELS_NOT_FOUND", "There is no hotels were found.",
-                ResultErrorType.NotFound);
         var pagedResult = new PagedResult<HotelSummaryResponse>
         {
             Items = hotels.Select(h => h.ToHotelSummaryResponse(h.City.Name)).ToList(),
@@ -25,7 +22,8 @@ public partial class HotelService
             TotalCount = totalCount
         };
 
-        return Result<PagedResult<HotelSummaryResponse>>.Success(pagedResult, success: new(
-            "HOTELS_FOUND", "Hotels were found successfully."));
+        return Result<PagedResult<HotelSummaryResponse>>.Success(pagedResult, success: hotels.Count == 0
+            ? new("HOTELS_EMPTY", "No hotels match the given criteria.")
+            : new("HOTELS_FOUND", "Hotels were found successfully."));
     }
 }

@@ -11,7 +11,9 @@ public sealed class HotelImage
     }
     public Guid ImageId { get; set; }
     public Guid HotelId { get; set; }
-    public string? Url { get; set; } = null!;
+    public string? Url { get; set; }
+    /// <summary>Cloudinary public id, needed to delete the asset. Null until the upload completes.</summary>
+    public string? PublicId { get; set; }
     public short DisplayOrder { get; set; }
     public HotelImageStatus Status { get; set; }
     public Hotel Hotel { get; set; } = null!;

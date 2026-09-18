@@ -52,10 +52,11 @@ public class ImageUploadConsumerHostedService(
         logger.LogInformation("Uploading image {ImageId} for hotel {HotelId}", message.ImageId, message.HotelId);
 
         // Transient failures (network, Cloudinary) throw here and are retried by the consumer.
-        string cloudinaryUrl = await cloudinaryUploader.UploadAsync(
+        var uploaded = await cloudinaryUploader.UploadAsync(
             message.FilePath, message.OriginalFileName, cancellationToken);
 
-        image.Url = cloudinaryUrl;
+        image.Url = uploaded.Url;
+        image.PublicId = uploaded.PublicId;
         image.Status = HotelImageStatus.Uploaded;
         await imageRepository.SaveChangesAsync(cancellationToken);
 

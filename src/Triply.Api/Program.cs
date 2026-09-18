@@ -12,7 +12,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         
-        // Add Car Rental DbContext
+        // Add Triply DbContext
         builder.Services.AddTriplyDbContext(builder.Configuration);
         
         // Add Redis Service

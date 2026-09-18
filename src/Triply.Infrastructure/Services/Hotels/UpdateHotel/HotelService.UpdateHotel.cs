@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Triply.Application.DTOs.Hotels;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Hotels.Commands.UpdateHotel;
-using Triply.Domain.Entities;
 using Triply.Domain.Results;
 using Triply.Domain.Results.Enums;
 
@@ -13,25 +12,25 @@ public partial class HotelService
     public async Task<Result<HotelResponse>> UpdateAsync(Guid hotelId, UpdateHotelRequest request,
         CancellationToken cancellationToken = default)
     {
-        var hotel = await hotelRepository.GetByIdAsync(hotelId, cancellationToken);
+        // Load the city and the gallery too: the response needs both, and a plain FindAsync
+        // leaves hotel.City null (which used to throw when the city was not changed).
+        var hotel = await hotelRepository.GetByIdWithImagesAsync(hotelId, cancellationToken);
         if (hotel is null)
-            return Result<HotelResponse>.Failure("HOTEL_NOT_FOUND", 
+            return Result<HotelResponse>.Failure("HOTEL_NOT_FOUND",
                 $"The requested hotel with id: {hotelId.ToString()} was not found.",
                 ResultErrorType.NotFound);
 
-        City city;
         if (request.CityId != hotel.CityId)
         {
             var newCity = await cityRepository.GetByIdAsync(request.CityId, cancellationToken);
             if (newCity is null)
                 return Result<HotelResponse>.Failure(
-                    "CITY_NOT_FOUND", 
-                    "The specified city does not exist.", 
-                    type: ResultErrorType.BusinessRule);
-            city = newCity;
+                    "CITY_NOT_FOUND",
+                    $"The specified city with id: {request.CityId.ToString()} does not exist.",
+                    ResultErrorType.NotFound);
+            hotel.City = newCity;
         }
-        else city = hotel.City;
-        
+
         hotel.Name = request.Name;
         hotel.CityId = request.CityId;
         hotel.OwnerId = request.OwnerId;
@@ -41,8 +40,9 @@ public partial class HotelService
         hotel.Longitude = request.Longitude;
         hotel.ModifiedAt = DateTime.UtcNow;
 
+        // The hotel is already tracked, so SaveChanges only updates the changed columns.
+        // Calling DbSet.Update here would also mark the loaded City and images as modified.
         hotelRepository.SetOriginalRowVersion(hotel, request.RowVersion);
-        hotelRepository.UpdateAsync(hotel);
 
         try
         {
@@ -56,8 +56,13 @@ public partial class HotelService
                 ResultErrorType.Conflict);
         }
 
+        var imageUrls = hotel.Images
+            .OrderBy(i => i.DisplayOrder)
+            .Select(i => i.Url!)
+            .ToList();
+
         return Result<HotelResponse>.Success(
-            hotel.ToHotelResponse(city.Name, []), ResultSuccessType.Ok,
+            hotel.ToHotelResponse(hotel.City.Name, imageUrls), ResultSuccessType.Ok,
             new ResultSuccess("HOTEL_UPDATED", "Hotel updated successfully."));
     }
 }

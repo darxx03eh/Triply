@@ -43,5 +43,6 @@ public static class Router
         public const string Delete = $"{Prefix}/{Id}";
         public const string AddImage = $"{Prefix}/{Id}/images";
         public const string GetImages = $"{Prefix}/{Id}/images";
+        public const string DeleteImage = $"{Prefix}/{Id}/images/{{imageId:guid}}";
     }
 }
