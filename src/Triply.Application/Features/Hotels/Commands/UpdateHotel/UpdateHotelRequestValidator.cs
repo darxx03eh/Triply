@@ -58,7 +58,8 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
             {
                 return !await hotelRepository.IsHotelExistsExcludeId(hotel.Name, hotel.CityId, hotel.HotelId,
                     cancellationToken);
-            }).WithMessage(ResultResponseMessages.Hotels.Validation.HotelAlreadyExists.Message);
+            }).WithMessage(ResultResponseMessages.Hotels.Validation.HotelAlreadyExists.Message)
+            .OverridePropertyName(nameof(UpdateHotelRequest.Name));
 
         RuleFor(x => x)
             .MustAsync(async (hotel, cancellationToken) =>
@@ -66,6 +67,7 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
                 return !await hotelRepository.IsLocationExistsExcludeIdAsync(
                     hotel.Latitude, hotel.Longitude, hotel.HotelId, cancellationToken);
             }).WithMessage(ResultResponseMessages.Hotels.Validation.LocationAlreadyExists.Message)
+            .OverridePropertyName(nameof(UpdateHotelRequest.Latitude))
             .When(x => x.Latitude.HasValue && x.Longitude.HasValue);
 
         RuleFor(x => x.CityId)

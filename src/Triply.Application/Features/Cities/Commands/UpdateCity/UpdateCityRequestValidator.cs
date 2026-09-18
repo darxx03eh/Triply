@@ -8,7 +8,11 @@ namespace Triply.Application.Features.Cities.Commands.UpdateCity;
 public class UpdateCityRequestValidator : AbstractValidator<UpdateCityRequest>
 {
     /// <summary>Initializes the city update validation rules.</summary>
-    public UpdateCityRequestValidator() => ApplyValidationRules();
+    public UpdateCityRequestValidator(ICityRepository cityRepository)
+    {
+        ApplyValidationRules();
+        ApplyCustomValidationRules(cityRepository);
+    }
 
     private void ApplyValidationRules()
     {
@@ -35,7 +39,10 @@ public class UpdateCityRequestValidator : AbstractValidator<UpdateCityRequest>
 
         RuleFor(request => request.RowVersion)
             .NotEmpty()
-            .WithMessage(ResultResponseMessages.Cities.Validation.RowVersionRequired.Message);
+            .WithMessage(ResultResponseMessages.Cities.Validation.RowVersionRequired.Message)
+            .Must(rowVersion => rowVersion.Length == 8)
+            .WithMessage(ResultResponseMessages.Cities.Validation.RowVersionInvalidLength.Message)
+            .When(request => request.RowVersion is { Length: > 0 });
     }
 
     private void ApplyCustomValidationRules(ICityRepository cityRepository)
@@ -46,6 +53,7 @@ public class UpdateCityRequestValidator : AbstractValidator<UpdateCityRequest>
                 return !await cityRepository.IsCityExistsExcludeId(
                     city.Name, city.Country, city.CityId,
                     cancellationTone);
-            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadExistsInThisCountry.Message);
+            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadExistsInThisCountry.Message)
+            .OverridePropertyName(nameof(UpdateCityRequest.Name));
     }
 }

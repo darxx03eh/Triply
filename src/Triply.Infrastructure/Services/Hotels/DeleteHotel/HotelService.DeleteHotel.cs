@@ -16,6 +16,7 @@ public partial class HotelService
 
         hotel.IsDeleted = true;
         hotel.ModifiedAt = DateTime.UtcNow;
+        await hotelRepository.SoftDeleteRoomsAsync(hotelId, cancellationToken);
         await hotelRepository.SaveChangesAsync(cancellationToken);
 
         return Result<bool>.Success(
