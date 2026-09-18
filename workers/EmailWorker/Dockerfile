@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
+FROM mcr.microsoft.com/dotnet/runtime:10.0 AS base
 
 USER $APP_UID
 
@@ -16,22 +16,14 @@ COPY ["libraries/MessageQueue/MessageQueue.csproj", "libraries/MessageQueue/"]
 
 RUN dotnet restore "workers/EmailWorker/EmailWorker.csproj"
 
-COPY . .
+# Only the worker and the shared library: edits under src/ don't rebuild this image.
+COPY ["workers/EmailWorker/", "workers/EmailWorker/"]
+COPY ["libraries/MessageQueue/", "libraries/MessageQueue/"]
 
-WORKDIR "/src/workers/EmailWorker"
-
-RUN dotnet build "EmailWorker.csproj" \
-    -c $BUILD_CONFIGURATION \
-    -o /app/build
-
-
-FROM build AS publish
-
-ARG BUILD_CONFIGURATION=Release
-
-RUN dotnet publish "EmailWorker.csproj" \
+RUN dotnet publish "workers/EmailWorker/EmailWorker.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \
+    --no-restore \
     /p:UseAppHost=false
 
 
@@ -39,6 +31,6 @@ FROM base AS final
 
 WORKDIR /app
 
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "EmailWorker.dll"]

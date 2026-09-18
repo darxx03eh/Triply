@@ -3,6 +3,7 @@ using Sieve.Models;
 using Sieve.Services;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
+using Triply.Domain.Enums.HotleImages;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -31,7 +32,9 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
     public async Task<Hotel?> GetByIdWithImagesAsync(Guid id, CancellationToken cancellationToken = default)
     => await context.Hotels
         .Include(h => h.City)
-        .Include(h => h.Images.OrderBy(i => i.DisplayOrder))
+        .Include(h => h.Images
+            .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+            .OrderBy(i => i.DisplayOrder))
         .FirstOrDefaultAsync(h => h.HotelId == id, cancellationToken);
 
     public async Task<(List<Hotel> Hotels, int TotalCount)> GetPagedAsync(SieveModel sieveModel,

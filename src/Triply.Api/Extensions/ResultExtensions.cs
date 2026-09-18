@@ -26,6 +26,7 @@ public static class ResultExtensions
             {
                 ResultSuccessType.Created => Results.Json(successResponse, statusCode: StatusCodes.Status201Created),
                 ResultSuccessType.NoContent => Results.NoContent(),
+                ResultSuccessType.Accepted => Results.Json(successResponse, statusCode: StatusCodes.Status202Accepted),
                 _ => Results.Ok(successResponse)
             };
         }
