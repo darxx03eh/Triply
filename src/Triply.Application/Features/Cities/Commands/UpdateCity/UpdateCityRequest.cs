@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Triply.Application.Features.Cities.Commands.UpdateCity;
 
 // <summary>Data required to update a city.</summary>
@@ -7,6 +9,7 @@ namespace Triply.Application.Features.Cities.Commands.UpdateCity;
 /// <param name="RowVersion">The concurrency version returned with the city.</param>
 public class UpdateCityRequest
 {
+    [JsonIgnore]
     public Guid CityId { get; set; }
     public string Name { get; set; }
     public string Country { get; set; }

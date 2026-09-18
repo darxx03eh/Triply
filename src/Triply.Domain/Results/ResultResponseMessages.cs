@@ -94,6 +94,42 @@ public static class ResultResponseMessages
         }
     }
 
+    public static class Hotels
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage NameRequired
+                = new("HOTEL_NAME_REQUIRED", "Hotel name is required.");
+
+            public static readonly ResultMessage NameMaxLength
+                = new("HOTEL_NAME_MAX_LENGTH", "Hotel name must not exceed 150 characters.");
+
+            public static readonly ResultMessage CityIdRequired
+                = new("CITY_ID_REQUIRED", "City Id is required.");
+            
+            public static readonly ResultMessage HotelAlreadyExists
+                = new("HOTEL_ALREADY_EXISTS", "This hotel already exists int this specific city.");
+
+            public static readonly ResultMessage LocationAlreadyExists
+                = new("LOCATION_ALREADY_EXISTS", "This latitude and longitude already exists.");
+            
+            public static readonly ResultMessage StarRatingInvalid
+                = new("STAR_RATING_INVALID", "Star ratings must be between 1 and 5.");
+
+            public static readonly ResultMessage DescriptionMaxLength
+                = new("DESCRIPTION_MAX_LENGTH", "Hotel description must not exceed 2000 characters.");
+
+            public static readonly ResultMessage LatitudeInvalid
+                = new("LATITUDE_INVALID", "Latitude must be between -90 and 90.");
+
+            public static readonly ResultMessage LongitudeInvalid
+                = new("LONGITUDE_INVALID", "Longitude must be between -180 and 180.");
+
+            public static readonly ResultMessage RowVersionRequired
+                = new("HOTEL_ROW_VERSION_REQUIRED", "RowVersion is required to detect concurrent edits.");
+        }
+    }
+
     public static class Cities
     {
         public static class Validation
@@ -132,7 +168,10 @@ public static class ResultResponseMessages
                 = new("CITY_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
 
             public static readonly ResultMessage CityAlreadExistsInThisCountry
-                = new("CITY_ALREADY_EXISTS", "This city already exists int this specific country.");
+                = new("CITY_ALREADY_EXISTS", "This city already exists in this specific country.");
+
+            public static readonly ResultMessage CityNotFound
+                = new("NOT_FOUND", "City with this Id was not found.");
         }
     }
 

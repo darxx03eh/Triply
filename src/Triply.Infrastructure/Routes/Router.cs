@@ -32,4 +32,14 @@ public static class Router
         public const string Update = $"{Prefix}/{Id}";
         public const string Delete = $"{Prefix}/{Id}";
     }
+    
+    public static class HotelRoutes
+    {
+        private const string Prefix = $"{Rule}/hotels";
+        public const string Create = Prefix;
+        public const string GetAll = Prefix;
+        public const string GetById = $"{Prefix}/{Id}";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
+    }
 }
