@@ -17,6 +17,13 @@ public static class HotelExtensions
             CreatedAt =  hotel.CreatedAt,
             ModifiedAt = hotel.ModifiedAt,
             RowVersion = hotel.RowVersion,
+            HotelType = hotel.HotelType,
+            Address = hotel.Address,
+            Amenities = hotel.HotelAmenities
+                .Where(ha => ha.Amenity is not null)
+                .Select(ha => ha.Amenity.Name)
+                .OrderBy(name => name)
+                .ToList(),
             Latitude =  hotel.Latitude,
             Longitude =  hotel.Longitude,
             OwnerId = hotel.OwnerId,
@@ -24,7 +31,7 @@ public static class HotelExtensions
         };
 
     public static HotelSummaryResponse ToHotelSummaryResponse(this Hotel hotel, string cityName,
-        int roomsCount = 0)
+        int roomsCount = 0, string? thumbnailUrl = null)
         => new HotelSummaryResponse()
         {
             HotelId =  hotel.HotelId,
@@ -37,7 +44,10 @@ public static class HotelExtensions
             Longitude =  hotel.Longitude,
             CreatedAt =  hotel.CreatedAt,
             ModifiedAt = hotel.ModifiedAt,
-            StarRating = hotel.StarRating
+            StarRating = hotel.StarRating,
+            HotelType = hotel.HotelType,
+            Address = hotel.Address,
+            ThumbnailUrl = thumbnailUrl
         };
 
     public static HotelImageResponse ToHotelImageResponse(this HotelImage image)

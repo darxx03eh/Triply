@@ -14,6 +14,8 @@ public sealed class City : BaseEntity
     public string Name { get; set; } = null!;
     public string Country { get; set; } = null!;
     public string? PostOffice  { get; set; }
+    public string? ThumbnailUrl { get; set; }
+    public string? ThumbnailPublicId { get; set; }
     public bool IsDeleted { get; set; }
     public byte[] RowVersion { get; set; } = null!;
     public ICollection<Hotel> Hotels { get; set; }

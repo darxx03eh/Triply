@@ -15,6 +15,10 @@ public class HotelAmenityConfigurations : IEntityTypeConfiguration<HotelAmenitie
         builder.ToTable("HotelAmenities");
 
         builder.HasKey(x => x.HotelAmenitiesId);
+
+        builder.HasIndex(x => new { x.HotelId, x.AmenityId })
+            .IsUnique()
+            .HasDatabaseName("UQ_HotelAmenities_Hotel_Amenity");
         
         builder.HasOne(x => x.Hotel)
             .WithMany(x => x.HotelAmenities)

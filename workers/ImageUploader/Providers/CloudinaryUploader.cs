@@ -13,13 +13,13 @@ public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudina
         options.Value.ApiKey, 
         options.Value.ApiSecret));
 
-    public async Task<CloudinaryUploadResult> UploadAsync(string filePath, string originalFileName,
+    public async Task<CloudinaryUploadResult> UploadAsync(string filePath, string originalFileName, string folder,
         CancellationToken cancellationToken = default)
     {
         var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(filePath),
-            Folder = "triply/hotels",
+            Folder = folder,
             UniqueFilename = true,
             Overwrite = false
         };

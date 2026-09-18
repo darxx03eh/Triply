@@ -4,6 +4,7 @@ using Triply.Application.DTOs.Cities;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Cities.Commands.CreateCity;
 using Triply.Application.Features.Cities.Commands.UpdateCity;
+using Triply.Application.Features.Cities.Commands.UploadCityThumbnail;
 using Triply.Application.Features.Cities.Queries.GetCitiesRequest;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Results;
@@ -14,7 +15,8 @@ public class ValidatedCityService(
     ICityService inner,
     IEnumerable<IValidator<CreateCityRequest>> createValidators,
     IEnumerable<IValidator<UpdateCityRequest>> updateValidators,
-    IEnumerable<IValidator<GetCitiesRequest>> getCitiesValidators) : ICityService
+    IEnumerable<IValidator<GetCitiesRequest>> getCitiesValidators,
+    IEnumerable<IValidator<UploadCityThumbnailRequest>> uploadThumbnailValidators) : ICityService
 {
     public async Task<Result<CityResponse>> CreateAsync(CreateCityRequest request,
         CancellationToken cancellationToken = default)
@@ -44,4 +46,14 @@ public class ValidatedCityService(
 
     public async Task<Result<bool>> DeleteAsync(Guid cityId, CancellationToken cancellationToken = default)
         => await inner.DeleteAsync(cityId, cancellationToken);
+
+    public async Task<Result<CityResponse>> UploadThumbnailAsync(Guid cityId, UploadCityThumbnailRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await uploadThumbnailValidators.ValidateAndThrowAsync(request, cancellationToken);
+        return await inner.UploadThumbnailAsync(cityId, request, cancellationToken);
+    }
+
+    public async Task<Result<bool>> DeleteThumbnailAsync(Guid cityId, CancellationToken cancellationToken = default)
+        => await inner.DeleteThumbnailAsync(cityId, cancellationToken);
 }

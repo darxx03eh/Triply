@@ -2,6 +2,7 @@ using ImageUploader.IProviders;
 using MessageQueue.IRabbitMQ;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Contracts;
+using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Enums.HotleImages;
 
 namespace ImageUploader;
@@ -13,6 +14,8 @@ public class ImageUploadConsumerHostedService(
     ILogger<ImageUploadConsumerHostedService> logger) : BackgroundService
 {
     private const string ImageUploadTopic = "image.upload";
+    private const string HotelsFolder = "triply/hotels";
+    private const string CitiesFolder = "triply/cities";
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         => await consumer.SubscribeAsync<ImageUploadMessage>(
@@ -20,9 +23,18 @@ public class ImageUploadConsumerHostedService(
 
     private async Task HandleAsync(ImageUploadMessage message, string routingKey, CancellationToken cancellationToken)
     {
-        // DbContext is scoped: create a fresh scope per message instead of holding one for the worker's lifetime.
         await using var scope = scopeFactory.CreateAsyncScope();
-        var imageRepository = scope.ServiceProvider.GetRequiredService<IHotelImageRepository>();
+
+        if (message.Target == ImageTarget.CityThumbnail)
+            await HandleCityThumbnailAsync(message, scope.ServiceProvider, cancellationToken);
+        else
+            await HandleHotelImageAsync(message, scope.ServiceProvider, cancellationToken);
+    }
+
+    private async Task HandleHotelImageAsync(ImageUploadMessage message, IServiceProvider services,
+        CancellationToken cancellationToken)
+    {
+        var imageRepository = services.GetRequiredService<IHotelImageRepository>();
 
         var image = await imageRepository.GetByIdAsync(message.ImageId, cancellationToken);
         if (image is null)
@@ -32,7 +44,6 @@ public class ImageUploadConsumerHostedService(
             return;
         }
 
-        // Redelivered message after a successful upload: nothing left to do.
         if (image.Status == HotelImageStatus.Uploaded)
         {
             TryDeleteFile(message.FilePath);
@@ -41,7 +52,6 @@ public class ImageUploadConsumerHostedService(
 
         if (!File.Exists(message.FilePath))
         {
-            // Retrying cannot bring the file back, so fail fast instead of going through the retry queue.
             logger.LogError("Staged file {FilePath} for image {ImageId} was not found",
                 message.FilePath, message.ImageId);
             image.Status = HotelImageStatus.Failed;
@@ -51,9 +61,8 @@ public class ImageUploadConsumerHostedService(
 
         logger.LogInformation("Uploading image {ImageId} for hotel {HotelId}", message.ImageId, message.HotelId);
 
-        // Transient failures (network, Cloudinary) throw here and are retried by the consumer.
         var uploaded = await cloudinaryUploader.UploadAsync(
-            message.FilePath, message.OriginalFileName, cancellationToken);
+            message.FilePath, message.OriginalFileName, HotelsFolder, cancellationToken);
 
         image.Url = uploaded.Url;
         image.PublicId = uploaded.PublicId;
@@ -65,20 +74,74 @@ public class ImageUploadConsumerHostedService(
         logger.LogInformation("Image {ImageId} uploaded successfully", message.ImageId);
     }
 
+    private async Task HandleCityThumbnailAsync(ImageUploadMessage message, IServiceProvider services,
+        CancellationToken cancellationToken)
+    {
+        var cityRepository = services.GetRequiredService<ICityRepository>();
+
+        var city = message.CityId is { } cityId
+            ? await cityRepository.GetByIdAsync(cityId, cancellationToken)
+            : null;
+        if (city is null)
+        {
+            logger.LogWarning("City {CityId} no longer exists; discarding staged file", message.CityId);
+            TryDeleteFile(message.FilePath);
+            return;
+        }
+
+        if (!File.Exists(message.FilePath))
+        {
+            logger.LogError("Staged file {FilePath} for city {CityId} was not found",
+                message.FilePath, message.CityId);
+            return;
+        }
+
+        logger.LogInformation("Uploading thumbnail for city {CityId}", message.CityId);
+
+        var uploaded = await cloudinaryUploader.UploadAsync(
+            message.FilePath, message.OriginalFileName, CitiesFolder, cancellationToken);
+
+        string? oldPublicId = city.ThumbnailPublicId;
+        city.ThumbnailUrl = uploaded.Url;
+        city.ThumbnailPublicId = uploaded.PublicId;
+        city.ModifiedAt = DateTime.UtcNow;
+        await cityRepository.SaveChangesAsync(cancellationToken);
+
+        TryDeleteFile(message.FilePath);
+
+        if (oldPublicId is not null)
+        {
+            try
+            {
+                await cloudinaryUploader.DeleteAsync(oldPublicId, cancellationToken);
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Could not delete the previous thumbnail {PublicId} of city {CityId}",
+                    oldPublicId, message.CityId);
+            }
+        }
+
+        logger.LogInformation("Thumbnail for city {CityId} uploaded successfully", message.CityId);
+    }
+
     private async Task OnRetriesExhaustedAsync(ImageUploadMessage message, Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Giving up on image {ImageId} for hotel {HotelId} after all retries",
-            message.ImageId, message.HotelId);
+        logger.LogError(exception, "Giving up on upload {ImageId} ({Target}) after all retries",
+            message.ImageId, message.Target);
 
-        await using var scope = scopeFactory.CreateAsyncScope();
-        var imageRepository = scope.ServiceProvider.GetRequiredService<IHotelImageRepository>();
-
-        var image = await imageRepository.GetByIdAsync(message.ImageId, cancellationToken);
-        if (image is not null && image.Status != HotelImageStatus.Uploaded)
+        if (message.Target == ImageTarget.HotelImage)
         {
-            image.Status = HotelImageStatus.Failed;
-            await imageRepository.SaveChangesAsync(cancellationToken);
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var imageRepository = scope.ServiceProvider.GetRequiredService<IHotelImageRepository>();
+
+            var image = await imageRepository.GetByIdAsync(message.ImageId, cancellationToken);
+            if (image is not null && image.Status != HotelImageStatus.Uploaded)
+            {
+                image.Status = HotelImageStatus.Failed;
+                await imageRepository.SaveChangesAsync(cancellationToken);
+            }
         }
 
         TryDeleteFile(message.FilePath);

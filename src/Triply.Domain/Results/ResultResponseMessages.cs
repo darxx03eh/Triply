@@ -131,6 +131,24 @@ public static class ResultResponseMessages
             public static readonly ResultMessage RowVersionInvalidLength
                 = new("HOTEL_ROW_VERSION_INVALID_LENGTH", "RowVersion must contain exactly 8 bytes.");
 
+            public static readonly ResultMessage HotelTypeInvalid
+                = new("HOTEL_TYPE_INVALID", "Hotel type must be Budget, Boutique or Luxury.");
+
+            public static readonly ResultMessage AddressRequired
+                = new("HOTEL_ADDRESS_REQUIRED", "Hotel address is required.");
+
+            public static readonly ResultMessage AddressMaxLength
+                = new("HOTEL_ADDRESS_MAX_LENGTH", "Hotel address must not exceed 300 characters.");
+
+            public static readonly ResultMessage AmenityIdsRequired
+                = new("HOTEL_AMENITY_IDS_REQUIRED", "Amenity ids list is required.");
+
+            public static readonly ResultMessage AmenityIdsDuplicated
+                = new("HOTEL_AMENITY_IDS_DUPLICATED", "Amenity ids must not contain duplicates.");
+
+            public static readonly ResultMessage AmenityNotFound
+                = new("HOTEL_AMENITY_NOT_FOUND", "One or more amenities were not found.");
+
             public static readonly ResultMessage PageInvalid
                 = new("HOTEL_PAGE_INVALID", "Page must be greater than or equal to 1.");
 
@@ -181,6 +199,24 @@ public static class ResultResponseMessages
 
             public static readonly ResultMessage CityNotFound
                 = new("NOT_FOUND", "City with this Id was not found.");
+        }
+    }
+
+    public static class Amenities
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage NameRequired
+                = new("AMENITY_NAME_REQUIRED", "Amenity name is required.");
+
+            public static readonly ResultMessage NameWhitespace
+                = new("AMENITY_NAME_WHITESPACE", "Amenity name cannot contain only whitespace.");
+
+            public static readonly ResultMessage NameMaxLength
+                = new("AMENITY_NAME_MAX_LENGTH", "Amenity name must not exceed 100 characters.");
+
+            public static readonly ResultMessage AmenityAlreadyExists
+                = new("AMENITY_ALREADY_EXISTS", "An amenity with this name already exists.");
         }
     }
 

@@ -2,6 +2,7 @@ using Triply.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Triply.Application.Features.Cities.Commands.CreateCity;
 using Triply.Application.Features.Cities.Commands.UpdateCity;
+using Triply.Application.Features.Cities.Commands.UploadCityThumbnail;
 using Triply.Application.Features.Cities.Queries.GetCitiesRequest;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
@@ -105,6 +106,45 @@ public static class CityEndpoints
                                  Returns a not found response if the city does not exist.
                                  """)
                 .Produces(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status404NotFound);
+
+            group.MapPost(Router.CityRoutes.Thumbnail, async (
+                    Guid id, [FromForm] UploadCityThumbnailRequest request,
+                    ICityService cityService, CancellationToken cancellationToken) =>
+                {
+                    var result = await cityService.UploadThumbnailAsync(id, request, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .DisableAntiforgery()
+                .WithName("UploadCityThumbnail")
+                .WithDisplayName("Upload City Thumbnail")
+                .WithSummary("Queues a thumbnail upload for a city")
+                .WithDescription("""
+                                 Accepts a JPG, PNG or WEBP image as multipart/form-data and queues it
+                                 for background upload to cloud storage. Once uploaded it replaces the
+                                 current thumbnail of the city, which is shown in trending destinations.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Accepts<UploadCityThumbnailRequest>("multipart/form-data")
+                .Produces(StatusCodes.Status202Accepted)
+                .Produces(StatusCodes.Status404NotFound)
+                .ProducesValidationProblem();
+
+            group.MapDelete(Router.CityRoutes.Thumbnail, async (
+                    Guid id, ICityService cityService, CancellationToken cancellationToken) =>
+                {
+                    var result = await cityService.DeleteThumbnailAsync(id, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .WithName("DeleteCityThumbnail")
+                .WithDisplayName("Delete City Thumbnail")
+                .WithSummary("Deletes the thumbnail of a city")
+                .WithDescription("""
+                                 Removes the thumbnail of a city and queues the removal of the stored
+                                 file from cloud storage.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status404NotFound);
         }
     }
