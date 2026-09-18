@@ -20,6 +20,16 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Hotel>(h => h.CreatedAt).CanSort();
         mapper.Property<Hotel>(h => h.ModifiedAt).CanSort();
 
+        mapper.Property<Room>(r => r.Number).CanFilter().CanSort();
+        mapper.Property<Room>(r => r.HotelId).CanFilter();
+        mapper.Property<Room>(r => r.RoomType).CanFilter().CanSort();
+        mapper.Property<Room>(r => r.AdultCapacity).CanFilter().CanSort();
+        mapper.Property<Room>(r => r.ChildCapacity).CanFilter().CanSort();
+        mapper.Property<Room>(r => r.PricePerNight).CanFilter().CanSort();
+        mapper.Property<Room>(r => r.IsAvailable).CanFilter();
+        mapper.Property<Room>(r => r.CreatedAt).CanSort();
+        mapper.Property<Room>(r => r.ModifiedAt).CanSort();
+
         return mapper;
     }
 }

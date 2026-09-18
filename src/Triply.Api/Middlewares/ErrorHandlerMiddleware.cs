@@ -71,6 +71,12 @@ public class ErrorHandlerMiddleware(RequestDelegate next)
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                 break;
             
+            case BadHttpRequestException:
+                response.Message = ApiResponseMessages.Validation.InvalidRequestBody.Message;
+                response.Code = ApiResponseMessages.Validation.InvalidRequestBody.Code;
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                break;
+            
             case InvalidOperationException e:
                 response.Message = e.Message;
                 response.Code = ApiResponseMessages.Validation.InvalidOperation.Code;

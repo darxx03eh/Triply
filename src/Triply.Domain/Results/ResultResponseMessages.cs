@@ -184,6 +184,60 @@ public static class ResultResponseMessages
         }
     }
 
+    public static class Rooms
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage HotelIdRequired
+                = new("HOTEL_ID_REQUIRED", "Hotel Id is required.");
+
+            public static readonly ResultMessage HotelNotFound
+                = new("HOTEL_NOT_FOUND", "Hotel with this Id was not found.");
+
+            public static readonly ResultMessage NumberRequired
+                = new("ROOM_NUMBER_REQUIRED", "Room number is required.");
+
+            public static readonly ResultMessage NumberWhitespace
+                = new("ROOM_NUMBER_WHITESPACE", "Room number cannot contain only whitespace.");
+
+            public static readonly ResultMessage NumberMaxLength
+                = new("ROOM_NUMBER_MAX_LENGTH", "Room number must not exceed 20 characters.");
+
+            public static readonly ResultMessage RoomTypeInvalid
+                = new("ROOM_TYPE_INVALID", "Room type must be Single, Double or Suite.");
+
+            public static readonly ResultMessage AdultCapacityInvalid
+                = new("ROOM_ADULT_CAPACITY_INVALID", "Adult capacity must be between 1 and 10.");
+
+            public static readonly ResultMessage ChildCapacityInvalid
+                = new("ROOM_CHILD_CAPACITY_INVALID", "Child capacity must be between 0 and 10.");
+
+            public static readonly ResultMessage PricePerNightInvalid
+                = new("ROOM_PRICE_INVALID", "Price per night must be greater than 0.");
+
+            public static readonly ResultMessage PricePerNightPrecision
+                = new("ROOM_PRICE_PRECISION", "Price per night must not exceed 8 digits and 2 decimals.");
+
+            public static readonly ResultMessage DescriptionMaxLength
+                = new("ROOM_DESCRIPTION_MAX_LENGTH", "Room description must not exceed 1000 characters.");
+
+            public static readonly ResultMessage RoomAlreadyExists
+                = new("ROOM_ALREADY_EXISTS", "This room number already exists in this hotel.");
+
+            public static readonly ResultMessage RowVersionRequired
+                = new("ROOM_ROW_VERSION_REQUIRED", "RowVersion is required to detect concurrent edits.");
+
+            public static readonly ResultMessage RowVersionInvalidLength
+                = new("ROOM_ROW_VERSION_INVALID_LENGTH", "RowVersion must contain exactly 8 bytes.");
+
+            public static readonly ResultMessage PageInvalid
+                = new("ROOM_PAGE_INVALID", "Page must be greater than or equal to 1.");
+
+            public static readonly ResultMessage PageSizeInvalid
+                = new("ROOM_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+        }
+    }
+
     public static class Success
     {
         public static readonly ResultMessage Created = new("CREATED", "Resource created successfully.");

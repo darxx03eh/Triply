@@ -16,7 +16,8 @@ public partial class CityService
                 $"The requested city with id: {cityId.ToString()} was not found.", 
                 ResultErrorType.NotFound);
 
-        return Result<CityResponse>.Success(city.ToCityResponse(), success: new(
+        var hotelsCount = await cityRepository.GetHotelsCountAsync([cityId], cancellationToken);
+        return Result<CityResponse>.Success(city.ToCityResponse(hotelsCount.GetValueOrDefault(cityId)), success: new(
             "CITY_FOUND", $"The requested city with id: {cityId} was found."));
     }
 }

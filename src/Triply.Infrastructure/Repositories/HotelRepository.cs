@@ -24,6 +24,17 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
             .AnyAsync(h => h.Latitude == latitude && h.Longitude == longitude && h.HotelId != hotelId,
                 cancellationToken);
 
+    public async Task<bool> IsHotelIdExistsAsync(Guid hotelId, CancellationToken cancellationToken = default)
+        => await context.Hotels.AnyAsync(h => h.HotelId == hotelId, cancellationToken);
+
+    public async Task<Dictionary<Guid, int>> GetRoomsCountAsync(IEnumerable<Guid> hotelIds,
+        CancellationToken cancellationToken = default)
+        => await context.Rooms
+            .Where(r => hotelIds.Contains(r.HotelId))
+            .GroupBy(r => r.HotelId)
+            .Select(g => new { HotelId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.HotelId, x => x.Count, cancellationToken);
+
     public async Task<bool> IsHotelExistsAsync(string name, Guid cityId, CancellationToken cancellationToken)
         => await context.Hotels.AnyAsync(h => h.Name.ToUpper() == name.ToUpper() && h.CityId == cityId,
             cancellationToken);
@@ -47,7 +58,10 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
         bool isAdmin,
         CancellationToken cancellationToken = default)
     {
-        var query = context.Hotels.Include(h => h.City).AsQueryable();
+        var query = context.Hotels
+            .Include(h => h.City)
+            .Include(h => h.Owner)
+            .AsQueryable();
 
         if (isAdmin) query = query.IgnoreQueryFilters();
 
