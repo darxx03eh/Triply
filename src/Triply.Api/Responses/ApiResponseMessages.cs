@@ -24,6 +24,9 @@ public static class ApiResponseMessages
 
         public static readonly ApiMessage InvalidOperation
             = new("INVALID_OPERATION", "Operation is invalid.");
+
+        public static readonly ApiMessage InvalidRequestBody
+            = new("INVALID_REQUEST_BODY", "The request body is malformed or contains invalid values.");
     }
     public static class Routing
     {

@@ -14,10 +14,11 @@ public partial class CityService
     {
         // An empty page is a valid result, so it returns 200 with no items instead of 404.
         var (cities, totalCount) = await cityRepository.GetPagedAsync(request, isAdmin, cancellationToken);
+        var hotelsCount = await cityRepository.GetHotelsCountAsync(cities.Select(c => c.CityId), cancellationToken);
 
         var pagedResult = new PagedResult<CityResponse>
         {
-            Items = cities.Select(c => c.ToCityResponse()).ToList(),
+            Items = cities.Select(c => c.ToCityResponse(hotelsCount.GetValueOrDefault(c.CityId))).ToList(),
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10,
             TotalCount = totalCount

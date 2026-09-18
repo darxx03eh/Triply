@@ -69,6 +69,9 @@ public class RoomConfigurations : IEntityTypeConfiguration<Room>
             .HasPrecision(10, 2)
             .IsRequired();
 
+        builder.Property(x => x.Description)
+            .HasMaxLength(1000);
+
         builder.Property(x => x.IsAvailable)
             .HasDefaultValue(true)
             .IsRequired();
