@@ -68,4 +68,10 @@ public static class Router
         public const string Update = $"{Prefix}/{Id}";
         public const string Delete = $"{Prefix}/{Id}";
     }
+
+    public static class SearchRoutes
+    {
+        private const string Prefix = $"{Rule}/search";
+        public const string Hotels = Prefix;
+    }
 }

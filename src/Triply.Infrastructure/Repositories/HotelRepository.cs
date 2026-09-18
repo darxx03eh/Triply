@@ -88,6 +88,19 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
         return (hotels, totalCount);
     }
 
+    public async Task SoftDeleteRoomsAsync(Guid hotelId, CancellationToken cancellationToken = default)
+    {
+        var rooms = await context.Rooms
+            .Where(r => r.HotelId == hotelId)
+            .ToListAsync(cancellationToken);
+
+        foreach (var room in rooms)
+        {
+            room.IsDeleted = true;
+            room.ModifiedAt = DateTime.UtcNow;
+        }
+    }
+
     public void SetOriginalRowVersion(Hotel hotel, byte[] rowVersion)
         => context.Entry(hotel).Property(c => c.RowVersion).OriginalValue = rowVersion;
 }

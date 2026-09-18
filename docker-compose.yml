@@ -26,8 +26,8 @@ services:
       RabbitMq__Port: ${RABBITMQ_PORT}
       RabbitMq__ExchangeName: ${RABBITMQ_EXCHANGE}
       RabbitMq__QueueName: ${RABBITMQ_EMAIL_QUEUE}
-      RabbitMq__MaxRetryCount: ${RABBITMQ_EMAIL_MAX_RETRY_COUNT}
-      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_EMAIL_RETRY_DELAY}
+      RabbitMq__MaxRetryCount: ${RABBITMQ_MAX_RETRY_COUNT:-3}
+      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_RETRY_DELAY:-5000}
       RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
       RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
       Redis__ConnectionString: redis:6379,password=${REDIS_PASSWORD}
@@ -192,6 +192,18 @@ services:
       triply-migrations:
         condition: service_completed_successfully
         
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: triply-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      triply:
+        condition: service_healthy
+
 volumes:
   triply-data:
   rabbitmq-data:

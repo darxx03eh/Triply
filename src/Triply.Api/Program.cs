@@ -76,6 +76,7 @@ public class Program
         app.MapHotelEndpoints();
         app.MapRoomEndpoints();
         app.MapAmenityEndpoints();
+        app.MapSearchEndpoints();
         app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }
