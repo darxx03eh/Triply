@@ -41,5 +41,7 @@ public static class Router
         public const string GetById = $"{Prefix}/{Id}";
         public const string Update = $"{Prefix}/{Id}";
         public const string Delete = $"{Prefix}/{Id}";
+        public const string AddImage = $"{Prefix}/{Id}/images";
+        public const string GetImages = $"{Prefix}/{Id}/images";
     }
 }

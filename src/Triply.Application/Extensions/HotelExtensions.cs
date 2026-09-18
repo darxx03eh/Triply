@@ -33,4 +33,14 @@ public static class HotelExtensions
             CreatedAt =  hotel.CreatedAt,
             StarRating = hotel.StarRating
         };
+
+    public static HotelImageResponse ToHotelImageResponse(this HotelImage image)
+        => new HotelImageResponse
+        {
+            ImageId = image.ImageId,
+            HotelId = image.HotelId,
+            Url = image.Url,
+            DisplayOrder = image.DisplayOrder,
+            Status = image.Status
+        };
 }

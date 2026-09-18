@@ -16,8 +16,10 @@ public partial class HotelService
                 $"The requested hotel with id: {hotelId.ToString()} was not found.", 
                 ResultErrorType.NotFound);
 
-        var imageUrls = hotel.Images.
-            OrderBy(i => i.DisplayOrder).Select(i => i.Url).ToList();
+        var imageUrls = hotel.Images
+            .OrderBy(i => i.DisplayOrder)
+            .Select(i => i.Url!)
+            .ToList();
         return Result<HotelResponse>.Success(hotel.ToHotelResponse(hotel.City.Name, imageUrls), success: new(
             "HOTEL_FOUND", $"The requested hotel with id: {hotelId.ToString()} was found."));
     }

@@ -34,17 +34,25 @@ services:
       Sieve__CaseSensitive: ${SIEVE_CASE_SENSITIVE:-false}
       Sieve__DefaultPageSize: ${SIEVE_DEFAULT_PAGE_SIZE:-10}
       Sieve__MaxPageSize: ${SIEVE_MAX_PAGE_SIZE:-50}
+      ImageUpload__SharedStoragePath: ${UPLOADS_PATH}
+      ImageUpload__MaxFileSizeBytes: ${UPLOADS_MAX_FILE_SIZE}
     depends_on:
       triply-db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      triply-migrations:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    volumes:
+      - uploads-temp:/app/uploads
 
   triply-db:
     image: mcr.microsoft.com/mssql/server:2025-latest
@@ -128,12 +136,9 @@ services:
       context: .
       dockerfile: workers/EmailWorker/Dockerfile
     container_name: email-worker
+    restart: unless-stopped
     depends_on:
       rabbitmq:
-        condition: service_healthy
-      triply-db:
-        condition: service_healthy
-      triply:
         condition: service_healthy
     environment:
       RabbitMq__UserName: ${RABBITMQ_USER}
@@ -142,10 +147,11 @@ services:
       RabbitMq__Port: ${RABBITMQ_PORT}
       RabbitMq__ExchangeName: ${RABBITMQ_EXCHANGE}
       RabbitMq__QueueName: ${RABBITMQ_EMAIL_QUEUE}
-      RabbitMq__MaxRetryCount: ${RABBITMQ_EMAIL_MAX_RETRY_COUNT}
-      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_EMAIL_RETRY_DELAY}
+      RabbitMq__MaxRetryCount: ${RABBITMQ_MAX_RETRY_COUNT}
+      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_RETRY_DELAY}
       RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
       RabbitMq__DeadLetterQueueName: ${RABBITMQ_EMAIL_DEAD_LETTER_QUEUE}
+      RabbitMq__DeadLetterRoutingKey: email.send
       Smtp__Host: ${SMTP_HOST}
       Smtp__Port: ${SMTP_PORT}
       Smtp__UserName: ${SMTP_USER}
@@ -153,8 +159,41 @@ services:
       Smtp__FromAddress: ${SMTP_FROM_ADDRESS}
       Smtp__FromName: ${SMTP_FROM_NAME}
       Smtp__UseSsl: ${SMTP_USE_SSL}
+
+  image-worker:
+    build:
+      context: .
+      dockerfile: workers/ImageUploader/Dockerfile
+    container_name: image-uploader
+    restart: unless-stopped
+    volumes:
+      - uploads-temp:/app/uploads
+    environment:
+      ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
+      RabbitMq__HostName: ${RABBITMQ_HOSTNAME}
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__UserName: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      RabbitMq__ExchangeName: ${RABBITMQ_EXCHANGE}
+      RabbitMq__QueueName: ${RABBITMQ_IMAGE_QUEUE}
+      RabbitMq__MaxRetryCount: ${RABBITMQ_MAX_RETRY_COUNT}
+      RabbitMq__RetryDelayMilliseconds: ${RABBITMQ_RETRY_DELAY}
+      RabbitMq__DeadLetterExchangeName: ${RABBITMQ_DEAD_LETTER_EXCHANGE}
+      RabbitMq__DeadLetterQueueName: ${RABBITMQ_IMAGE_DEAD_LETTER_QUEUE}
+      RabbitMq__DeadLetterRoutingKey: image.upload
+      Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME}
+      Cloudinary__ApiKey: ${CLOUDINARY_API_KEY}
+      Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      triply-db:
+        condition: service_healthy
+      triply-migrations:
+        condition: service_completed_successfully
         
 volumes:
   triply-data:
   rabbitmq-data:
   redis-data:
+  uploads-temp:

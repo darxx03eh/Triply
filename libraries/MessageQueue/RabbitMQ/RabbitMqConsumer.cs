@@ -53,7 +53,13 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
     /// <param name="cancellationToken">Token used to cancel setup and consumption.</param>
     /// <exception cref="ArgumentException">Thrown if <paramref name="topicPattern"/> is null/empty/whitespace.</exception>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="handler"/> is null.</exception>
+    public Task SubscribeAsync<T>(string topicPattern, Func<T, string, CancellationToken, Task> handler,
+        CancellationToken cancellationToken = default)
+        => SubscribeAsync(topicPattern, handler, onRetriesExhausted: null, cancellationToken);
+
+    /// <inheritdoc />
     public async Task SubscribeAsync<T>(string topicPattern, Func<T, string, CancellationToken, Task> handler,
+        Func<T, Exception, CancellationToken, Task>? onRetriesExhausted,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(topicPattern))
@@ -155,21 +161,34 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (_, args) =>
         {
+            T? payload = default;
             try
             {
-                T? payload = JsonSerializer.Deserialize<T>(args.Body.Span);
+                payload = JsonSerializer.Deserialize<T>(args.Body.Span);
                 if (payload is not null)
                     await handler(payload, args.RoutingKey, cancellationToken).ConfigureAwait(false);
 
                 await _channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken)
                     .ConfigureAwait(false);
             }
-            catch
+            catch (Exception exception)
             {
                 int retryCount = GetRetryCount(args.BasicProperties, retryQueueName);
 
                 if (retryCount >= _options.MaxRetryCount && !string.IsNullOrWhiteSpace(finalDlxName))
                 {
+                    if (payload is not null && onRetriesExhausted is not null)
+                    {
+                        try
+                        {
+                            await onRetriesExhausted(payload, exception, cancellationToken).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            // Compensation is best-effort; the message still goes to the DLQ below.
+                        }
+                    }
+
                     // BasicPublishAsync requires a concrete IAmqpHeader-implementing type,
                     // so we copy the read-only incoming properties into a mutable BasicProperties instance.
                     var publishProperties = new BasicProperties(args.BasicProperties);

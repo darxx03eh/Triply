@@ -1,13 +1,45 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+# Builds an EF Core migration bundle at image build time. The container then only
+# applies pending migrations instead of compiling the whole solution on every "up".
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
-RUN dotnet tool install --global dotnet-ef
+RUN dotnet tool install --global dotnet-ef --version 10.0.12
 
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
-WORKDIR /workspace
+WORKDIR /src
 
-COPY . .
+COPY ["src/Triply.Api/Triply.Api.csproj", "src/Triply.Api/"]
+COPY ["src/Triply.Application/Triply.Application.csproj", "src/Triply.Application/"]
+COPY ["src/Triply.Domain/Triply.Domain.csproj", "src/Triply.Domain/"]
+COPY ["src/Triply.Infrastructure/Triply.Infrastructure.csproj", "src/Triply.Infrastructure/"]
+COPY ["libraries/MessageQueue/MessageQueue.csproj", "libraries/MessageQueue/"]
 
-RUN dotnet restore src/Triply.sln
+RUN dotnet restore "src/Triply.Api/Triply.Api.csproj"
 
-CMD ["dotnet", "ef", "database", "update", "--project", "src/Triply.Infrastructure", "--startup-project", "src/Triply.Api"]
+COPY ["src/Triply.Api/", "src/Triply.Api/"]
+COPY ["src/Triply.Application/", "src/Triply.Application/"]
+COPY ["src/Triply.Domain/", "src/Triply.Domain/"]
+COPY ["src/Triply.Infrastructure/", "src/Triply.Infrastructure/"]
+COPY ["libraries/MessageQueue/", "libraries/MessageQueue/"]
+
+# The bundle is created by booting the API's host at design time, which requires these settings.
+# They are placeholders used only to build the model; the real values come from the environment at runtime.
+RUN JwtSettings__SecretKey="design-time-placeholder-secret-key-not-used" \
+    JwtSettings__Issuer="design-time" \
+    JwtSettings__Audience="design-time" \
+    ConnectionStrings__TriplyDbLocalConnection="Server=design-time;Database=Triply" \
+    dotnet ef migrations bundle \
+    --project src/Triply.Infrastructure \
+    --startup-project src/Triply.Api \
+    --configuration Release \
+    --output /app/efbundle
+
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+
+WORKDIR /app
+
+COPY --from=build /app/efbundle .
+
+# The connection string is read from ConnectionStrings__TriplyDbLocalConnection.
+ENTRYPOINT ["./efbundle"]
