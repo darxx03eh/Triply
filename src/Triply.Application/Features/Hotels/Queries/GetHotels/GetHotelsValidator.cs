@@ -11,11 +11,11 @@ public class GetHotelsValidator : AbstractValidator<GetHotelsRequest>
         RuleFor(request => request.Page)
             .GreaterThanOrEqualTo(1)
             .When(request => request.Page.HasValue)
-            .WithMessage(ResultResponseMessages.Cities.Validation.PageInvalid.Message);
+            .WithMessage(ResultResponseMessages.Hotels.Validation.PageInvalid.Message);
 
         RuleFor(request => request.PageSize)
             .InclusiveBetween(1, 50)
             .When(request => request.PageSize.HasValue)
-            .WithMessage(ResultResponseMessages.Cities.Validation.PageSizeInvalid.Message);
+            .WithMessage(ResultResponseMessages.Hotels.Validation.PageSizeInvalid.Message);
     }
 }

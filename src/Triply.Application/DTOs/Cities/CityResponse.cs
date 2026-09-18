@@ -7,6 +7,7 @@ namespace Triply.Application.DTOs.Cities;
 /// <param name="PostOffice">The optional post-office identifier.</param>
 /// <param name="CreatedAt">The UTC creation time.</param>
 /// <param name="ModifiedAt">The UTC modification time, when available.</param>
+/// <param name="RowVersion">The concurrency token to send back unchanged when updating the city.</param>
 public sealed record CityResponse
 {
     public Guid CityId { get; init; }
@@ -16,4 +17,5 @@ public sealed record CityResponse
     public bool IsDeleted { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? ModifiedAt { get; init; }
+    public byte[] RowVersion { get; init; } = [];
 }

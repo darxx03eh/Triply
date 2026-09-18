@@ -127,6 +127,15 @@ public static class ResultResponseMessages
 
             public static readonly ResultMessage RowVersionRequired
                 = new("HOTEL_ROW_VERSION_REQUIRED", "RowVersion is required to detect concurrent edits.");
+
+            public static readonly ResultMessage RowVersionInvalidLength
+                = new("HOTEL_ROW_VERSION_INVALID_LENGTH", "RowVersion must contain exactly 8 bytes.");
+
+            public static readonly ResultMessage PageInvalid
+                = new("HOTEL_PAGE_INVALID", "Page must be greater than or equal to 1.");
+
+            public static readonly ResultMessage PageSizeInvalid
+                = new("HOTEL_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
         }
     }
 

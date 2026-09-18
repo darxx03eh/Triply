@@ -16,6 +16,7 @@ public static class HotelExtensions
             ImageUrls = imageUrls,
             CreatedAt =  hotel.CreatedAt,
             ModifiedAt = hotel.ModifiedAt,
+            RowVersion = hotel.RowVersion,
             Latitude =  hotel.Latitude,
             Longitude =  hotel.Longitude,
             OwnerId = hotel.OwnerId,

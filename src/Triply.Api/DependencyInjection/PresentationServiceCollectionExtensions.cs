@@ -18,7 +18,7 @@ public static class PresentationServiceCollectionExtensions
                 c.SwaggerDoc("v1", new OpenApiInfo()
                 {
                     Version = "v1",
-                    Title = "Car Rental API",
+                    Title = "Triply API",
                     Description = """
                                   ASP.NET Core API for a Travel and Accommodation Booking Platform 
                                   Web Application.

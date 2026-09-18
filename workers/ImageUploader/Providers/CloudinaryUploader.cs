@@ -13,7 +13,7 @@ public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudina
         options.Value.ApiKey, 
         options.Value.ApiSecret));
 
-    public async Task<string> UploadAsync(string filePath, string originalFileName,
+    public async Task<CloudinaryUploadResult> UploadAsync(string filePath, string originalFileName,
         CancellationToken cancellationToken = default)
     {
         var uploadParams = new ImageUploadParams
@@ -29,6 +29,22 @@ public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudina
         if (result.Error is not null)
             throw new InvalidOperationException($"Cloudinary upload failed: {result.Error.Message}");
 
-        return result.SecureUrl.ToString();
+        return new CloudinaryUploadResult(result.SecureUrl.ToString(), result.PublicId);
+    }
+
+    public async Task DeleteAsync(string publicId, CancellationToken cancellationToken = default)
+    {
+        var result = await _cloudinary.DestroyAsync(new DeletionParams(publicId)
+        {
+            ResourceType = ResourceType.Image,
+            Invalidate = true
+        });
+
+        if (result.Error is not null)
+            throw new InvalidOperationException($"Cloudinary delete failed: {result.Error.Message}");
+
+        // "not found" means it is already gone, which is the desired end state.
+        if (result.Result is not ("ok" or "not found"))
+            throw new InvalidOperationException($"Cloudinary delete returned '{result.Result}'.");
     }
 }

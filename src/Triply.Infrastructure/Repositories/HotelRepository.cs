@@ -18,6 +18,12 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
         => await context.Hotels
             .AnyAsync(h => h.Latitude == latitude && h.Longitude == longitude, cancellationToken);
 
+    public async Task<bool> IsLocationExistsExcludeIdAsync(decimal? latitude, decimal? longitude, Guid hotelId,
+        CancellationToken cancellationToken = default)
+        => await context.Hotels
+            .AnyAsync(h => h.Latitude == latitude && h.Longitude == longitude && h.HotelId != hotelId,
+                cancellationToken);
+
     public async Task<bool> IsHotelExistsAsync(string name, Guid cityId, CancellationToken cancellationToken)
         => await context.Hotels.AnyAsync(h => h.Name.ToUpper() == name.ToUpper() && h.CityId == cityId,
             cancellationToken);
