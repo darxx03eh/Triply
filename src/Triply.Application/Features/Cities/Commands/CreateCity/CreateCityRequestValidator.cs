@@ -42,6 +42,7 @@ public class CreateCityRequestValidator : AbstractValidator<CreateCityRequest>
             .MustAsync(async (city, cancellation) =>
             {
                 return !await cityRepository.IsCityExistsAsync(city.Name, city.Country, cancellation);
-            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadExistsInThisCountry.Message);
+            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadExistsInThisCountry.Message)
+            .OverridePropertyName(nameof(CreateCityRequest.Name));
     }
 }

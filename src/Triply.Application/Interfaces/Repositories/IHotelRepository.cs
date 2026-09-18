@@ -21,5 +21,6 @@ public interface IHotelRepository : IGenericRepository<Hotel>
     Task<(List<Hotel> Hotels, int TotalCount)> GetPagedAsync(SieveModel sieveModel, 
         bool isAdmin,
         CancellationToken cancellationToken = default);
+    Task SoftDeleteRoomsAsync(Guid hotelId, CancellationToken cancellationToken = default);
     void SetOriginalRowVersion(Hotel hotel, byte[] rowVersion);
 }

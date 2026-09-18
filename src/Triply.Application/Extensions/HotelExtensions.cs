@@ -40,6 +40,7 @@ public static class HotelExtensions
             OwnerId = hotel.OwnerId,
             OwnerName = hotel.Owner is null ? null : $"{hotel.Owner.FirstName} {hotel.Owner.LastName}",
             RoomsCount = roomsCount,
+            IsDeleted = hotel.IsDeleted,
             Latitude =  hotel.Latitude,
             Longitude =  hotel.Longitude,
             CreatedAt =  hotel.CreatedAt,

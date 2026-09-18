@@ -220,6 +220,61 @@ public static class ResultResponseMessages
         }
     }
 
+    public static class Search
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage QueryMaxLength
+                = new("SEARCH_QUERY_MAX_LENGTH", "Search text must not exceed 100 characters.");
+
+            public static readonly ResultMessage CheckInInPast
+                = new("SEARCH_CHECK_IN_IN_PAST", "Check-in date cannot be in the past.");
+
+            public static readonly ResultMessage CheckOutBeforeCheckIn
+                = new("SEARCH_CHECK_OUT_BEFORE_CHECK_IN", "Check-out date must be after the check-in date.");
+
+            public static readonly ResultMessage StayTooLong
+                = new("SEARCH_STAY_TOO_LONG", "A stay cannot be longer than 30 nights.");
+
+            public static readonly ResultMessage AdultsInvalid
+                = new("SEARCH_ADULTS_INVALID", "Adults must be between 1 and 20.");
+
+            public static readonly ResultMessage ChildrenInvalid
+                = new("SEARCH_CHILDREN_INVALID", "Children must be between 0 and 20.");
+
+            public static readonly ResultMessage RoomsInvalid
+                = new("SEARCH_ROOMS_INVALID", "Rooms must be between 1 and 10.");
+
+            public static readonly ResultMessage RoomsMoreThanAdults
+                = new("SEARCH_ROOMS_MORE_THAN_ADULTS", "Each room needs at least one adult.");
+
+            public static readonly ResultMessage PriceInvalid
+                = new("SEARCH_PRICE_INVALID", "Price must be greater than or equal to 0.");
+
+            public static readonly ResultMessage PriceRangeInvalid
+                = new("SEARCH_PRICE_RANGE_INVALID", "Maximum price must be greater than or equal to the minimum price.");
+
+            public static readonly ResultMessage StarsInvalid
+                = new("SEARCH_STARS_INVALID", "Star ratings must be between 1 and 5.");
+
+            public static readonly ResultMessage HotelTypeInvalid
+                = new("SEARCH_HOTEL_TYPE_INVALID", "Hotel type must be Budget, Boutique or Luxury.");
+
+            public static readonly ResultMessage AmenitiesTooMany
+                = new("SEARCH_AMENITIES_TOO_MANY", "You can filter by at most 20 amenities.");
+
+            public static readonly ResultMessage SortInvalid
+                = new("SEARCH_SORT_INVALID",
+                    "Sort must be one of: recommended, price_asc, price_desc, stars_desc, stars_asc, name.");
+
+            public static readonly ResultMessage PageInvalid
+                = new("SEARCH_PAGE_INVALID", "Page must be greater than or equal to 1.");
+
+            public static readonly ResultMessage PageSizeInvalid
+                = new("SEARCH_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+        }
+    }
+
     public static class Rooms
     {
         public static class Validation
