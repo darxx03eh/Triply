@@ -64,13 +64,14 @@ public static class HotelEndpoints
                 {
                     var result = await hotelService.GetByIdAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
                 .WithName("GetHotelById")
                 .WithDisplayName("Get Hotel by id")
                 .WithSummary("Retrieves a hotel by its ID")
                 .WithDescription("""
                                  Retrieves the details of a specific hotel using its unique 
-                                 identifier. Returns the hotel details when the hotel exists.
+                                 identifier: gallery, amenities, location and review summary.
+                                 This endpoint is public and powers the hotel page.
                                  """)
                 .Produces(StatusCodes.Status200OK)
                 .Produces(StatusCodes.Status404NotFound);

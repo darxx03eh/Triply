@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.OpenApi;
+using Triply.Api.Endpoints;
 using Triply.Api.Responses;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Services.Blacklist;
@@ -88,6 +89,18 @@ public static class PresentationServiceCollectionExtensions
                 };
                 await context.Response.WriteAsJsonAsync(response);
             });
+        }
+
+        public void MapEndpoints()
+        {
+            app.MapAuthenticationEndpoints();
+            app.MapCityEndpoints();
+            app.MapHotelEndpoints();
+            app.MapRoomEndpoints();
+            app.MapAmenityEndpoints();
+            app.MapSearchEndpoints();
+            app.MapAttractionEndpoints();
+            app.MapReviewEndpoints();
         }
     }
 }

@@ -47,6 +47,8 @@ public static class Router
         public const string DeleteImage = $"{Prefix}/{Id}/images/{{imageId:guid}}";
         public const string GetRooms = $"{Prefix}/{Id}/rooms";
         public const string Amenities = $"{Prefix}/{Id}/amenities";
+        public const string Reviews = $"{Prefix}/{Id}/reviews";
+        public const string Attractions = $"{Prefix}/{Id}/attractions";
     }
 
     public static class RoomRoutes
@@ -73,5 +75,19 @@ public static class Router
     {
         private const string Prefix = $"{Rule}/search";
         public const string Hotels = Prefix;
+    }
+
+    public static class ReviewRoutes
+    {
+        private const string Prefix = $"{Rule}/reviews";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
+    }
+
+    public static class AttractionRoutes
+    {
+        private const string Prefix = $"{Rule}/attractions";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
     }
 }

@@ -192,17 +192,17 @@ services:
       triply-migrations:
         condition: service_completed_successfully
         
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: triply-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    depends_on:
-      triply:
-        condition: service_healthy
+  #frontend:
+    #build:
+      #context: ./frontend
+      #dockerfile: Dockerfile
+    #container_name: triply-frontend
+    #restart: unless-stopped
+    #ports:
+      #- "3000:80"
+    #depends_on:
+      #triply:
+        #condition: service_healthy
 
 volumes:
   triply-data:

@@ -155,6 +155,8 @@ public static class InfrastructureServiceCollectionExtensions
             services.Decorate<IRoomService, ValidatedRoomService>();
             services.Decorate<IAmenityService, ValidatedAmenityService>();
             services.Decorate<ISearchService, ValidatedSearchService>();
+            services.Decorate<IAttractionService, ValidatedAttractionService>();
+            services.Decorate<IReviewService, ValidatedReviewService>();
             return services;
         }
     }

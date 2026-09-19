@@ -219,6 +219,58 @@ public static class ResultResponseMessages
                 = new("AMENITY_ALREADY_EXISTS", "An amenity with this name already exists.");
         }
     }
+    
+    public static class Reviews
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage RatingInvalid
+                = new("REVIEW_RATING_INVALID", "Rating must be between 1 and 5.");
+
+            public static readonly ResultMessage TitleMaxLength
+                = new("REVIEW_TITLE_MAX_LENGTH", "Review title must not exceed 100 characters.");
+
+            public static readonly ResultMessage CommentRequired
+                = new("REVIEW_COMMENT_REQUIRED", "Review comment is required.");
+
+            public static readonly ResultMessage CommentLength
+                = new("REVIEW_COMMENT_LENGTH", "Review comment must be between 10 and 1000 characters.");
+
+            public static readonly ResultMessage HotelNotFound
+                = new("HOTEL_NOT_FOUND", "Hotel with this Id was not found.");
+
+            public static readonly ResultMessage AlreadyReviewed
+                = new("REVIEW_ALREADY_EXISTS",
+                    "You have already reviewed this hotel. Update your existing review instead.");
+
+            public static readonly ResultMessage PageInvalid
+                = new("REVIEW_PAGE_INVALID", "Page must be greater than or equal to 1.");
+
+            public static readonly ResultMessage PageSizeInvalid
+                = new("REVIEW_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+        }
+    }
+
+    public static class Attractions
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage NameRequired
+                = new("ATTRACTION_NAME_REQUIRED", "Attraction name is required.");
+
+            public static readonly ResultMessage NameMaxLength
+                = new("ATTRACTION_NAME_MAX_LENGTH", "Attraction name must not exceed 150 characters.");
+
+            public static readonly ResultMessage CategoryRequired
+                = new("ATTRACTION_CATEGORY_REQUIRED", "Attraction category is required.");
+
+            public static readonly ResultMessage CategoryMaxLength
+                = new("ATTRACTION_CATEGORY_MAX_LENGTH", "Attraction category must not exceed 50 characters.");
+
+            public static readonly ResultMessage DistanceInvalid
+                = new("ATTRACTION_DISTANCE_INVALID", "Distance must be between 0 and 100 km with at most 2 decimals.");
+        }
+    }
 
     public static class Search
     {
@@ -252,7 +304,8 @@ public static class ResultResponseMessages
                 = new("SEARCH_PRICE_INVALID", "Price must be greater than or equal to 0.");
 
             public static readonly ResultMessage PriceRangeInvalid
-                = new("SEARCH_PRICE_RANGE_INVALID", "Maximum price must be greater than or equal to the minimum price.");
+                = new("SEARCH_PRICE_RANGE_INVALID",
+                    "Maximum price must be greater than or equal to the minimum price.");
 
             public static readonly ResultMessage StarsInvalid
                 = new("SEARCH_STARS_INVALID", "Star ratings must be between 1 and 5.");

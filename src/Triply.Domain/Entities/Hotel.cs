@@ -13,6 +13,8 @@ public sealed class Hotel : BaseEntity
         Images = new HashSet<HotelImage>();
         RecentVisits = new HashSet<UserRecentVisit>();
         HotelAmenities = new HashSet<HotelAmenities>();
+        Attractions = new HashSet<Attraction>();
+        Reviews = new HashSet<Review>();
         IsDeleted = false;
     }
     public Guid HotelId { get; set; }
@@ -46,4 +48,6 @@ public sealed class Hotel : BaseEntity
     public ICollection<HotelImage> Images { get; set; }
     public ICollection<UserRecentVisit> RecentVisits { get; set; }
     public ICollection<HotelAmenities> HotelAmenities { get; set; }
+    public ICollection<Attraction> Attractions { get; set; }
+    public ICollection<Review> Reviews { get; set; }
 }

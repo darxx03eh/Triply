@@ -5,7 +5,8 @@ namespace Triply.Application.Extensions;
 
 public static class HotelExtensions
 {
-    public static HotelResponse ToHotelResponse(this Hotel hotel, string cityName, IReadOnlyList<string> imageUrls)
+    public static HotelResponse ToHotelResponse(this Hotel hotel, string cityName, IReadOnlyList<string> imageUrls,
+        decimal? averageRating = null, int reviewsCount = 0)
         => new HotelResponse()
         {
             HotelId = hotel.HotelId,
@@ -24,6 +25,8 @@ public static class HotelExtensions
                 .Select(ha => ha.Amenity.Name)
                 .OrderBy(name => name)
                 .ToList(),
+            AverageRating = averageRating,
+            ReviewsCount = reviewsCount,
             Latitude =  hotel.Latitude,
             Longitude =  hotel.Longitude,
             OwnerId = hotel.OwnerId,
