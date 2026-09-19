@@ -43,6 +43,11 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Room>(r => r.CreatedAt).CanSort();
         mapper.Property<Room>(r => r.ModifiedAt).CanSort();
 
+        mapper.Property<Review>(r => r.Rating)
+            .CanFilter().CanSort()
+            .HasName("rate");
+        mapper.Property<Review>(r => r.CreatedAt).CanSort();
+
         return mapper;
     }
 }

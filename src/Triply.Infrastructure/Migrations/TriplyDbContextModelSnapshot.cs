@@ -153,6 +153,48 @@ namespace Triply.Infrastructure.Migrations
                     b.ToTable("Amenities", (string)null);
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.Attraction", b =>
+                {
+                    b.Property<Guid>("AttractionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<decimal>("DistanceKm")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("AttractionId");
+
+                    b.HasIndex("HotelId")
+                        .HasDatabaseName("IX_Attractions_HotelId");
+
+                    b.ToTable("Attractions", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Attractions_Distance", "[DistanceKm] >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.Booking", b =>
                 {
                     b.Property<Guid>("BookingId")
@@ -638,6 +680,55 @@ namespace Triply.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.Review", b =>
+                {
+                    b.Property<Guid>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("HotelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte>("Rating")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("HotelId", "CreatedAt")
+                        .HasDatabaseName("IX_Reviews_HotelId_CreatedAt");
+
+                    b.HasIndex("HotelId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_Reviews_Hotel_User");
+
+                    b.ToTable("Reviews", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Reviews_Rating", "[Rating] BETWEEN 1 AND 5");
+                        });
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.Room", b =>
                 {
                     b.Property<Guid>("RoomId")
@@ -803,6 +894,18 @@ namespace Triply.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.Attraction", b =>
+                {
+                    b.HasOne("Triply.Domain.Entities.Hotel", "Hotel")
+                        .WithMany("Attractions")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Attractions_Hotels");
+
+                    b.Navigation("Hotel");
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.Booking", b =>
                 {
                     b.HasOne("Triply.Domain.Entities.Room", "Room")
@@ -901,6 +1004,27 @@ namespace Triply.Infrastructure.Migrations
                     b.Navigation("Booking");
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.Review", b =>
+                {
+                    b.HasOne("Triply.Domain.Entities.Hotel", "Hotel")
+                        .WithMany("Reviews")
+                        .HasForeignKey("HotelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Reviews_Hotels");
+
+                    b.HasOne("Triply.Domain.Entities.Identity.TriplyUser", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Reviews_Users");
+
+                    b.Navigation("Hotel");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.Room", b =>
                 {
                     b.HasOne("Triply.Domain.Entities.Hotel", "Hotel")
@@ -951,11 +1075,15 @@ namespace Triply.Infrastructure.Migrations
 
             modelBuilder.Entity("Triply.Domain.Entities.Hotel", b =>
                 {
+                    b.Navigation("Attractions");
+
                     b.Navigation("HotelAmenities");
 
                     b.Navigation("Images");
 
                     b.Navigation("RecentVisits");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Rooms");
                 });
@@ -969,6 +1097,8 @@ namespace Triply.Infrastructure.Migrations
                     b.Navigation("RecentVisits");
 
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Triply.Domain.Entities.Room", b =>

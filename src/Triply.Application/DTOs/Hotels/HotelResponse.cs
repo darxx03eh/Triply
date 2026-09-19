@@ -19,6 +19,8 @@ public record HotelResponse()
     public decimal? Longitude { get; init; }
     public IReadOnlyList<string> ImageUrls { get; init; }
     public IReadOnlyList<string> Amenities { get; init; } = [];
+    public decimal? AverageRating { get; init; }
+    public int ReviewsCount { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime? ModifiedAt { get; init; }
     /// <summary>Concurrency token (base64 in JSON); send it back unchanged when updating the hotel.</summary>
