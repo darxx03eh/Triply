@@ -12,13 +12,18 @@ public class UserRecentVisitConfigurations : IEntityTypeConfiguration<UserRecent
     /// <param name="builder"></param>
     public void Configure(EntityTypeBuilder<UserRecentVisit> builder)
     {
-        builder.ToTable("UserRecentVisits");
+        builder.ToTable("UserRecentVisits")
+            .HasQueryFilter(x => !x.Hotel.IsDeleted);
 
         builder.HasKey(x => x.VisitId);
 
         builder.HasIndex(x => new { x.UserId, x.VisitedAt })
             .IsDescending(false, true)
             .HasDatabaseName("IX_UserRecentVisits_UserId");
+
+        builder.HasIndex(x => new { x.UserId, x.HotelId })
+            .IsUnique()
+            .HasDatabaseName("UQ_UserRecentVisits_User_Hotel");
 
         builder.HasIndex(x => x.HotelId)
             .HasDatabaseName("IX_UserRecentVisits_HotelId");

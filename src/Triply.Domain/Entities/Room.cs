@@ -9,6 +9,7 @@ public sealed class Room : BaseEntity
     {
         RoomId =  Guid.NewGuid();
         Bookings =  new HashSet<Booking>();
+        Deals = new HashSet<Deal>();
         AdultCapacity = 2;
         IsAvailable = true;
         IsDeleted = false;
@@ -37,4 +38,5 @@ public sealed class Room : BaseEntity
     public Hotel Hotel { get; set; } = null!;
 
     public ICollection<Booking> Bookings { get; set; }
+    public ICollection<Deal> Deals { get; set; }
 }
