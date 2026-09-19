@@ -32,6 +32,7 @@ public static class Router
         public const string Update = $"{Prefix}/{Id}";
         public const string Delete = $"{Prefix}/{Id}";
         public const string Thumbnail = $"{Prefix}/{Id}/thumbnail";
+        public const string Trending = $"{Prefix}/trending";
     }
     
     public static class HotelRoutes
@@ -89,5 +90,22 @@ public static class Router
         private const string Prefix = $"{Rule}/attractions";
         public const string Update = $"{Prefix}/{Id}";
         public const string Delete = $"{Prefix}/{Id}";
+    }
+
+    public static class DealRoutes
+    {
+        private const string Prefix = $"{Rule}/deals";
+        public const string Create = Prefix;
+        public const string GetAll = Prefix;
+        public const string Featured = $"{Prefix}/featured";
+        public const string GetById = $"{Prefix}/{Id}";
+        public const string Update = $"{Prefix}/{Id}";
+        public const string Delete = $"{Prefix}/{Id}";
+    }
+
+    public static class UserRoutes
+    {
+        private const string Prefix = $"{Rule}/users/me";
+        public const string RecentHotels = $"{Prefix}/recent-hotels";
     }
 }

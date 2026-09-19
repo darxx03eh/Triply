@@ -47,6 +47,18 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
             .CanFilter().CanSort()
             .HasName("rate");
         mapper.Property<Review>(r => r.CreatedAt).CanSort();
+        
+        mapper.Property<Deal>(d => d.RoomId).CanFilter();
+        mapper.Property<Deal>(d => d.Title).CanFilter().CanSort();
+        mapper.Property<Deal>(d => d.DiscountPercentage)
+            .CanFilter().CanSort()
+            .HasName("discount");
+        mapper.Property<Deal>(d => d.IsFeatured)
+            .CanFilter()
+            .HasName("featured");
+        mapper.Property<Deal>(d => d.StartsAt).CanFilter().CanSort();
+        mapper.Property<Deal>(d => d.EndsAt).CanFilter().CanSort();
+        mapper.Property<Deal>(d => d.CreatedAt).CanSort();
 
         return mapper;
     }

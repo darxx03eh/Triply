@@ -39,4 +39,5 @@ public class TriplyDbContext : IdentityDbContext<TriplyUser, TriplyRole, Guid,
     public DbSet<UserRecentVisit>  UserRecentVisits { get; set; }
     public DbSet<Attraction> Attractions { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<Deal> Deals { get; set; }
 }

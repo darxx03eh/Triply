@@ -60,9 +60,12 @@ public static class HotelEndpoints
 
             group.MapGet(Router.HotelRoutes.GetById, async (
                     Guid id, IHotelService hotelService, 
+                    ICurrentUserAccessor user, IHomeService homeService,
                     CancellationToken cancellationToken) =>
                 {
                     var result = await hotelService.GetByIdAsync(id, cancellationToken);
+                    if (result.IsSuccess && user.UserId != Guid.Empty)
+                        await homeService.RecordVisitAsync(user.UserId, id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetHotelById")

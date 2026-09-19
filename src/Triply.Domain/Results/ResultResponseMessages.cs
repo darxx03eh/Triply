@@ -382,6 +382,36 @@ public static class ResultResponseMessages
         }
     }
 
+    public static class Deals
+    {
+        public static class Validation
+        {
+            public static readonly ResultMessage RoomIdRequired
+                = new("DEAL_ROOM_ID_REQUIRED", "Room id is required.");
+    
+            public static readonly ResultMessage TitleRequired
+                = new("DEAL_TITLE_REQUIRED", "Deal title is required.");
+    
+            public static readonly ResultMessage TitleMaxLength
+                = new("DEAL_TITLE_MAX_LENGTH", "Deal title must not exceed 100 characters.");
+    
+            public static readonly ResultMessage DiscountInvalid
+                = new("DEAL_DISCOUNT_INVALID", "Discount must be between 1 and 90 percent with at most 2 decimals.");
+    
+            public static readonly ResultMessage EndsBeforeStarts
+                = new("DEAL_ENDS_BEFORE_STARTS", "Deal end date must be after its start date.");
+    
+            public static readonly ResultMessage EndsInPast
+                = new("DEAL_ENDS_IN_PAST", "Deal end date cannot be in the past.");
+    
+            public static readonly ResultMessage PageInvalid
+                = new("DEAL_PAGE_INVALID", "Page must be greater than or equal to 1.");
+    
+            public static readonly ResultMessage PageSizeInvalid
+                = new("DEAL_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+        }
+    }
+
     public static class Success
     {
         public static readonly ResultMessage Created = new("CREATED", "Resource created successfully.");

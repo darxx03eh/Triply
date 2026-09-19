@@ -101,6 +101,8 @@ public static class PresentationServiceCollectionExtensions
             app.MapSearchEndpoints();
             app.MapAttractionEndpoints();
             app.MapReviewEndpoints();
+            app.MapDealEndpoints();
+            app.MapHomeEndpoints();
         }
     }
 }
