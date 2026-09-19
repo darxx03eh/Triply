@@ -12,6 +12,7 @@ public sealed class TriplyUser : IdentityUser<Guid>
         OwnedHotels = new HashSet<Hotel>();
         Bookings = new HashSet<Booking>();
         RecentVisits = new HashSet<UserRecentVisit>();
+        Reviews = new HashSet<Review>();
         CreatedAt = DateTime.UtcNow;
         IsDeleted = false;
         IsActive = true;
@@ -40,4 +41,6 @@ public sealed class TriplyUser : IdentityUser<Guid>
     public ICollection<Booking> Bookings { get; set; }
     /// <summary>Gets or sets the user's recent hotel visits.</summary>
     public ICollection<UserRecentVisit> RecentVisits { get; set; }
+    /// <summary>Gets or sets the reviews written by the user.</summary>
+    public ICollection<Review> Reviews { get; set; }
 }

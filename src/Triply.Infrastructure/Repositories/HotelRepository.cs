@@ -103,4 +103,21 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
 
     public void SetOriginalRowVersion(Hotel hotel, byte[] rowVersion)
         => context.Entry(hotel).Property(c => c.RowVersion).OriginalValue = rowVersion;
+
+    public async Task<(decimal? AverageRating, int ReviewsCount)> GetReviewStatsAsync(Guid hotelId,
+        CancellationToken cancellationToken = default)
+
+    {
+        var stats = await context.Reviews
+            .Where(r => r.HotelId == hotelId)
+            .GroupBy(r => r.HotelId)
+            .Select(g => new
+            {
+                Average = g.Average(r => (decimal)r.Rating),
+                Count =  g.Count()
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return stats is null ? (null, 0) : (Math.Round(stats.Average, 1), stats.Count);
+    }
 }

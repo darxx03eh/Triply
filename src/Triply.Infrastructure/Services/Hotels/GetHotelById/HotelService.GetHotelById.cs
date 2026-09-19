@@ -20,7 +20,12 @@ public partial class HotelService
             .OrderBy(i => i.DisplayOrder)
             .Select(i => i.Url!)
             .ToList();
-        return Result<HotelResponse>.Success(hotel.ToHotelResponse(hotel.City.Name, imageUrls), success: new(
+
+        var stats = await hotelRepository.GetReviewStatsAsync(hotelId, cancellationToken);
+        return Result<HotelResponse>.Success(hotel.ToHotelResponse(
+                hotel.City.Name, imageUrls,
+                stats.AverageRating, stats.ReviewsCount), 
+            success: new(
             "HOTEL_FOUND", $"The requested hotel with id: {hotelId.ToString()} was found."));
     }
 }

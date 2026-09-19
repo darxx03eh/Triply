@@ -71,12 +71,9 @@ public class Program
         app.MapHealthChecks("/health");
         app.UseAuthorization();
 
-        app.MapAuthenticationEndpoints();
-        app.MapCityEndpoints();
-        app.MapHotelEndpoints();
-        app.MapRoomEndpoints();
-        app.MapAmenityEndpoints();
-        app.MapSearchEndpoints();
+        // Map all endpoints
+        app.MapEndpoints();
+        // When route not found return 404 Not Found
         app.Map404NotFoundEndpoints();
         await app.RunAsync();
     }

@@ -23,4 +23,7 @@ public interface IHotelRepository : IGenericRepository<Hotel>
         CancellationToken cancellationToken = default);
     Task SoftDeleteRoomsAsync(Guid hotelId, CancellationToken cancellationToken = default);
     void SetOriginalRowVersion(Hotel hotel, byte[] rowVersion);
+
+    Task<(decimal? AverageRating, int ReviewsCount)> GetReviewStatsAsync(Guid hotelId,
+        CancellationToken cancellationToken = default);
 }
