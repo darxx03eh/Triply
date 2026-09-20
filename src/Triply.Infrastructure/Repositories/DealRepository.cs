@@ -81,4 +81,18 @@ public class DealRepository(TriplyDbContext context, ISieveProcessor sieveProces
                                              && d.DealId != excludeDealId
                                              && d.StartsAt < endsAt
                                              && d.EndsAt > startsAt, cancellationToken);
+
+    /// <summary>Gets active max discount percentage for rooms using it identifier.</summary>
+    public async Task<Dictionary<Guid, decimal>> GetActiveDiscountsAsync(IEnumerable<Guid> roomIds,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var ids = roomIds.Distinct().ToList();
+        return await context.Deals
+            .AsNoTracking()
+            .Where(d => ids.Contains(d.RoomId) && d.StartsAt <= now && d.EndsAt > now)
+            .GroupBy(d => d.RoomId)
+            .Select(g => new { RoomId = g.Key, Discount = g.Max(d => d.DiscountPercentage) })
+            .ToDictionaryAsync(x => x.RoomId, x => x.Discount, cancellationToken);
+    }
 }

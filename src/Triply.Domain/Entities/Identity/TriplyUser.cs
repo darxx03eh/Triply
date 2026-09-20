@@ -13,6 +13,7 @@ public sealed class TriplyUser : IdentityUser<Guid>
         Bookings = new HashSet<Booking>();
         RecentVisits = new HashSet<UserRecentVisit>();
         Reviews = new HashSet<Review>();
+        CartItems = new HashSet<CartItem>();
         CreatedAt = DateTime.UtcNow;
         IsDeleted = false;
         IsActive = true;
@@ -43,4 +44,6 @@ public sealed class TriplyUser : IdentityUser<Guid>
     public ICollection<UserRecentVisit> RecentVisits { get; set; }
     /// <summary>Gets or sets the reviews written by the user.</summary>
     public ICollection<Review> Reviews { get; set; }
+    /// <summary>Get or sets the navigation property for cart items.</summary>
+    public ICollection<CartItem> CartItems { get; set; }
 }

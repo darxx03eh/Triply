@@ -57,4 +57,6 @@ public class TriplyDbContext : IdentityDbContext<TriplyUser, TriplyRole, Guid,
     public DbSet<Review> Reviews { get; set; }
     /// <summary>Gets or sets the deals.</summary>
     public DbSet<Deal> Deals { get; set; }
+    /// <summary>Gets or sets the deals.</summary>
+    public DbSet<CartItem> CartItems { get; set; }
 }

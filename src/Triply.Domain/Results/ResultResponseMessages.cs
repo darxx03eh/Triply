@@ -260,8 +260,8 @@ public static class ResultResponseMessages
             public static readonly ResultMessage PageSizeInvalid
                 = new("CITY_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
 
-            /// <summary>Message returned for the city alread exists in this country.</summary>
-            public static readonly ResultMessage CityAlreadExistsInThisCountry
+            /// <summary>Message returned for the city already exists in this country.</summary>
+            public static readonly ResultMessage CityAlreadyExistsInThisCountry
                 = new("CITY_ALREADY_EXISTS", "This city already exists in this specific country.");
 
             /// <summary>Message returned when the city is not found.</summary>
@@ -377,7 +377,7 @@ public static class ResultResponseMessages
             public static readonly ResultMessage CheckInInPast
                 = new("SEARCH_CHECK_IN_IN_PAST", "Check-in date cannot be in the past.");
 
-            /// <summary>Message returned for the check out before check in.</summary>
+            /// <summary>Message returned for the check-out before check in.</summary>
             public static readonly ResultMessage CheckOutBeforeCheckIn
                 = new("SEARCH_CHECK_OUT_BEFORE_CHECK_IN", "Check-out date must be after the check-in date.");
 
@@ -385,15 +385,15 @@ public static class ResultResponseMessages
             public static readonly ResultMessage StayTooLong
                 = new("SEARCH_STAY_TOO_LONG", "A stay cannot be longer than 30 nights.");
 
-            /// <summary>Message returned when the adults is invalid.</summary>
+            /// <summary>Message returned when the adults are invalid.</summary>
             public static readonly ResultMessage AdultsInvalid
                 = new("SEARCH_ADULTS_INVALID", "Adults must be between 1 and 20.");
 
-            /// <summary>Message returned when the children is invalid.</summary>
+            /// <summary>Message returned when the children are invalid.</summary>
             public static readonly ResultMessage ChildrenInvalid
                 = new("SEARCH_CHILDREN_INVALID", "Children must be between 0 and 20.");
 
-            /// <summary>Message returned when the rooms is invalid.</summary>
+            /// <summary>Message returned when the rooms are invalid.</summary>
             public static readonly ResultMessage RoomsInvalid
                 = new("SEARCH_ROOMS_INVALID", "Rooms must be between 1 and 10.");
 
@@ -410,7 +410,7 @@ public static class ResultResponseMessages
                 = new("SEARCH_PRICE_RANGE_INVALID",
                     "Maximum price must be greater than or equal to the minimum price.");
 
-            /// <summary>Message returned when the stars is invalid.</summary>
+            /// <summary>Message returned when the stars are invalid.</summary>
             public static readonly ResultMessage StarsInvalid
                 = new("SEARCH_STARS_INVALID", "Star ratings must be between 1 and 5.");
 
@@ -535,7 +535,7 @@ public static class ResultResponseMessages
             public static readonly ResultMessage EndsBeforeStarts
                 = new("DEAL_ENDS_BEFORE_STARTS", "Deal end date must be after its start date.");
     
-            /// <summary>Message returned when the ends is in the past.</summary>
+            /// <summary>Message returned when the ends are in the past.</summary>
             public static readonly ResultMessage EndsInPast
                 = new("DEAL_ENDS_IN_PAST", "Deal end date cannot be in the past.");
     
@@ -546,6 +546,39 @@ public static class ResultResponseMessages
             /// <summary>Message returned when the page size is invalid.</summary>
             public static readonly ResultMessage PageSizeInvalid
                 = new("DEAL_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
+        }
+    }
+
+    /// <summary>The messages of the deals cart.</summary>
+    public static class Cart
+    {
+        /// <summary>The validation messages of the cart.</summary>
+        public static class Validation
+        {
+            /// <summary>Message returned when the room identifier is missing.</summary>
+            public static readonly ResultMessage RoomIdRequired
+                = new("CART_ROOM_ID_REQUIRED", "Room id is required.");
+            /// <summary>Message returned when the room not found.</summary>
+            public static readonly ResultMessage RoomNotFound
+                = new("CART_ROOM_NOT_FOUND", "The selected room was not found.");
+            /// <summary>Message returned when the start is in the past.</summary>
+            public static readonly ResultMessage CheckInInPast
+                = new("CART_CHECK_IN_IN_PAST", "Check-in date cannot be in the past.");
+            /// <summary>Message returned when the ends are before start.</summary>
+            public static readonly ResultMessage CheckOutBeforeCheckIn
+                = new("CART_CHECK_OUT_BEFORE_CHECK_IN", "Check-out date must be after the check-in date.");
+            /// <summary>Message returned when the nights are more than 30.</summary>
+            public static readonly ResultMessage StayTooLong
+                = new("CART_STAY_TOO_LONG", "A stay cannot be longer than 30 nights.");
+            /// <summary>Message returned when the adults are invalid.</summary>
+            public static readonly ResultMessage AdultsInvalid
+                = new("CART_ADULTS_INVALID", "Adults must be between 1 and 20.");
+            /// <summary>Message returned when the children are invalid.</summary>
+            public static readonly ResultMessage ChildrenInvalid
+                = new("CART_CHILDREN_INVALID", "Children must be between 0 and 20.");
+            /// <summary>Message returned when the item already in the cart.</summary>
+            public static readonly ResultMessage AlreadyInCart
+                = new("CART_ITEM_ALREADY_EXISTS", "This room is already in your cart for the same dates.");
         }
     }
 
