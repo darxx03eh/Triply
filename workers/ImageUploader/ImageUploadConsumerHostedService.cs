@@ -7,6 +7,8 @@ using Triply.Domain.Enums.HotleImages;
 
 namespace ImageUploader;
 
+/// <summary>Gets or sets the image upload consumer hosted service.</summary>
+/// <summary>Defines the mage upload consumer hosted operations.</summary>
 public class ImageUploadConsumerHostedService(
     IMessageConsumer consumer,
     ICloudinaryUploader cloudinaryUploader,
@@ -17,6 +19,7 @@ public class ImageUploadConsumerHostedService(
     private const string HotelsFolder = "triply/hotels";
     private const string CitiesFolder = "triply/cities";
 
+    /// <summary>Executes.</summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         => await consumer.SubscribeAsync<ImageUploadMessage>(
             ImageUploadTopic, HandleAsync, OnRetriesExhaustedAsync, stoppingToken);

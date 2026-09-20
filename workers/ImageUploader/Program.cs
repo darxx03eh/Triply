@@ -2,6 +2,7 @@ using ImageUploader;
 using ImageUploader.IProviders;
 using ImageUploader.Options;
 using ImageUploader.Providers;
+using Logging.DependencyInjection;
 using MessageQueue.DependencyInjection;
 using MessageQueue.Options;
 using MessageQueue.RabbitMQ;
@@ -11,6 +12,8 @@ using Triply.Infrastructure.DependencyInjection;
 using Triply.Infrastructure.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+builder.AddTriplyLogging("image-uploader");
 
 builder.Services.AddRabbitMqMessaging(builder.Configuration);
 builder.Services.AddTriplyDbContext(builder.Configuration);
@@ -39,7 +42,7 @@ builder.Services.AddHostedService(sp =>
     options.DeadLetterRoutingKey = "image.delete";
 
     return new ImageDeleteConsumerHostedService(
-        new RabbitMqConsumer(Options.Create(options)),
+        new RabbitMqConsumer(Options.Create(options), sp.GetRequiredService<ILogger<RabbitMqConsumer>>()),
         sp.GetRequiredService<ICloudinaryUploader>(),
         sp.GetRequiredService<ILogger<ImageDeleteConsumerHostedService>>());
 });
