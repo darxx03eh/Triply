@@ -7,13 +7,18 @@ using Triply.Application.Features.Cities.Queries.GetCitiesRequest;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Cities;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the city endpoints.</summary>
 public static class CityEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the city endpoints.</summary>
         public void MapCityEndpoints()
         {
             var group = app.MapGroup("")
@@ -34,8 +39,8 @@ public static class CityEndpoints
                                  Creates a new city using the provided city information.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<CityResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.CityRoutes.GetAll, async (
                     [AsParameters] GetCitiesRequest request, 
@@ -53,7 +58,7 @@ public static class CityEndpoints
                                  Retrieves a paginated list of cities based on the provided
                                  pagination and filtering parameters.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<PagedResult<CityResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.CityRoutes.GetById, async (
                     Guid id, ICityService cityService, CancellationToken cancellationToken) =>
@@ -68,8 +73,8 @@ public static class CityEndpoints
                                  Retrieves the details of a specific city using its unique identifier.
                                  Returns a not found response if the city does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<CityResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.CityRoutes.Update, async (
                     Guid id, UpdateCityRequest request, ICityService cityService, CancellationToken cancellationToken) =>
@@ -87,9 +92,9 @@ public static class CityEndpoints
                                  Returns a conflict response if the updated city information conflicts
                                  with an existing city.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status409Conflict);
+                .Produces<ApiResponse<CityResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
 
             group.MapDelete(Router.CityRoutes.Delete, async (
                     Guid id, ICityService cityService, CancellationToken cancellationToken) =>
@@ -105,8 +110,8 @@ public static class CityEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  Returns a not found response if the city does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<bool>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPost(Router.CityRoutes.Thumbnail, async (
                     Guid id, [FromForm] UploadCityThumbnailRequest request,
@@ -126,9 +131,9 @@ public static class CityEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Accepts<UploadCityThumbnailRequest>("multipart/form-data")
-                .Produces(StatusCodes.Status202Accepted)
-                .Produces(StatusCodes.Status404NotFound)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<CityResponse>>(StatusCodes.Status202Accepted)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapDelete(Router.CityRoutes.Thumbnail, async (
                     Guid id, ICityService cityService, CancellationToken cancellationToken) =>
@@ -145,7 +150,7 @@ public static class CityEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }
     }
 }
