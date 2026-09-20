@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Reviews.Queries.GetReviews;
 
+/// <summary>Validates the get reviews request.</summary>
 public class GetReviewsRequestValidator : AbstractValidator<GetReviewsRequest>
 {
+    /// <summary>Initializes a new instance of the get reviews request validator.</summary>
     public GetReviewsRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

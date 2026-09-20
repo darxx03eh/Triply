@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Authentications.Commands.Register;
 
+/// <summary>Validates the register user request.</summary>
 public class RegisterUserRequestValidator : AbstractValidator<RegisterUserRequest>
 {
+    /// <summary>Initializes a new instance of the register user request validator.</summary>
     public RegisterUserRequestValidator(IUserRepository userRepository)
     {
         ApplyValidationRules();

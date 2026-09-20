@@ -5,6 +5,7 @@ using Triply.Domain.Enums.Payments;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the payment entity.</summary>
 public class PaymentConfigurations : IEntityTypeConfiguration<Payment>
 {
     /// <summary>

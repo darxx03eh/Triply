@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Rooms.Commands.CreateRoom;
 
+/// <summary>Validates the create room request.</summary>
 public class CreateRoomRequestValidator : AbstractValidator<CreateRoomRequest>
 {
+    /// <summary>Initializes a new instance of the create room request validator.</summary>
     public CreateRoomRequestValidator(IRoomRepository roomRepository, IHotelRepository hotelRepository)
     {
         ApplyValidationRules();

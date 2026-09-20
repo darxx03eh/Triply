@@ -13,12 +13,14 @@ WORKDIR /src
 
 COPY ["workers/EmailWorker/EmailWorker.csproj", "workers/EmailWorker/"]
 COPY ["libraries/MessageQueue/MessageQueue.csproj", "libraries/MessageQueue/"]
+COPY ["libraries/Logging/Logging.csproj", "libraries/Logging/"]
 
 RUN dotnet restore "workers/EmailWorker/EmailWorker.csproj"
 
 # Only the worker and the shared library: edits under src/ don't rebuild this image.
 COPY ["workers/EmailWorker/", "workers/EmailWorker/"]
 COPY ["libraries/MessageQueue/", "libraries/MessageQueue/"]
+COPY ["libraries/Logging/", "libraries/Logging/"]
 
 RUN dotnet publish "workers/EmailWorker/EmailWorker.csproj" \
     -c $BUILD_CONFIGURATION \

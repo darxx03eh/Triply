@@ -1,13 +1,18 @@
 using Triply.Api.Extensions;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Deals;
+using Triply.Application.DTOs.Home;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the home endpoints.</summary>
 public static class HomeEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the home endpoints.</summary>
         public void MapHomeEndpoints()
         {
             var group = app.MapGroup("")
@@ -26,7 +31,7 @@ public static class HomeEndpoints
                                  Retrieves the running featured deals (default 5, max 20) with the hotel
                                  thumbnail, location, star rating, original price and discounted price.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<IReadOnlyList<FeaturedDealResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.CityRoutes.Trending, async (
                     int? count, IHomeService homeService, CancellationToken cancellationToken) =>
@@ -41,7 +46,7 @@ public static class HomeEndpoints
                                  Retrieves the most visited cities in the last 30 days (default 5, max 20)
                                  with their thumbnails, used for the trending destinations section.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<IReadOnlyList<TrendingCityResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.UserRoutes.RecentHotels, async (
                     int? count, ICurrentUserAccessor user, IHomeService homeService,
@@ -57,8 +62,8 @@ public static class HomeEndpoints
                                  Retrieves the last hotels the signed-in user opened (default 5, max 20)
                                  with the thumbnail, city, star rating and the lowest room price.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status401Unauthorized);
+                .Produces<ApiResponse<IReadOnlyList<RecentHotelResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized);
         }
     }
 }

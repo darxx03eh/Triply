@@ -5,13 +5,17 @@ using Triply.Application.Features.Hotels.Commands.SetHotelAmenities;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Amenities;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the amenity endpoints.</summary>
 public static class AmenityEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the amenity endpoints.</summary>
         public void MapAmenityEndpoints()
         {
             var group = app.MapGroup("")
@@ -33,8 +37,8 @@ public static class AmenityEndpoints
                                  assigned to hotels. Amenity names must be unique.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.AmenityRoutes.GetAll, async (
                     IAmenityService amenityService,
@@ -50,7 +54,7 @@ public static class AmenityEndpoints
                                  Retrieves all available amenities ordered by name.
                                  Used to build the amenities filter in the search page.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.AmenityRoutes.GetById, async (
                     Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
@@ -65,8 +69,8 @@ public static class AmenityEndpoints
                                  Retrieves the details of a specific amenity using its unique identifier.
                                  Returns a not found response if the amenity does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.AmenityRoutes.Update, async (
                     Guid id, UpdateAmenityRequest request,
@@ -84,8 +88,8 @@ public static class AmenityEndpoints
                                  Renames an existing amenity using its unique identifier.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.AmenityRoutes.Delete, async (
                     Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
@@ -101,7 +105,7 @@ public static class AmenityEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapGet(Router.HotelRoutes.Amenities, async (
                     Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
@@ -117,8 +121,8 @@ public static class AmenityEndpoints
                                  Retrieves the amenities offered by a specific hotel ordered by name.
                                  Returns a not found response when the hotel does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.HotelRoutes.Amenities, async (
                     Guid id, SetHotelAmenitiesRequest request,
@@ -138,9 +142,9 @@ public static class AmenityEndpoints
                                  Send an empty list to remove all amenities.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
         }
     }
 }

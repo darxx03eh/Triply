@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Reviews.Commands.UpdateReview;
 
+/// <summary>Validates the update review request.</summary>
 public class UpdateReviewRequestValidator : AbstractValidator<UpdateReviewRequest>
 {
+    /// <summary>Initializes a new instance of the update review request validator.</summary>
     public UpdateReviewRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

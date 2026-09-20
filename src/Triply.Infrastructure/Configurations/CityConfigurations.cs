@@ -5,6 +5,7 @@ using Triply.Domain.Entities.Identity;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the city entity.</summary>
 public class CityConfigurations : IEntityTypeConfiguration<City>
 {
     /// <summary>

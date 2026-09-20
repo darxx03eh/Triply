@@ -4,6 +4,7 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the amenity entity.</summary>
 public class AmenityConfigurations : IEntityTypeConfiguration<Amenity>
 {
     /// <summary>

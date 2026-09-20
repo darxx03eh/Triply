@@ -12,6 +12,7 @@ using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Results;
 using Triply.Infrastructure.Settings;
+using Serilog;
 
 namespace Triply.Api.Endpoints;
 
@@ -41,7 +42,7 @@ public static class AuthenticationEndpoints
                                  Creates a new user account in the system using the provided registration details,
                                  such as username, email, and password. Returns the full name, user id and email.
                                  """)
-                .Produces(StatusCodes.Status201Created);
+                .Produces<ApiResponse<RegisterUserResponse>>(StatusCodes.Status201Created);
             
             group.MapGet(Router.AuthenticationRoutes.EmailConfirmation, async (
                 [FromQuery] string email,
@@ -73,6 +74,7 @@ public static class AuthenticationEndpoints
                     IOptions<JwtSettings> jwtSettings,
                     HttpContext context,
                     IWebHostEnvironment env,
+                    IDiagnosticContext diagnostic,
                     CancellationToken cancellationToken
                 ) =>
                 {
@@ -81,6 +83,9 @@ public static class AuthenticationEndpoints
                         return result.ToMinimalApiResult();
 
                     SetRefreshTokenCookie(context, result.Value!.Refresh, jwtSettings.Value, env);
+                    // The success response is built here instead of ToMinimalApiResult, so the request log
+                    // gets the result code from here.
+                    diagnostic.Set("ResultCode", result.SuccessObject!.Code);
 
                     var response = result.Value!.ToLoginApiResponse();
                     return Results.Ok(new ApiResponse<LoginApiResponse>()
@@ -98,12 +103,13 @@ public static class AuthenticationEndpoints
                                  Validates the provided credentials (identifier and password) and, if valid,
                                  returns a JWT access token to be used for authenticating subsequent requests.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<LoginApiResponse>>(StatusCodes.Status200OK);
             
             group.MapPost(Router.AuthenticationRoutes.Refresh, async (
                 IAuthenticationService authenticationService,
                 HttpContext context,
                 ClaimsPrincipal user,
+                IDiagnosticContext diagnostic,
                 CancellationToken cancellationToken
                 ) =>
             {
@@ -112,6 +118,8 @@ public static class AuthenticationEndpoints
                     await authenticationService.GenerateAccessTokenFromRefreshToken(refresh, user, cancellationToken);
                 if (!result.IsSuccess)
                     return result.ToMinimalApiResult();
+
+                diagnostic.Set("ResultCode", result.SuccessObject!.Code);
                 
                 var response = result.Value!.ToLoginApiResponse();
                 return Results.Ok(new ApiResponse<LoginApiResponse>()
@@ -129,12 +137,13 @@ public static class AuthenticationEndpoints
                                  in the client's HTTP-only cookie. The refresh token is validated
                                  before issuing a new access token.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<LoginApiResponse>>(StatusCodes.Status200OK);
 
             group.MapDelete(Router.AuthenticationRoutes.Logout, async (
                 HttpContext context,
                 IAuthenticationService authenticationService,
                 ClaimsPrincipal user,
+                IDiagnosticContext diagnostic,
                 CancellationToken cancellationToken
             ) =>
             {
@@ -144,6 +153,7 @@ public static class AuthenticationEndpoints
                     return result.ToMinimalApiResult();
 
                 RemoveRefreshTokenCookie(context);
+                diagnostic.Set("ResultCode", result.SuccessObject!.Code);
 
                 return Results.NoContent();
             }).RequireAuthorization()

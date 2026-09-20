@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +19,13 @@ public partial class AuthenticationService
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(refresh))
+        {
+            logger.LogWarning("Token refresh failed: the refresh token cookie is missing");
             return Result<LoginResponse>.Failure(
                 "REFRESH_TOKEN_MISSING",
                 "Your session has expired. Please log in again.",
                 type: ResultErrorType.Unauthorized);
+        }
         
         var jwtToken = await tokenService.ReadJwtTokenAsync(refresh, cancellationToken);
         var (isValid, reason) = await ValidateDetails(jwtToken, refresh, cancellationToken);
@@ -30,31 +34,45 @@ public partial class AuthenticationService
             var (code, message, error) = reason switch
             {
                 "WRONG_ALGORITHM" =>
-                    ("REFRESH_TOKEN_INVALID","Your session is no longer valid. Please log in again.",ResultErrorType.Unauthorized),
+                    ("REFRESH_TOKEN_INVALID","Your session is no longer valid. Please log in again."
+                        ,ResultErrorType.Unauthorized),
                 "EXPIRED" => 
-                    ("REFRESH_TOKEN_EXPIRED", "Your session has expired. Please log in again.", ResultErrorType.Unauthorized),
+                    ("REFRESH_TOKEN_EXPIRED", "Your session has expired. Please log in again."
+                        , ResultErrorType.Unauthorized),
                 "REVOKED" => 
-                    ("REFRESH_TOKEN_REVOKED", "Your session was terminated. Please log in again.", ResultErrorType.BusinessRule),
+                    ("REFRESH_TOKEN_REVOKED", "Your session was terminated. Please log in again."
+                        , ResultErrorType.BusinessRule),
                 "NOT_FOUND" => 
-                    ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again.", ResultErrorType.NotFound),
+                    ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again."
+                        , ResultErrorType.NotFound),
                 "NOT_ACTIVE" =>
-                    ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again.",ResultErrorType.BusinessRule),
+                    ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again."
+                        ,ResultErrorType.BusinessRule),
                 _ => 
-                    ("REFRESH_TOKEN_INVALID", "Something went wrong. Please log in again.", ResultErrorType.Unauthorized)
+                    ("REFRESH_TOKEN_INVALID", "Something went wrong. Please log in again."
+                        , ResultErrorType.Unauthorized)
             };
-            
+
+            logger.LogWarning("Token refresh rejected: the refresh token is {Reason}", reason);
             return  Result<LoginResponse>.Failure(code, message, type: error);
         }
         var userId = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals(TokenClaims.Id))?.Value;
         var user = await userManager.FindByIdAsync(userId);
         if (user is null)
+        {
+            logger.LogWarning("Token refresh failed: user {UserId} from the refresh token no longer exists", userId);
             throw new NotFoundException($"User with email {userId} not found", "USER_NOT_FOUND");
+        }
         
         if (!user.IsActive)
+        {
+            logger.LogWarning(
+                "Token refresh blocked: user {UserId} ({UserName}) is not active", user.Id, user.UserName);
             return Result<LoginResponse>.Failure(
                 "ACCOUNT_NOT_ACTIVE",
                 "Your account is not active. Please contact support for assistance.",
                 ResultErrorType.Forbidden);
+        }
 
         var token = await tokenService.GenerateAccessTokenAsync(user, flag: false, cancellationToken);
         
@@ -70,6 +88,8 @@ public partial class AuthenticationService
         var expiryUtc = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim)).UtcDateTime;
 
         await tokenBlacklistService.BlacklistTokenAsync(jti, expiryUtc, cancellationToken);
+        logger.LogInformation("Access token refreshed for user {UserId} ({UserName}), old token {Jti} blacklisted",
+            user.Id, user.UserName, jti);
 
         var response = new LoginResponse($"{user.FirstName} {user.LastName}", token.Access, refresh);
         return Result<LoginResponse>.Success(response, success: new(
@@ -98,6 +118,9 @@ public partial class AuthenticationService
            
             if (refreshToken.ExpiryDate < DateTime.UtcNow)
             {
+                logger.LogInformation(
+                    "Refresh token {Jti} of user {UserId} expired and was revoked", 
+                    jti, refreshToken.UserId);
                 refreshToken.IsRevoked = true;
                 refreshToken.IsActive = false;
                 await refreshTokenRepository.UpdateAsync(refreshToken);

@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Hotels.Commands.SetHotelAmenities;
 
+/// <summary>Validates the set hotel amenities request.</summary>
 public class SetHotelAmenitiesRequestValidator : AbstractValidator<SetHotelAmenitiesRequest>
 {
+    /// <summary>Initializes a new instance of the set hotel amenities request validator.</summary>
     public SetHotelAmenitiesRequestValidator(IAmenityRepository amenityRepository)
     {
         ApplyValidationRules();

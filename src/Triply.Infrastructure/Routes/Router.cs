@@ -23,89 +23,147 @@ public static class Router
         public const string EmailConfirmation = $"{Prefix}/confirm-email";
     }
 
+    /// <summary>Represents the city routes.</summary>
     public static class CityRoutes
     {
         private const string Prefix = $"{Rule}/cities";
+        /// <summary>The create.</summary>
         public const string Create = Prefix;
+        /// <summary>The get all.</summary>
         public const string GetAll = Prefix;
+        /// <summary>The get by identifier.</summary>
         public const string GetById = $"{Prefix}/{Id}";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
+        /// <summary>The thumbnail.</summary>
         public const string Thumbnail = $"{Prefix}/{Id}/thumbnail";
+        /// <summary>The trending.</summary>
         public const string Trending = $"{Prefix}/trending";
     }
     
+    /// <summary>Represents the hotel routes.</summary>
     public static class HotelRoutes
     {
         private const string Prefix = $"{Rule}/hotels";
+        /// <summary>The create.</summary>
         public const string Create = Prefix;
+        /// <summary>The get all.</summary>
         public const string GetAll = Prefix;
+        /// <summary>The get by identifier.</summary>
         public const string GetById = $"{Prefix}/{Id}";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
+        /// <summary>The add image.</summary>
         public const string AddImage = $"{Prefix}/{Id}/images";
+        /// <summary>The get images.</summary>
         public const string GetImages = $"{Prefix}/{Id}/images";
+        /// <summary>The delete image.</summary>
         public const string DeleteImage = $"{Prefix}/{Id}/images/{{imageId:guid}}";
+        /// <summary>The get rooms.</summary>
         public const string GetRooms = $"{Prefix}/{Id}/rooms";
+        /// <summary>The amenities.</summary>
         public const string Amenities = $"{Prefix}/{Id}/amenities";
+        /// <summary>The reviews.</summary>
         public const string Reviews = $"{Prefix}/{Id}/reviews";
+        /// <summary>The attractions.</summary>
         public const string Attractions = $"{Prefix}/{Id}/attractions";
     }
 
+    /// <summary>Represents the room routes.</summary>
     public static class RoomRoutes
     {
         private const string Prefix = $"{Rule}/rooms";
+        /// <summary>The create.</summary>
         public const string Create = Prefix;
+        /// <summary>The get all.</summary>
         public const string GetAll = Prefix;
+        /// <summary>The get by identifier.</summary>
         public const string GetById = $"{Prefix}/{Id}";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
     }
 
+    /// <summary>Represents the amenity routes.</summary>
     public static class AmenityRoutes
     {
         private const string Prefix = $"{Rule}/amenities";
+        /// <summary>The create.</summary>
         public const string Create = Prefix;
+        /// <summary>The get all.</summary>
         public const string GetAll = Prefix;
+        /// <summary>The get by identifier.</summary>
         public const string GetById = $"{Prefix}/{Id}";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
     }
 
+    /// <summary>Represents the search routes.</summary>
     public static class SearchRoutes
     {
         private const string Prefix = $"{Rule}/search";
+        /// <summary>The hotels.</summary>
         public const string Hotels = Prefix;
     }
 
+    /// <summary>Represents the review routes.</summary>
     public static class ReviewRoutes
     {
         private const string Prefix = $"{Rule}/reviews";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
     }
 
+    /// <summary>Represents the attraction routes.</summary>
     public static class AttractionRoutes
     {
         private const string Prefix = $"{Rule}/attractions";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
     }
 
+    /// <summary>Represents the deal routes.</summary>
     public static class DealRoutes
     {
         private const string Prefix = $"{Rule}/deals";
+        /// <summary>The create.</summary>
         public const string Create = Prefix;
+        /// <summary>The get all.</summary>
         public const string GetAll = Prefix;
+        /// <summary>The featured.</summary>
         public const string Featured = $"{Prefix}/featured";
+        /// <summary>The get by identifier.</summary>
         public const string GetById = $"{Prefix}/{Id}";
+        /// <summary>The update.</summary>
         public const string Update = $"{Prefix}/{Id}";
+        /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
     }
 
+    /// <summary>Represents the user routes.</summary>
     public static class UserRoutes
     {
         private const string Prefix = $"{Rule}/users/me";
+        /// <summary>The recent hotels.</summary>
         public const string RecentHotels = $"{Prefix}/recent-hotels";
+    }
+
+    /// <summary>Represents the logging routes.</summary>
+    public static class LoggingRoutes
+    {
+        private const string Prefix = $"{Rule}/logging";
+        /// <summary>The test.</summary>
+        public const string Test = $"{Prefix}/test";
     }
 }

@@ -2,8 +2,10 @@ using Triply.Domain.Results.Enums;
 
 namespace Triply.Domain.Results;
 
+/// <summary>Represents the default success messages.</summary>
 public static class DefaultSuccessMessages
 {
+    /// <summary>Fors.</summary>
     public static ResultSuccess For(ResultSuccessType type) => type switch
     {
         ResultSuccessType.Created => new ResultSuccess(

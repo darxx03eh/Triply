@@ -8,8 +8,11 @@ using Triply.Infrastructure.Db;
 
 namespace Triply.Infrastructure.Repositories;
 
+/// <summary>Gets or sets the search repository.</summary>
+/// <summary>Persistence operations for search.</summary>
 public class SearchRepository(TriplyDbContext context) : ISearchRepository
 {
+    /// <summary>Searches the hotels.</summary>
     public async Task<(List<HotelSearchItemResponse> Hotels, int TotalCount)> SearchHotelsAsync(
         SearchHotelsCriteria criteria, CancellationToken cancellationToken = default)
     {

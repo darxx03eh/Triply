@@ -5,8 +5,11 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Filtering;
 
+/// <summary>Gets or sets the application Sieve processor.</summary>
+/// <summary>Represents the application Sieve processor.</summary>
 public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SieveProcessor(options)
 {
+    /// <summary>Maps the properties.</summary>
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
         mapper.Property<City>(c => c.Name).CanFilter().CanSort();

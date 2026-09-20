@@ -6,6 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace ImageUploader.Providers;
 
+/// <summary>Gets or sets the Cloudinary uploader.</summary>
+/// <summary>Represents the Cloudinary uploader.</summary>
 public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudinaryUploader
 {
     private readonly Cloudinary _cloudinary = new(new Account(
@@ -13,6 +15,7 @@ public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudina
         options.Value.ApiKey, 
         options.Value.ApiSecret));
 
+    /// <summary>Uploads.</summary>
     public async Task<CloudinaryUploadResult> UploadAsync(string filePath, string originalFileName, string folder,
         CancellationToken cancellationToken = default)
     {
@@ -32,6 +35,7 @@ public class CloudinaryUploader(IOptions<CloudinaryOptions> options) : ICloudina
         return new CloudinaryUploadResult(result.SecureUrl.ToString(), result.PublicId);
     }
 
+    /// <summary>Deletes the Cloudinary uploader.</summary>
     public async Task DeleteAsync(string publicId, CancellationToken cancellationToken = default)
     {
         var result = await _cloudinary.DestroyAsync(new DeletionParams(publicId)

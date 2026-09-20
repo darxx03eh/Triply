@@ -5,6 +5,7 @@ using Triply.Domain.Enums.Hotels;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the hotel entity.</summary>
 public class HotelConfigurations : IEntityTypeConfiguration<Hotel>
 {
     /// <summary>

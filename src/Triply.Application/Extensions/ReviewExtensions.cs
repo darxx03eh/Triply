@@ -4,8 +4,10 @@ using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for review.</summary>
 public static class ReviewExtensions
 {
+    /// <summary>Maps the review to a review response.</summary>
     public static ReviewResponse ToReviewResponse(this Review review, string authorName)
         => new ReviewResponse()
         {
@@ -20,6 +22,7 @@ public static class ReviewExtensions
             ModifiedAt = review.ModifiedAt
         };
 
+    /// <summary>Maps the review to a review.</summary>
     public static Review ToReview(this CreateReviewRequest request)
         => new Review()
         {

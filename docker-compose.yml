@@ -36,6 +36,9 @@ services:
       Sieve__MaxPageSize: ${SIEVE_MAX_PAGE_SIZE:-50}
       ImageUpload__SharedStoragePath: ${UPLOADS_PATH}
       ImageUpload__MaxFileSizeBytes: ${UPLOADS_MAX_FILE_SIZE}
+      DatabaseLoggingSettings__SlowQueryThresholdMs: ${SLOW_QUERY_THRESHOLD_MS:-500}
+      Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
+      Elasticsearch__Uri: http://elasticsearch:9200
     depends_on:
       triply-db:
         condition: service_healthy
@@ -45,6 +48,8 @@ services:
         condition: service_healthy
       triply-migrations:
         condition: service_completed_successfully
+      elasticsearch:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -140,6 +145,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     environment:
       RabbitMq__UserName: ${RABBITMQ_USER}
       RabbitMq__Password: ${RABBITMQ_PASSWORD}
@@ -159,6 +166,8 @@ services:
       Smtp__FromAddress: ${SMTP_FROM_ADDRESS}
       Smtp__FromName: ${SMTP_FROM_NAME}
       Smtp__UseSsl: ${SMTP_USE_SSL}
+      Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
+      Elasticsearch__Uri: http://elasticsearch:9200
 
   image-worker:
     build:
@@ -184,6 +193,8 @@ services:
       Cloudinary__CloudName: ${CLOUDINARY_CLOUD_NAME}
       Cloudinary__ApiKey: ${CLOUDINARY_API_KEY}
       Cloudinary__ApiSecret: ${CLOUDINARY_API_SECRET}
+      Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
+      Elasticsearch__Uri: http://elasticsearch:9200
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -191,6 +202,62 @@ services:
         condition: service_healthy
       triply-migrations:
         condition: service_completed_successfully
+      elasticsearch:
+        condition: service_healthy
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: triply-elasticsearch
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: triply-kibana
+    restart: unless-stopped
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q '\"level\":\"available\"' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 40s
+
+  # One-shot: creates the "Triply logs" data view (logs-triply.*) in Kibana, then exits.
+  kibana-setup:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: triply-kibana-setup
+    restart: "no"
+    depends_on:
+      kibana:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >-
+        curl -fsS -X POST http://kibana:5601/api/data_views/data_view
+        -H 'kbn-xsrf: true' -H 'Content-Type: application/json'
+        -d '{"override": true, "data_view": {"id": "triply-logs", "title": "logs-triply.*", "name": "Triply logs", "timeFieldName": "@timestamp"}}'
+        && echo ' -> Triply logs data view is ready'
         
   #frontend:
     #build:
@@ -209,3 +276,4 @@ volumes:
   rabbitmq-data:
   redis-data:
   uploads-temp:
+  elasticsearch-data:

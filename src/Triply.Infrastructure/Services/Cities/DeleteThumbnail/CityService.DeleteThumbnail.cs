@@ -9,20 +9,27 @@ public partial class CityService
 {
     private const string ImageDeleteTopic = "image.delete";
 
+    /// <summary>Deletes the thumbnail.</summary>
     public async Task<Result<bool>> DeleteThumbnailAsync(Guid cityId, CancellationToken cancellationToken = default)
     {
         var city = await cityRepository.GetByIdAsync(cityId, cancellationToken);
         if (city is null)
+        {
+            logger.LogWarning("Delete thumbnail failed: city {CityId} was not found", cityId);
             return Result<bool>.Failure(
                 "CITY_NOT_FOUND",
                 $"The requested city with id: {cityId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         if (city.ThumbnailUrl is null)
+        {
+            logger.LogWarning("Delete thumbnail failed: city {CityId} has no thumbnail", cityId);
             return Result<bool>.Failure(
                 "CITY_THUMBNAIL_NOT_FOUND",
                 $"The city with id: {cityId.ToString()} has no thumbnail.",
                 ResultErrorType.NotFound);
+        }
 
         string? publicId = city.ThumbnailPublicId;
 
@@ -30,14 +37,21 @@ public partial class CityService
         city.ThumbnailPublicId = null;
         city.ModifiedAt = DateTime.UtcNow;
         await cityRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Thumbnail of city {CityId} removed", cityId);
 
         if (publicId is not null)
         {
             try
             {
                 await publisher.PublishAsync(ImageDeleteTopic,
-                    new ImageDeleteMessage { ImageId = cityId, PublicId = publicId },
+                    new ImageDeleteMessage
+                    {
+                        ImageId = cityId, 
+                        PublicId = publicId
+                    },
                     cancellationToken: cancellationToken);
+                logger.LogInformation("Cloudinary asset {PublicId} of city {CityId} queued for deletion", publicId,
+                    cityId);
             }
             catch (Exception exception)
             {
@@ -49,6 +63,6 @@ public partial class CityService
 
         return Result<bool>.Success(
             true, ResultSuccessType.NoContent,
-            new ("CITY_THUMBNAIL_DELETED", "City thumbnail deleted successfully."));
+            new("CITY_THUMBNAIL_DELETED", "City thumbnail deleted successfully."));
     }
 }

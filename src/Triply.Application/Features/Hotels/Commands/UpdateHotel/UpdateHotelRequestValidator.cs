@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Hotels.Commands.UpdateHotel;
 
+/// <summary>Validates the update hotel request.</summary>
 public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
 {
+    /// <summary>Initializes a new instance of the update hotel request validator.</summary>
     public UpdateHotelRequestValidator(IHotelRepository hotelRepository, ICityRepository cityRepository)
     {
         ApplyValidationRules();

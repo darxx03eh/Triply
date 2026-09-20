@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Attractions;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Attractions.Commands.UpdateAttraction;
@@ -8,21 +9,28 @@ namespace Triply.Infrastructure.Services.Attractions;
 
 public partial class AttractionService
 {
+    /// <summary>Updates an existing attraction.</summary>
     public async Task<Result<AttractionResponse>> UpdateAsync(Guid attractionId, UpdateAttractionRequest request,
         CancellationToken cancellationToken = default)
     {
         var attraction = await attractionRepository.GetByIdAsync(attractionId, cancellationToken);
         if (attraction is null)
+        {
+            logger.LogWarning("Update attraction failed: attraction {AttractionId} was not found", attractionId);
             return Result<AttractionResponse>.Failure(
                 "ATTRACTION_NOT_FOUND",
                 $"The requested attraction with id: {attractionId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         attraction.Name = request.Name.Trim();
         attraction.Category = request.Category.Trim();
         attraction.DistanceKm = request.DistanceKm;
         attraction.ModifiedAt = DateTime.UtcNow;
         await attractionRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation(
+            "Attraction {AttractionId} of hotel {HotelId} updated to {AttractionName} ({DistanceKm} km)",
+            attractionId, attraction.HotelId, attraction.Name, attraction.DistanceKm);
 
         return Result<AttractionResponse>.Success(
             attraction.ToAttractionResponse(), ResultSuccessType.Ok,

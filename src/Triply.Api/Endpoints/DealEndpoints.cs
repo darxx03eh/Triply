@@ -5,13 +5,18 @@ using Triply.Application.Features.Deals.Queries.GetDeals;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Deals;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the deal endpoints.</summary>
 public static class DealEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the deal endpoints.</summary>
         public void MapDealEndpoints()
         {
             var group = app.MapGroup("")
@@ -32,10 +37,10 @@ public static class DealEndpoints
                                  A room can not have two deals in the same period.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status409Conflict)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<DealResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.DealRoutes.GetAll, async (
                     [AsParameters] GetDealsRequest request, IDealService dealService,
@@ -52,7 +57,7 @@ public static class DealEndpoints
                                  (filters=featured==true, sorts=-discount).
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<PagedResult<DealResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.DealRoutes.GetById, async (
                     Guid id, IDealService dealService, CancellationToken cancellationToken) =>
@@ -67,8 +72,8 @@ public static class DealEndpoints
                                  Retrieves the details of a specific deal using its unique identifier.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<DealResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.DealRoutes.Update, async (
                     Guid id, UpdateDealRequest request, IDealService dealService,
@@ -84,10 +89,10 @@ public static class DealEndpoints
                                  Updates the title, discount, period and featured flag of a deal.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status409Conflict)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<DealResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapDelete(Router.DealRoutes.Delete, async (
                     Guid id, IDealService dealService, CancellationToken cancellationToken) =>
@@ -103,7 +108,7 @@ public static class DealEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }
     }
 }

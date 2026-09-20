@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Deals.Queries.GetDeals;
 
+/// <summary>Validates the get deals request.</summary>
 public class GetDealsRequestValidator : AbstractValidator<GetDealsRequest>
 {
+    /// <summary>Initializes a new instance of the get deals request validator.</summary>
     public GetDealsRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()
