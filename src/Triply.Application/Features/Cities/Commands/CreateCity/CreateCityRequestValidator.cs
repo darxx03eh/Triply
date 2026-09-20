@@ -7,6 +7,7 @@ namespace Triply.Application.Features.Cities.Commands.CreateCity;
 /// <summary>Validates city creation requests.</summary>
 public class CreateCityRequestValidator : AbstractValidator<CreateCityRequest>
 {
+    /// <summary>Initializes a new instance of the create city request validator.</summary>
     public CreateCityRequestValidator(ICityRepository cityRepository)
     {
         ApplyValidationRules();

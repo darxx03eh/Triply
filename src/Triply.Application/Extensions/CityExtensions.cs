@@ -3,8 +3,10 @@ using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for city.</summary>
 public static class CityExtensions
 {
+    /// <summary>Maps the city to a city response.</summary>
     public static CityResponse ToCityResponse(this City city, int hotelsCount = 0)
         => new CityResponse()
         {

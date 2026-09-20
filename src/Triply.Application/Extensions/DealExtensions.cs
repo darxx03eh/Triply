@@ -4,8 +4,10 @@ using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for deal.</summary>
 public static class DealExtensions
 {
+    /// <summary>Maps the deal to a deal response.</summary>
     public static DealResponse ToDealResponse(this Deal deal)
         => new DealResponse()
         {
@@ -19,6 +21,7 @@ public static class DealExtensions
             CreatedAt = deal.CreatedAt
         };
 
+    /// <summary>Maps the deal to a deal.</summary>
     public static Deal ToDeal(this CreateDealRequest request)
         => new Deal()
         {
@@ -30,6 +33,7 @@ public static class DealExtensions
             IsFeatured = request.IsFeatured
         };
     
+    /// <summary>Applies the discount.</summary>
     public static decimal ApplyDiscount(this decimal price, decimal discountPercentage)
         => Math.Round(price * (100 - discountPercentage) / 100, 2);
 }

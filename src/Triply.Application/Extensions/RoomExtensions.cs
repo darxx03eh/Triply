@@ -3,8 +3,10 @@ using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for room.</summary>
 public static class RoomExtensions
 {
+    /// <summary>Maps the room to a room response.</summary>
     public static RoomResponse ToRoomResponse(this Room room, string hotelName)
         => new RoomResponse()
         {

@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Amenities.Commands.CreateAmenity;
 
+/// <summary>Validates the create amenity request.</summary>
 public class CreateAmenityRequestValidator : AbstractValidator<CreateAmenityRequest>
 {
+    /// <summary>Initializes a new instance of the create amenity request validator.</summary>
     public CreateAmenityRequestValidator(IAmenityRepository amenityRepository)
     {
         ApplyValidationRules();

@@ -3,8 +3,10 @@ using Triply.Application.Exceptions;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for validation.</summary>
 public static class ValidationExtensions
 {
+    /// <summary>Validates the and throw async t request.</summary>
     public static async Task ValidateAndThrowAsync<TRequest>(
         this IEnumerable<IValidator<TRequest>> validators,
         TRequest request,

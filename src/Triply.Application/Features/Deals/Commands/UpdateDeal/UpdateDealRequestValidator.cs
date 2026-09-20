@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Deals.Commands.UpdateDeal;
 
+/// <summary>Validates the update deal request.</summary>
 public class UpdateDealRequestValidator : AbstractValidator<UpdateDealRequest>
 {
+    /// <summary>Initializes a new instance of the update deal request validator.</summary>
     public UpdateDealRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

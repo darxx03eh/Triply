@@ -5,8 +5,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Hotels.Commands.CreateHotel;
 
+/// <summary>Validates the create hotel request.</summary>
 public class CreateHotelRequestValidator : AbstractValidator<CreateHotelRequest>
 {
+    /// <summary>Initializes a new instance of the create hotel request validator.</summary>
     public CreateHotelRequestValidator(IHotelRepository hotleRepository, ICityRepository cityRepository)
     {
         ApplyValidationRules();

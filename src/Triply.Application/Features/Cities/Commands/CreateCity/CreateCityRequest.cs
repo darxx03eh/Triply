@@ -1,12 +1,12 @@
 namespace Triply.Application.Features.Cities.Commands.CreateCity;
 
 /// <summary>Data required to create a city.</summary>
-/// <param name="Name">The city name.</param>
-/// <param name="Country">The country containing the city.</param>
-/// <param name="PostOffice">The optional post-office identifier.</param>
 public class CreateCityRequest
 {
+    /// <summary>Gets or sets the name.</summary>
     public string Name { get; set; }
+    /// <summary>Gets or sets the country.</summary>
     public string Country { get; set; }
+    /// <summary>Gets or sets the post office.</summary>
     public string? PostOffice { get; set; }
 }
