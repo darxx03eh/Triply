@@ -1,4 +1,5 @@
 using Triply.Application.DTOs.Hotels;
+using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
@@ -66,5 +67,20 @@ public static class HotelExtensions
             Url = image.Url,
             DisplayOrder = image.DisplayOrder,
             Status = image.Status
+        };
+
+    /// <summary>Maps the Create hotel request to a hotel.</summary>
+    public static Hotel ToHotel(this CreateHotelRequest request, Guid ownerId)
+        => new Hotel()
+        {
+            Name = request.Name.Trim(),
+            CityId = request.CityId,
+            OwnerId = ownerId,
+            StarRating = request.StarRating,
+            HotelType = request.HotelType,
+            Address = request.Address.Trim(),
+            Description = request.Description.Trim(),
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
         };
 }

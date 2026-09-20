@@ -1,4 +1,5 @@
 using Triply.Application.DTOs.Rooms;
+using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
@@ -24,5 +25,19 @@ public static class RoomExtensions
             CreatedAt = room.CreatedAt,
             ModifiedAt = room.ModifiedAt,
             RowVersion = room.RowVersion,
+        };
+
+    /// <summary>Maps the Create room request to a room.</summary>
+    public static Room ToRoom(this CreateRoomRequest request)
+        => new Room()
+        {
+            HotelId = request.HotelId,
+            Number = request.Number.Trim(),
+            RoomType = request.RoomType,
+            AdultCapacity = request.AdultCapacity,
+            ChildCapacity = request.ChildCapacity,
+            PricePerNight = request.PricePerNight,
+            IsAvailable = request.IsAvailable,
+            Description = request.Description
         };
 }

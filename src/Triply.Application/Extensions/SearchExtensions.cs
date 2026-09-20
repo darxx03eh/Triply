@@ -1,3 +1,4 @@
+using Triply.Application.DTOs.Search;
 using Triply.Application.Features.Search.Queries.SearchHotels;
 using Triply.Domain.Enums.Hotels;
 
@@ -41,5 +42,26 @@ public static class SearchExtensions
             Sort = string.IsNullOrWhiteSpace(request.Sort) ? SearchSorts.Recommended : request.Sort.ToLowerInvariant(),
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10
+        };
+
+    /// <summary>Maps the criteria to search response.</summary>
+    public static SearchHotelsResponse ToSearchHotelsResponse(this SearchHotelsCriteria criteria,
+        IList<HotelSearchItemResponse> hotels, int totalCount)
+        => new SearchHotelsResponse()
+        {
+            Items = hotels.Select(h => h 
+                with
+                {
+                    TotalPrice = h.MinPricePerNight * criteria.Nights * criteria.Rooms
+                }).ToList(),
+            Page = criteria.Page,
+            PageSize = criteria.PageSize,
+            TotalCount = totalCount,
+            CheckIn = criteria.CheckIn,
+            CheckOut = criteria.CheckOut,
+            Nights = criteria.Nights,
+            Adults = criteria.Adults,
+            Children = criteria.Children,
+            Rooms = criteria.Rooms
         };
 }
