@@ -53,7 +53,7 @@ public class UpdateCityRequestValidator : AbstractValidator<UpdateCityRequest>
                 return !await cityRepository.IsCityExistsExcludeId(
                     city.Name, city.Country, city.CityId,
                     cancellationTone);
-            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadExistsInThisCountry.Message)
+            }).WithMessage(ResultResponseMessages.Cities.Validation.CityAlreadyExistsInThisCountry.Message)
             .OverridePropertyName(nameof(UpdateCityRequest.Name));
     }
 }

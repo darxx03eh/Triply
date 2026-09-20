@@ -18,4 +18,7 @@ public interface IDealRepository : IGenericRepository<Deal>
     /// <summary>Checks whether the deal overlapping.</summary>
     Task<bool> IsDealOverlappingAsync(Guid roomId, DateTime startsAt, DateTime endsAt, Guid? excludeDealId = null,
         CancellationToken cancellationToken = default);
+    /// <summary>Gets discounts for rooms.</summary>
+    Task<Dictionary<Guid, decimal>> GetActiveDiscountsAsync(IEnumerable<Guid> roomIds,
+        CancellationToken cancellationToken = default);
 }
