@@ -3,14 +3,39 @@ using Triply.Api.Middlewares;
 using Triply.Infrastructure.DependencyInjection;
 using MessageQueue.DependencyInjection;
 using Triply.Api.Endpoints;
+using Logging.DependencyInjection;
+using Serilog;
 
 namespace Triply.Api;
 
+/// <summary>Represents the program.</summary>
 public class Program
 {
+    /// <summary>Mains.</summary>
     public static async Task Main(string[] args)
     {
+        TriplyLoggingExtensions.CreateBootstrapLogger();
+        try
+        {
+            Log.Information("Starting Triply API");
+            await RunAsync(args);
+        }
+        catch (Exception exception) when (exception is not HostAbortedException)
+        {
+            Log.Fatal(exception, "Triply API terminated unexpectedly");
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
+
+    private static async Task RunAsync(string[] args)
+    {
         var builder = WebApplication.CreateBuilder(args);
+        
+        // Add Serilog (Console + Elasticsearch)
+        builder.AddTriplyLogging("api");
         
         // Add Triply DbContext
         builder.Services.AddTriplyDbContext(builder.Configuration);
@@ -65,6 +90,8 @@ public class Program
             });
         }
 
+        // Correlation id + one log per request
+        app.UseTriplyRequestLogging();
         app.UseHttpsRedirection();
         app.UseMiddleware<ErrorHandlerMiddleware>();
         

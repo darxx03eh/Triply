@@ -4,14 +4,19 @@ using Triply.Api.Responses;
 
 namespace Triply.Api.ResponseHelper;
 
+/// <summary>Represents the response handler.</summary>
 public static class ResponseHandler
 {
+    /// <summary>
+    /// JSON Options to Apply when Writes the JSON response
+    /// </summary>
     private static readonly JsonSerializerOptions JSONOPTIONS = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
     };
 
+    /// <summary>Writes the JSON response.</summary>
     public static async Task WriteJsonResponse(
         HttpContext context,
         HttpStatusCode statusCode,

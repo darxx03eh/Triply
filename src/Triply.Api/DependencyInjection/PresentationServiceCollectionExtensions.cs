@@ -7,10 +7,12 @@ using Triply.Infrastructure.Services.Blacklist;
 
 namespace Triply.Api.DependencyInjection;
 
+/// <summary>Extension methods for presentation service collection.</summary>
 public static class PresentationServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>Registers the swagger services.</summary>
         public IServiceCollection AddSwagger()
         {
             services.AddEndpointsApiExplorer();
@@ -23,8 +25,7 @@ public static class PresentationServiceCollectionExtensions
                     Description = """
                                   ASP.NET Core API for a Travel and Accommodation Booking Platform 
                                   Web Application.
-                                  Supports user authentication, profile management, 
-                                  and hotel search.
+                                  Supports user authentication and hotel search.
                                   """,
                     Contact = new OpenApiContact()
                     {
@@ -47,16 +48,16 @@ public static class PresentationServiceCollectionExtensions
                         new List<string>()
                     }
                 });
-                c.CustomSchemaIds(type => type.FullName);
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
+                c.CustomSchemaIds(SchemaId);
+                // The XML docs of every Triply assembly, so the schemas show the DTO comments too.
+                foreach (var xmlPath in Directory.GetFiles(AppContext.BaseDirectory, "Triply.*.xml"))
                     c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
                 c.OrderActionsBy(apiDesc => apiDesc.RelativePath);
             });
             return services;
         }
 
+        /// <summary>Registers the Redis service services.</summary>
         public IServiceCollection AddRedisService(IConfiguration configuration)
         {
             services.AddStackExchangeRedisCache(options =>
@@ -71,6 +72,7 @@ public static class PresentationServiceCollectionExtensions
     }
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the 404 not found endpoints.</summary>
         public void Map404NotFoundEndpoints()
         {
             app.MapFallback(async context =>
@@ -91,6 +93,7 @@ public static class PresentationServiceCollectionExtensions
             });
         }
 
+        /// <summary>Maps the endpoints.</summary>
         public void MapEndpoints()
         {
             app.MapAuthenticationEndpoints();
@@ -105,4 +108,10 @@ public static class PresentationServiceCollectionExtensions
             app.MapHomeEndpoints();
         }
     }
+
+    /// <summary>Builds a readable schema id, so ApiResponse&lt;HotelResponse&gt; does not become a mangled generic name.</summary>
+    private static string SchemaId(Type type)
+        => type.IsGenericType
+            ? $"{type.FullName!.Split('`')[0]}Of{string.Join("And", type.GetGenericArguments().Select(SchemaId))}"
+            : type.FullName!;
 }
