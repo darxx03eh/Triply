@@ -5,6 +5,8 @@ using MessageQueue.IRabbitMQ;
 
 namespace EmailWorker;
 
+/// <summary>Gets or sets the email consumer hosted service.</summary>
+/// <summary>Implements the email consumer hosted operations.</summary>
 public class EmailConsumerHostedService(
     IMessageConsumer consumer,
     IEmailTemplateProvider templateProvider,
@@ -12,6 +14,7 @@ public class EmailConsumerHostedService(
     ILogger<EmailConsumerHostedService> logger
     ) : BackgroundService
 {
+    /// <summary>Executes.</summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await consumer.SubscribeAsync<EmailMessage>("email.send", HandleAsync, stoppingToken);
