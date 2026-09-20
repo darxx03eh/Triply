@@ -4,6 +4,7 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the attraction entity.</summary>
 public class AttractionConfigurations : IEntityTypeConfiguration<Attraction>
 {
     /// <summary>

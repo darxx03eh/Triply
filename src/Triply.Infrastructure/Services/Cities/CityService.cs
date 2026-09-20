@@ -7,6 +7,8 @@ using Triply.Application.Options;
 
 namespace Triply.Infrastructure.Services.Cities;
 
+/// <summary>Gets or sets the city service.</summary>
+/// <summary>Implements the city operations.</summary>
 public partial class CityService(
     ICityRepository cityRepository,
     IOptions<ImageUploadOptions> uploadOptions,

@@ -8,15 +8,19 @@ using Triply.Infrastructure.Repositories.General;
 
 namespace Triply.Infrastructure.Repositories;
 
+/// <summary>Gets or sets the room repository.</summary>
+/// <summary>Persistence operations for room.</summary>
 public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProcessor)
     : GenericRepository<Room>(context),
     IRoomRepository
 {
+    /// <summary>Gets the room by its identifier including the hotel.</summary>
     public async Task<Room?> GetByIdWithHotelAsync(Guid roomId, CancellationToken cancellationToken = default)
         => await context.Rooms
             .Include(r => r.Hotel)
             .FirstOrDefaultAsync(r => r.RoomId == roomId, cancellationToken);
 
+    /// <summary>Gets a paginated list of rooms.</summary>
     public async Task<(List<Room> Rooms, int TotalCount)> GetPagedAsync(SieveModel sieveModel,
         bool isAdmin,
         Guid? hotelId = null,
@@ -36,11 +40,13 @@ public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProces
         return (rooms, totalCount);
     }
 
+    /// <summary>Checks whether the room number exists.</summary>
     public async Task<bool> IsRoomNumberExistsAsync(Guid hotelId, string number,
         CancellationToken cancellationToken = default)
         => await context.Rooms.AnyAsync(r =>
             r.HotelId == hotelId && r.Number.ToUpper() == number.ToUpper(), cancellationToken);
 
+    /// <summary>Checks whether the room number exists exclude identifier.</summary>
     public async Task<bool> IsRoomNumberExistsExcludeIdAsync(string number, Guid roomId,
         CancellationToken cancellationToken = default)
         => await context.Rooms.AnyAsync(r =>
@@ -52,6 +58,7 @@ public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProces
                     .FirstOrDefault(),
             cancellationToken);
 
+    /// <summary>Sets the original row version.</summary>
     public void SetOriginalRowVersion(Room room, byte[] rowVersion)
         => context.Entry(room).Property(r => r.RowVersion).OriginalValue = rowVersion;
 }

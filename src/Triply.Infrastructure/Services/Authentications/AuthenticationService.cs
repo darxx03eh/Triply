@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
@@ -18,7 +19,8 @@ public partial class AuthenticationService(
     RoleManager<TriplyRole> roleManager,
     IMessagePublisher publisher,
     ITokenBlacklistService tokenBlacklistService,
-    IHttpContextAccessor httpContextAccessor
+    IHttpContextAccessor httpContextAccessor,
+    ILogger<AuthenticationService> logger
     ) : IAuthenticationService
 {
     private const string DefaultRole = Roles.User;

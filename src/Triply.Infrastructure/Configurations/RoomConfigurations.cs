@@ -5,6 +5,7 @@ using Triply.Domain.Enums.Rooms;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the room entity.</summary>
 public class RoomConfigurations : IEntityTypeConfiguration<Room>
 {
     /// <summary>

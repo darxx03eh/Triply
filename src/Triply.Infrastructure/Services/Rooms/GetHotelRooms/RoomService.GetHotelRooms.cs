@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Rooms;
 using Triply.Application.Extensions;
@@ -9,18 +10,24 @@ namespace Triply.Infrastructure.Services.Rooms;
 
 public partial class RoomService
 {
+    /// <summary>Gets the hotel rooms.</summary>
     public async Task<Result<PagedResult<RoomResponse>>> GetHotelRoomsAsync(Guid hotelId, GetRoomsRequest request,
         CancellationToken cancellationToken = default)
     {
         if (!await hotelRepository.IsHotelIdExistsAsync(hotelId, cancellationToken))
+        {
+            logger.LogWarning("Get rooms failed: hotel {HotelId} was not found", hotelId);
             return Result<PagedResult<RoomResponse>>.Failure(
                 "HOTEL_NOT_FOUND",
                 $"The requested hotel with id: {hotelId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         var (rooms, totalCount) = await roomRepository.GetPagedAsync(request, isAdmin: false, hotelId,
             cancellationToken);
 
+        logger.LogDebug("Hotel {HotelId} rooms page {Page} returned {Count} of {TotalCount}",
+            hotelId, request.Page ?? 1, rooms.Count, totalCount);
         var pagedResult = new PagedResult<RoomResponse>
         {
             Items = rooms.Select(r => r.ToRoomResponse(r.Hotel.Name)).ToList(),

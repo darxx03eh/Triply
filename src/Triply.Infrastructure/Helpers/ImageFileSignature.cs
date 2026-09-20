@@ -1,5 +1,6 @@
 namespace Triply.Infrastructure.Helpers;
 
+/// <summary>Represents the image file signature.</summary>
 public static class ImageFileSignature
 {
     private static readonly Dictionary<string, byte[]> Signatures = new()
@@ -12,6 +13,7 @@ public static class ImageFileSignature
 
     private static readonly byte[] WebpMarker = "WEBP"u8.ToArray();
 
+    /// <summary>Checks whether the valid.</summary>
     public static bool IsValid(Stream stream, string extension)
     {
         if (!Signatures.TryGetValue(extension.ToLowerInvariant(), out var signature))

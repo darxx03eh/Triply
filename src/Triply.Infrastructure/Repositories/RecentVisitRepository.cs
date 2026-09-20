@@ -8,14 +8,18 @@ using Triply.Infrastructure.Repositories.General;
 
 namespace Triply.Infrastructure.Repositories;
 
+/// <summary>Gets or sets the recent visit repository.</summary>
+/// <summary>Persistence operations for recent visit.</summary>
 public class RecentVisitRepository(TriplyDbContext context) : GenericRepository<UserRecentVisit>(context),
     IRecentVisitRepository
 {
+    /// <summary>Gets the user visit.</summary>
     public async Task<UserRecentVisit?> GetUserVisitAsync(Guid userId, Guid hotelId,
         CancellationToken cancellationToken = default)
         => await context.UserRecentVisits
             .FirstOrDefaultAsync(v => v.UserId == userId && v.HotelId == hotelId, cancellationToken);
 
+    /// <summary>Gets the recent hotels.</summary>
     public async Task<List<RecentHotelResponse>> GetRecentHotelsAsync(Guid userId, int count,
         CancellationToken cancellationToken = default)
         => await context.UserRecentVisits
@@ -42,6 +46,7 @@ public class RecentVisitRepository(TriplyDbContext context) : GenericRepository<
             })
             .ToListAsync(cancellationToken);
 
+    /// <summary>Gets the trending cities.</summary>
     public async Task<List<TrendingCityResponse>> GetTrendingCitiesAsync(DateTime since, int count,
         CancellationToken cancellationToken = default)
         => await context.Cities

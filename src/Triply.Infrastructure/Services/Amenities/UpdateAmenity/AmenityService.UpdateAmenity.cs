@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Amenities;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Amenities.Commands.UpdateAmenity;
@@ -8,19 +9,24 @@ namespace Triply.Infrastructure.Services.Amenities;
 
 public partial class AmenityService
 {
+    /// <summary>Updates an existing amenity.</summary>
     public async Task<Result<AmenityResponse>> UpdateAsync(Guid amenityId, UpdateAmenityRequest request,
         CancellationToken cancellationToken = default)
     {
         var amenity = await amenityRepository.GetByIdAsync(amenityId, cancellationToken);
         if (amenity is null)
+        {
+            logger.LogWarning("Update amenity failed: amenity {AmenityId} was not found", amenityId);
             return Result<AmenityResponse>.Failure(
                 "AMENITY_NOT_FOUND",
                 $"The requested amenity with id: {amenityId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         amenity.Name = request.Name.Trim();
         amenity.ModifiedAt = DateTime.UtcNow;
         await amenityRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Amenity {AmenityId} renamed to {AmenityName}", amenityId, amenity.Name);
 
         return Result<AmenityResponse>.Success(
             amenity.ToAmenityResponse(), ResultSuccessType.Ok,

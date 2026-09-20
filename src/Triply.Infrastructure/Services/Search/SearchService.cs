@@ -1,9 +1,13 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Application.Interfaces.Services;
 
 namespace Triply.Infrastructure.Services.Search;
 
-public partial class SearchService(ISearchRepository searchRepository) : ISearchService
+/// <summary>Implements the search operations.</summary>
+public partial class SearchService(
+    ISearchRepository searchRepository,
+    ILogger<SearchService> logger) : ISearchService
 {
     
 }

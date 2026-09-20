@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Reviews;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Reviews.Commands.CreateReview;
@@ -7,20 +8,26 @@ using Triply.Domain.Results.Enums;
 
 namespace Triply.Infrastructure.Services.Reviews;
 
+/// <summary>Implements the review operations.</summary>
 public partial class ReviewService
 {
+    /// <summary>Creates a new review.</summary>
     public async Task<Result<ReviewResponse>> CreateAsync(CreateReviewRequest request,
         CancellationToken cancellationToken = default)
     {
-        var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        var user = await userManager.FindByIdAsync(request.UserId.ToString());
         if (user is null)
+        {
+            logger.LogWarning("Create review failed: user {UserId} was not found", request.UserId);
             return Result<ReviewResponse>.Failure(
                 "USER_NOT_FOUND", "The current user was not found.", ResultErrorType.Unauthorized);
-
+        }
         var review = request.ToReview();
 
         await reviewRepository.AddAsync(review, cancellationToken);
         await reviewRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Review {ReviewId} ({Rating} stars) added to hotel {HotelId} by user {UserId}",
+            review.ReviewId, review.Rating, review.HotelId, review.UserId);
 
         return Result<ReviewResponse>.Success(
             review.ToReviewResponse($"{user.FirstName} {user.LastName}"), ResultSuccessType.Created,

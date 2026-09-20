@@ -15,22 +15,31 @@ public partial class HotelService
 {
     private const string ImageUploadTopic = "image.upload";
 
+    /// <summary>Initiates the upload.</summary>
     public async Task<Result<HotelImageResponse>> InitiateUploadAsync(
         Guid hotelId, UploadHotelImageRequest request, CancellationToken cancellationToken = default)
     {
         var hotel = await hotelRepository.GetByIdAsync(hotelId, cancellationToken);
         if (hotel is null)
+        {
+            logger.LogWarning("Upload image failed: hotel {HotelId} was not found", hotelId);
             return Result<HotelImageResponse>.Failure(
                 "HOTEL_NOT_FOUND", "The specified hotel does not exist.", ResultErrorType.NotFound);
+        }
 
         string extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
 
         await using var stream = request.File.OpenReadStream();
         if (!ImageFileSignature.IsValid(stream, extension))
+        {
+            logger.LogWarning(
+                "Upload image for hotel {HotelId} rejected: the content of {FileName} does not match its extension",
+                hotelId, request.File.FileName);
             return Result<HotelImageResponse>.Failure(
                 "FILE_CONTENT_INVALID",
                 "The file content does not match its extension.",
                 ResultErrorType.Validation);
+        }
 
         var image = new HotelImage
         {
@@ -70,6 +79,9 @@ public partial class HotelService
                     OriginalFileName = request.File.FileName,
                 },
                 cancellationToken: cancellationToken);
+            logger.LogInformation("Image {ImageId} of hotel {HotelId} " +
+                                  "saved to {FilePath} ({FileSize} bytes) and queued for upload",
+                image.ImageId, hotelId, filePath, request.File.Length);
         }
         catch (Exception exception)
         {

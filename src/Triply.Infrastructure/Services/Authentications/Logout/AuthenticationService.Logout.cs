@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Triply.Domain.Constants;
@@ -22,13 +23,17 @@ public partial class AuthenticationService
         var expiryUtc = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim)).UtcDateTime;
 
         await tokenBlacklistService.BlacklistTokenAsync(jti, expiryUtc, cancellationToken);
-        
+        var userId = user.FindFirstValue(TokenClaims.Id);
+        logger.LogInformation("Access token {Jti} of user {UserId} blacklisted on logout", jti, userId);
         
         if (string.IsNullOrWhiteSpace(refresh))
+        {
+            logger.LogWarning("Logout of user {UserId} without a refresh token cookie", userId);
             return Result<string>.Failure(
                 "REFRESH_TOKEN_MISSING",
                 "Your session has expired. Please log in again.",
                 type: ResultErrorType.Unauthorized);
+        }
         
         var (isRevoked, reason) = await RevokeRefreshTokenAsync(refresh, cancellationToken);
         if (!isRevoked)
@@ -36,17 +41,24 @@ public partial class AuthenticationService
             var (code, message, error) = reason switch
             {
                 "EXPIRED"   
-                    => ("REFRESH_TOKEN_EXPIRED", "Your session has expired. Please log in again.", ResultErrorType.Unauthorized),
+                    => ("REFRESH_TOKEN_EXPIRED", "Your session has expired. Please log in again.", 
+                        ResultErrorType.Unauthorized),
                 "REVOKED"   
-                    => ("REFRESH_TOKEN_REVOKED", "Your session was terminated. Please log in again.", ResultErrorType.BusinessRule),
+                    => ("REFRESH_TOKEN_REVOKED", "Your session was terminated. Please log in again.", 
+                        ResultErrorType.BusinessRule),
                 "NOT_FOUND" 
-                    => ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again.", ResultErrorType.NotFound),
+                    => ("REFRESH_TOKEN_INVALID", "Your session is no longer valid. Please log in again.", 
+                        ResultErrorType.NotFound),
                 _           
-                    => ("REFRESH_TOKEN_INVALID", "Something went wrong. Please log in again.", ResultErrorType.Unauthorized)
+                    => ("REFRESH_TOKEN_INVALID", "Something went wrong. Please log in again.", 
+                        ResultErrorType.Unauthorized)
             };
+            logger.LogWarning("Logout of user {UserId}: the refresh token is {Reason}", userId, reason);
             return  Result<string>.Failure(
                 code, message, type: error);
         }
+
+        logger.LogInformation("User {UserId} logged out", userId);
 
         return Result<string>.Success(
             null, ResultSuccessType.NoContent, new(
