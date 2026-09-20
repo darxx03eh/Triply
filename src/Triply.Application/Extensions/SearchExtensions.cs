@@ -13,7 +13,7 @@ public static class SearchExtensions
     /// <summary>Gets the check in.</summary>
     public static DateOnly GetCheckIn(this SearchHotelsRequest request) => request.CheckIn ?? Today();
 
-    /// <summary>Gets the check out.</summary>
+    /// <summary>Gets the check-out.</summary>
     public static DateOnly GetCheckOut(this SearchHotelsRequest request)
         => request.CheckOut ?? request.GetCheckIn().AddDays(1);
 

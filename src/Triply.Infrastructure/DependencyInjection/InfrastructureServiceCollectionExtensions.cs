@@ -135,7 +135,8 @@ public static class InfrastructureServiceCollectionExtensions
                     {
                         context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
                             .CreateLogger("Triply.Authentication")
-                            .LogWarning("JWT authentication failed for {RequestMethod} {RequestPath}: {FailureType} {FailureMessage}",
+                            .LogWarning("JWT authentication failed for " +
+                                        "{RequestMethod} {RequestPath}: {FailureType} {FailureMessage}",
                                 context.Request.Method, context.Request.Path,
                                 context.Exception.GetType().Name, context.Exception.Message);
                         return Task.CompletedTask;
@@ -182,6 +183,7 @@ public static class InfrastructureServiceCollectionExtensions
             services.Decorate<IAttractionService, ValidatedAttractionService>();
             services.Decorate<IReviewService, ValidatedReviewService>();
             services.Decorate<IDealService, ValidatedDealService>();
+            services.Decorate<ICartService, ValidatedCartService>();
             return services;
         }
     }

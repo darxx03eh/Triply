@@ -25,7 +25,7 @@ public sealed class Booking : BaseEntity
     /// <summary>Gets or sets the check in.</summary>
     public DateTime CheckIn { get; set; }
 
-    /// <summary>Gets or sets the check out.</summary>
+    /// <summary>Gets or sets the check-out.</summary>
     public DateTime CheckOut { get; set; }
 
     /// <summary>Gets or sets the adults.</summary>

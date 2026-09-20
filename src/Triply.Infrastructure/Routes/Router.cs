@@ -159,11 +159,17 @@ public static class Router
         public const string RecentHotels = $"{Prefix}/recent-hotels";
     }
 
-    /// <summary>Represents the logging routes.</summary>
-    public static class LoggingRoutes
+    /// <summary>Represents the cart routes.</summary>
+    public static class CartRoutes
     {
-        private const string Prefix = $"{Rule}/logging";
-        /// <summary>The test.</summary>
-        public const string Test = $"{Prefix}/test";
+        private const string Prefix = $"{Rule}/cart";
+        /// <summary>The get cart.</summary>
+        public const string Get = Prefix;
+        /// <summary>The clear cart.</summary>
+        public const string Clear = Prefix;
+        /// <summary>The add item to cart.</summary>
+        public const string AddItem = $"{Prefix}/items";
+        /// <summary>The remove item from cart.</summary>
+        public const string RemoveItem = $"{Prefix}/items/{Id}";
     }
 }
