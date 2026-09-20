@@ -16,6 +16,7 @@ public class ImageDeleteConsumerHostedService(
 {
     private const string ImageDeleteTopic = "image.delete";
 
+    /// <summary>Executes.</summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         => await consumer.SubscribeAsync<ImageDeleteMessage>(
             ImageDeleteTopic, HandleAsync, OnRetriesExhaustedAsync, stoppingToken);
@@ -38,6 +39,7 @@ public class ImageDeleteConsumerHostedService(
         return Task.CompletedTask;
     }
 
+    /// <summary>Stops.</summary>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);

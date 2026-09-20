@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Sieve.Models;
 using Sieve.Services;
@@ -17,6 +19,7 @@ using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Filtering;
+using Triply.Infrastructure.Interceptors;
 using Triply.Infrastructure.Repositories;
 using Triply.Infrastructure.Repositories.General;
 using Triply.Infrastructure.Seeders;
@@ -26,10 +29,12 @@ using Triply.Infrastructure.Settings;
 
 namespace Triply.Infrastructure.DependencyInjection;
 
+/// <summary>Extension methods for infrastructure service collection.</summary>
 public static class InfrastructureServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>Registers the Sieve service services.</summary>
         public IServiceCollection AddSieveService(IConfiguration configuration)
         {
             services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
@@ -37,15 +42,22 @@ public static class InfrastructureServiceCollectionExtensions
 
             return services;
         }
+        /// <summary>Registers the Triply database context services.</summary>
         public IServiceCollection AddTriplyDbContext(IConfiguration configuration)
         {
-            services.AddDbContext<TriplyDbContext>(options =>
+            services.Configure<DatabaseLoggingSettings>(configuration.GetSection(nameof(DatabaseLoggingSettings)));
+            services.AddSingleton<SlowQueryInterceptor>();
+            services.AddDbContext<TriplyDbContext>((provider, options) =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("TriplyDbLocalConnection"));
+                var logging = provider.GetRequiredService<IOptions<DatabaseLoggingSettings>>().Value;
+                options.UseSqlServer(configuration.GetConnectionString("TriplyDbLocalConnection"))
+                    .AddInterceptors(provider.GetRequiredService<SlowQueryInterceptor>())
+                    .EnableSensitiveDataLogging(logging.EnableSensitiveDataLogging);
             });
             return services;
         }
 
+        /// <summary>Registers the identity services services.</summary>
         public IServiceCollection AddIdentityServices()
         {
             services.AddIdentity<TriplyUser, TriplyRole>(options =>
@@ -72,6 +84,7 @@ public static class InfrastructureServiceCollectionExtensions
             return services;
         }
         
+        /// <summary>Registers the JWT authentication services.</summary>
         public IServiceCollection AddJwtAuthentication(IConfiguration configuration)
         {
             services.AddOptions<JwtSettings>()
@@ -117,12 +130,22 @@ public static class InfrastructureServiceCollectionExtensions
                         if (string.IsNullOrEmpty(jti) ||
                             await blacklistService.IsBlacklistedAsync(jti, context.HttpContext.RequestAborted))
                             context.Fail("Token has been revoked.");
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
+                            .CreateLogger("Triply.Authentication")
+                            .LogWarning("JWT authentication failed for {RequestMethod} {RequestPath}: {FailureType} {FailureMessage}",
+                                context.Request.Method, context.Request.Path,
+                                context.Exception.GetType().Name, context.Exception.Message);
+                        return Task.CompletedTask;
                     }
                 };
             });
             return services;
         }
         
+        /// <summary>Registers the infrastructure dependencies services.</summary>
         public IServiceCollection AddInfrastructureDependencies()
         {
             services.AddHttpContextAccessor();
@@ -145,6 +168,7 @@ public static class InfrastructureServiceCollectionExtensions
             return services;
         }
 
+        /// <summary>Applies the decorators.</summary>
         public IServiceCollection ApplyDecorators()
         {
             services.AddValidatorsFromAssemblyContaining<RegisterUserRequestValidator>();
@@ -163,6 +187,7 @@ public static class InfrastructureServiceCollectionExtensions
     }
     extension(IServiceProvider services)
     {
+        /// <summary>Seeds the default infrastructure service collection data when it is missing.</summary>
         public async Task SeedAsync()
         {
             using var scope = services.CreateScope();
@@ -170,8 +195,11 @@ public static class InfrastructureServiceCollectionExtensions
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<TriplyUser>>();
             var context = scope.ServiceProvider.GetRequiredService<TriplyDbContext>();
 
-            await RoleSeeder.SeedAsync(roleManager, CancellationToken.None);
-            await UserSeeder.SeedAsync(userManager, CancellationToken.None);
+            var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>()
+                .CreateLogger("Triply.Infrastructure.Seeders");
+
+            await RoleSeeder.SeedAsync(roleManager, logger, CancellationToken.None);
+            await UserSeeder.SeedAsync(userManager, logger, CancellationToken.None);
         }
     }
 }

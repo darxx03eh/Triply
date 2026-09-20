@@ -6,13 +6,18 @@ using Triply.Application.Features.Rooms.Queries.GetRooms;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Rooms;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the room endpoints.</summary>
 public static class RoomEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the room endpoints.</summary>
         public void MapRoomEndpoints()
         {
             var group = app.MapGroup("")
@@ -34,9 +39,9 @@ public static class RoomEndpoints
                                  The room number must be unique within the hotel.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .Produces(StatusCodes.Status404NotFound)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.RoomRoutes.GetAll, async (
                     [AsParameters] GetRoomsRequest request,
@@ -55,7 +60,7 @@ public static class RoomEndpoints
                                  filtering, sorting, and pagination parameters (e.g. filters=HotelId==...).
                                  Deleted rooms are included for administrators.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<PagedResult<RoomResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.HotelRoutes.GetRooms, async (
                     Guid id,
@@ -75,8 +80,8 @@ public static class RoomEndpoints
                                  type, capacity, price per night and availability.
                                  Returns a not found response when the hotel does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<PagedResult<RoomResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapGet(Router.RoomRoutes.GetById, async (
                     Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
@@ -91,8 +96,8 @@ public static class RoomEndpoints
                                  Retrieves the details of a specific room using its unique identifier.
                                  Returns a not found response if the room does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.RoomRoutes.Update, async (
                     Guid id, UpdateRoomRequest request,
@@ -111,9 +116,9 @@ public static class RoomEndpoints
                                  Returns a conflict response when the room was modified by someone else.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status409Conflict);
+                .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
 
             group.MapDelete(Router.RoomRoutes.Delete, async (
                     Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
@@ -130,7 +135,7 @@ public static class RoomEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }
     }
 }

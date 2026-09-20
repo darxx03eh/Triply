@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Reviews.Commands.CreateReview;
 
+/// <summary>Validates the create review request.</summary>
 public class CreateReviewRequestValidator : AbstractValidator<CreateReviewRequest>
 {
+    /// <summary>Initializes a new instance of the create review request validator.</summary>
     public CreateReviewRequestValidator(IReviewRepository reviewRepository, IHotelRepository hotelRepository)
     {
         ApplyValidationRules();

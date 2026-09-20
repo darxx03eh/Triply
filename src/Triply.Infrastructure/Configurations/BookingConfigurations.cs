@@ -5,6 +5,7 @@ using Triply.Domain.Enums.Bookings;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the booking entity.</summary>
 public class BookingConfigurations : IEntityTypeConfiguration<Booking>
 {
     /// <summary>

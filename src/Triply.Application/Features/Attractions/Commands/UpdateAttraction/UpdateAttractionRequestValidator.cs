@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Attractions.Commands.UpdateAttraction;
 
+/// <summary>Validates the update attraction request.</summary>
 public class UpdateAttractionRequestValidator : AbstractValidator<UpdateAttractionRequest>
 {
+    /// <summary>Initializes a new instance of the update attraction request validator.</summary>
     public UpdateAttractionRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

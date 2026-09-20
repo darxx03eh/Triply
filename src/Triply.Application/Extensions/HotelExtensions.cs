@@ -1,10 +1,13 @@
 using Triply.Application.DTOs.Hotels;
+using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Domain.Entities;
 
 namespace Triply.Application.Extensions;
 
+/// <summary>Extension methods for hotel.</summary>
 public static class HotelExtensions
 {
+    /// <summary>Maps the hotel to a hotel response.</summary>
     public static HotelResponse ToHotelResponse(this Hotel hotel, string cityName, IReadOnlyList<string> imageUrls,
         decimal? averageRating = null, int reviewsCount = 0)
         => new HotelResponse()
@@ -33,6 +36,7 @@ public static class HotelExtensions
             StarRating =  hotel.StarRating,
         };
 
+    /// <summary>Maps the hotel to a hotel summary response.</summary>
     public static HotelSummaryResponse ToHotelSummaryResponse(this Hotel hotel, string cityName,
         int roomsCount = 0, string? thumbnailUrl = null)
         => new HotelSummaryResponse()
@@ -54,6 +58,7 @@ public static class HotelExtensions
             ThumbnailUrl = thumbnailUrl
         };
 
+    /// <summary>Maps the hotel to a hotel image response.</summary>
     public static HotelImageResponse ToHotelImageResponse(this HotelImage image)
         => new HotelImageResponse
         {
@@ -62,5 +67,20 @@ public static class HotelExtensions
             Url = image.Url,
             DisplayOrder = image.DisplayOrder,
             Status = image.Status
+        };
+
+    /// <summary>Maps the Create hotel request to a hotel.</summary>
+    public static Hotel ToHotel(this CreateHotelRequest request, Guid ownerId)
+        => new Hotel()
+        {
+            Name = request.Name.Trim(),
+            CityId = request.CityId,
+            OwnerId = ownerId,
+            StarRating = request.StarRating,
+            HotelType = request.HotelType,
+            Address = request.Address.Trim(),
+            Description = request.Description.Trim(),
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
         };
 }

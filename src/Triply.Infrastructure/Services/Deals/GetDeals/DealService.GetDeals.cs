@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Deals;
 using Triply.Application.Extensions;
@@ -8,11 +9,14 @@ namespace Triply.Infrastructure.Services.Deals;
 
 public partial class DealService
 {
+    /// <summary>Gets a paginated list of deals.</summary>
     public async Task<Result<PagedResult<DealResponse>>> GetPagedAsync(GetDealsRequest request,
         CancellationToken cancellationToken = default)
     {
         var (deals, totalCount) = await dealRepository.GetPagedAsync(request, cancellationToken);
 
+        logger.LogDebug("Deals page {Page} returned {Count} of {TotalCount}", request.Page ?? 1, deals.Count,
+            totalCount);
         var pagedResult = new PagedResult<DealResponse>
         {
             Items = deals.Select(d => d.ToDealResponse()).ToList(),

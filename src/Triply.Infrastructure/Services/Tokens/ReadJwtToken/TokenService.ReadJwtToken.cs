@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Triply.Infrastructure.Services.Tokens;
@@ -11,8 +12,14 @@ public partial class TokenService
             throw new ArgumentNullException(nameof(token));
 
         var handler = new JwtSecurityTokenHandler();
-        var response = handler.ReadJwtToken(token);
-        
-        return response;
+        try
+        {
+            return handler.ReadJwtToken(token);
+        }
+        catch (ArgumentException exception)
+        {
+            logger.LogWarning(exception, "Could not read a malformed JWT token");
+            throw;
+        }
     }
 }

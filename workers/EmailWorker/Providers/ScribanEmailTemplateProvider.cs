@@ -6,6 +6,7 @@ using Scriban.Runtime;
 
 namespace EmailWorker.Providers;
 
+/// <summary>Represents the scriban email template provider.</summary>
 public class ScribanEmailTemplateProvider : IEmailTemplateProvider
 {
     private static readonly Dictionary<EmailType, (string File, string Subject)> _templateMap = new()
@@ -15,6 +16,7 @@ public class ScribanEmailTemplateProvider : IEmailTemplateProvider
         [EmailType.BookingConfirmation] = ("booking-confirmation.html", "Booking Confirmed - {{ hotel_name }}")
     };
 
+    /// <summary>Renders.</summary>
     public async Task<(string Subject, string HtmlBody)> RenderAsync(EmailType type, Dictionary<string, string> data,
         CancellationToken cancellationToken = default)
     {

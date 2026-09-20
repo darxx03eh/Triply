@@ -8,13 +8,18 @@ using Triply.Application.Features.Hotels.Queries.GetHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Hotels;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the hotel endpoints.</summary>
 public static class HotelEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the hotel endpoints.</summary>
         public void MapHotelEndpoints()
         {
             var group = app.MapGroup("")
@@ -36,8 +41,8 @@ public static class HotelEndpoints
                                  The authenticated administrator is assigned as the creator 
                                  of the hotel.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<HotelResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.HotelRoutes.GetAll, async (
                     [AsParameters] GetHotelsRequest request, 
@@ -56,7 +61,7 @@ public static class HotelEndpoints
                                  The returned data may vary depending on whether the current 
                                  user has administrator privileges.
                                  """)
-                .Produces(StatusCodes.Status200OK);
+                .Produces<ApiResponse<PagedResult<HotelSummaryResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.HotelRoutes.GetById, async (
                     Guid id, IHotelService hotelService, 
@@ -76,8 +81,8 @@ public static class HotelEndpoints
                                  identifier: gallery, amenities, location and review summary.
                                  This endpoint is public and powers the hotel page.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<HotelResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.HotelRoutes.Update, async (
                     Guid id, UpdateHotelRequest request, 
@@ -97,9 +102,9 @@ public static class HotelEndpoints
                                  Returns a conflict response when the requested update 
                                  violates a uniqueness or business constraint.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status409Conflict);
+                .Produces<ApiResponse<HotelResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
 
             group.MapDelete(Router.HotelRoutes.Delete, async (
                     Guid id, 
@@ -117,8 +122,8 @@ public static class HotelEndpoints
                                  Returns a not found response when the specified hotel 
                                  does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<bool>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
             
             group.MapPost(Router.HotelRoutes.AddImage, async (
                     Guid id, [FromForm] UploadHotelImageRequest request,
@@ -139,9 +144,9 @@ public static class HotelEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Accepts<UploadHotelImageRequest>("multipart/form-data")
-                .Produces(StatusCodes.Status202Accepted)
-                .Produces(StatusCodes.Status404NotFound)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<HotelImageResponse>>(StatusCodes.Status202Accepted)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapGet(Router.HotelRoutes.GetImages, async (
                     Guid id, IHotelService hotelService, CancellationToken cancellationToken) =>
@@ -157,8 +162,8 @@ public static class HotelEndpoints
                                  ordered by display order. Use it to track background uploads.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<IReadOnlyList<HotelImageResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.HotelRoutes.DeleteImage, async (
                     Guid id, Guid imageId, IHotelService hotelService, CancellationToken cancellationToken) =>
@@ -176,7 +181,7 @@ public static class HotelEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }
     }
 }

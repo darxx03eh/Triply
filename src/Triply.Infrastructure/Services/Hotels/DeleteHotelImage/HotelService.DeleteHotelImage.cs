@@ -9,20 +9,26 @@ public partial class HotelService
 {
     private const string ImageDeleteTopic = "image.delete";
 
+    /// <summary>Deletes the image.</summary>
     public async Task<Result<bool>> DeleteImageAsync(Guid hotelId, Guid imageId,
         CancellationToken cancellationToken = default)
     {
         var image = await imageRepository.GetByIdAsync(imageId, cancellationToken);
         if (image is null || image.HotelId != hotelId)
+        {
+            logger.LogWarning("Delete image failed: image {ImageId} was not found for hotel {HotelId}", imageId,
+                hotelId);
             return Result<bool>.Failure(
                 "HOTEL_IMAGE_NOT_FOUND",
                 $"The image with id: {imageId.ToString()} was not found for this hotel.",
                 ResultErrorType.NotFound);
+        }
 
         string? publicId = image.PublicId;
 
         await imageRepository.DeleteAsync(image);
         await imageRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Image {ImageId} removed from hotel {HotelId}", imageId, hotelId);
 
         // Pending/Failed images were never stored in Cloudinary. A Pending image's staged file is
         // cleaned up by the upload worker once it sees the row is gone.
@@ -33,6 +39,8 @@ public partial class HotelService
                 await publisher.PublishAsync(ImageDeleteTopic,
                     new ImageDeleteMessage { ImageId = imageId, HotelId = hotelId, PublicId = publicId },
                     cancellationToken: cancellationToken);
+                logger.LogInformation("Cloudinary asset {PublicId} of image {ImageId} queued for deletion", publicId,
+                    imageId);
             }
             catch (Exception exception)
             {

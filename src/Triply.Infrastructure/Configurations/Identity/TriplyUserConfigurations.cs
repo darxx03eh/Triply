@@ -4,6 +4,7 @@ using Triply.Domain.Entities.Identity;
 
 namespace Triply.Infrastructure.Configurations.Identity;
 
+/// <summary>Entity Framework configuration of the Triply user entity.</summary>
 public class TriplyUserConfigurations : IEntityTypeConfiguration<TriplyUser>
 {
     /// <summary>

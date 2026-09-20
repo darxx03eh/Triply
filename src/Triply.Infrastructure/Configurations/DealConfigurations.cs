@@ -4,6 +4,7 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the deal entity.</summary>
 public class DealConfigurations : IEntityTypeConfiguration<Deal>
 {
     /// <summary>

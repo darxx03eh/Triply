@@ -14,24 +14,33 @@ public partial class CityService
 {
     private const string ImageUploadTopic = "image.upload";
 
+    /// <summary>Uploads the thumbnail.</summary>
     public async Task<Result<CityResponse>> UploadThumbnailAsync(Guid cityId, UploadCityThumbnailRequest request,
         CancellationToken cancellationToken = default)
     {
         var city = await cityRepository.GetByIdAsync(cityId, cancellationToken);
         if (city is null)
+        {
+            logger.LogWarning("Upload thumbnail failed: city {CityId} was not found", cityId);
             return Result<CityResponse>.Failure(
                 "CITY_NOT_FOUND",
                 $"The requested city with id: {cityId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         string extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
 
         await using var stream = request.File.OpenReadStream();
         if (!ImageFileSignature.IsValid(stream, extension))
+        {
+            logger.LogWarning(
+                "Upload thumbnail for city {CityId} rejected: the content of {FileName} does not match its extension",
+                cityId, request.File.FileName);
             return Result<CityResponse>.Failure(
                 "FILE_CONTENT_INVALID",
                 "The file content does not match its extension.",
                 ResultErrorType.Validation);
+        }
 
         var uploadId = Guid.NewGuid();
         string storageDirectory = uploadOptions.Value.SharedStoragePath;
@@ -51,8 +60,10 @@ public partial class CityService
                     Target = ImageTarget.CityThumbnail,
                     FilePath = filePath,
                     OriginalFileName = request.File.FileName,
-                },
-                cancellationToken: cancellationToken);
+                }, cancellationToken: cancellationToken);
+            logger.LogInformation("Thumbnail {UploadId} of city {CityId} saved to " +
+                                  "{FilePath} ({FileSize} bytes) and queued for upload",
+                uploadId, cityId, filePath, request.File.Length);
         }
         catch (Exception exception)
         {
@@ -69,6 +80,7 @@ public partial class CityService
         return Result<CityResponse>.Success(
             city.ToCityResponse(hotelsCount.GetValueOrDefault(cityId)),
             ResultSuccessType.Accepted,
-            new ResultSuccess("CITY_THUMBNAIL_UPLOAD_QUEUED", "Thumbnail upload has been queued for processing."));
+            new ResultSuccess("CITY_THUMBNAIL_UPLOAD_QUEUED", 
+                "Thumbnail upload has been queued for processing."));
     }
 }

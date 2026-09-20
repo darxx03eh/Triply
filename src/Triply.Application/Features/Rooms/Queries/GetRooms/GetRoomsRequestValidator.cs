@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Rooms.Queries.GetRooms;
 
+/// <summary>Validates the get rooms request.</summary>
 public class GetRoomsRequestValidator : AbstractValidator<GetRoomsRequest>
 {
+    /// <summary>Initializes a new instance of the get rooms request validator.</summary>
     public GetRoomsRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

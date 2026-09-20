@@ -4,6 +4,7 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the user recent visit entity.</summary>
 public class UserRecentVisitConfigurations : IEntityTypeConfiguration<UserRecentVisit>
 {
     /// <summary>

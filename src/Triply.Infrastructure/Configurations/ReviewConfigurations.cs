@@ -4,6 +4,7 @@ using Triply.Domain.Entities;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the review entity.</summary>
 public class ReviewConfigurations : IEntityTypeConfiguration<Review>
 {
     /// <summary>

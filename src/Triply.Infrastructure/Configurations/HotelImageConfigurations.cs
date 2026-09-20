@@ -5,6 +5,7 @@ using Triply.Domain.Enums.HotleImages;
 
 namespace Triply.Infrastructure.Configurations;
 
+/// <summary>Entity Framework configuration of the hotel image entity.</summary>
 public class HotelImageConfigurations : IEntityTypeConfiguration<HotelImage>
 {
     /// <summary>

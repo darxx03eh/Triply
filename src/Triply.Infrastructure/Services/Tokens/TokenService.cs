@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Application.Interfaces.Services;
@@ -11,7 +12,8 @@ namespace Triply.Infrastructure.Services.Tokens;
 public partial class TokenService(
     IOptions<JwtSettings> options,
     IRefreshTokenRepository refreshTokenRepository,
-    UserManager<TriplyUser> userManager
+    UserManager<TriplyUser> userManager,
+    ILogger<TokenService> logger
     ) : ITokenService
 {
     private readonly JwtSettings _jwtSettings = options.Value;

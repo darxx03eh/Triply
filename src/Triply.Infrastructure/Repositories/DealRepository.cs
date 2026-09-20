@@ -10,10 +10,13 @@ using Triply.Infrastructure.Repositories.General;
 
 namespace Triply.Infrastructure.Repositories;
 
+/// <summary>Gets or sets the deal repository.</summary>
+/// <summary>Persistence operations for deal.</summary>
 public class DealRepository(TriplyDbContext context, ISieveProcessor sieveProcessor) 
     : GenericRepository<Deal>(context),
     IDealRepository
 {
+    /// <summary>Gets a paginated list of deals.</summary>
     public async Task<(List<Deal> Deals, int TotalCount)> GetPagedAsync(SieveModel sieveModel,
         CancellationToken cancellationToken = default)
     {
@@ -31,6 +34,7 @@ public class DealRepository(TriplyDbContext context, ISieveProcessor sieveProces
         return (deals, totalCount);
     }
 
+    /// <summary>Gets the featured.</summary>
     public async Task<List<FeaturedDealResponse>> GetFeaturedAsync(int count,
         CancellationToken cancellationToken = default)
     {
@@ -69,6 +73,7 @@ public class DealRepository(TriplyDbContext context, ISieveProcessor sieveProces
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>Checks whether the deal overlapping.</summary>
     public async Task<bool> IsDealOverlappingAsync(Guid roomId, DateTime startsAt, DateTime endsAt,
         Guid? excludeDealId = null,
         CancellationToken cancellationToken = default)

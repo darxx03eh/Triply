@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Tokens;
 using Triply.Domain.Entities.Identity;
 
@@ -28,7 +29,11 @@ public partial class TokenService
 
             await refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
             await refreshTokenRepository.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("Refresh token {Jti} issued for user {UserId}, expires at {ExpiryDate}",
+                refresh.Jti, user.Id, refreshToken.ExpiryDate);
         }
+
+        logger.LogDebug("Access token issued for user {UserId}", user.Id);
 
         return new TokenResponse(access, refresh.Token);
     }

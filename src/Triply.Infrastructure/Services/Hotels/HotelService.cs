@@ -7,6 +7,7 @@ using Triply.Application.Options;
 
 namespace Triply.Infrastructure.Services.Hotels;
 
+/// <summary>Implements the hotel operations.</summary>
 public partial class HotelService(
     IHotelRepository hotelRepository,
     IHotelImageRepository imageRepository,

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Amenities;
 using Triply.Application.Extensions;
 using Triply.Domain.Results;
@@ -7,19 +8,25 @@ namespace Triply.Infrastructure.Services.Amenities;
 
 public partial class AmenityService
 {
+    /// <summary>Gets the hotel amenities.</summary>
     public async Task<Result<IReadOnlyList<AmenityResponse>>> GetHotelAmenitiesAsync(Guid hotelId,
         CancellationToken cancellationToken = default)
     {
-        if (!await hotelRepository.IsHotelIdExistsAsync(hotelId, cancellationToken))
+        var isExists = await hotelRepository.IsHotelIdExistsAsync(hotelId, cancellationToken);
+        if (!isExists)
+        {
+            logger.LogWarning("Get amenities failed: hotel {HotelId} was not found", hotelId);
             return Result<IReadOnlyList<AmenityResponse>>.Failure(
                 "HOTEL_NOT_FOUND",
                 $"The requested hotel with id: {hotelId.ToString()} was not found.",
                 ResultErrorType.NotFound);
+        }
 
         var amenities = await amenityRepository.GetByHotelIdAsync(hotelId, cancellationToken);
 
         return Result<IReadOnlyList<AmenityResponse>>.Success(
             amenities.Select(a => a.ToAmenityResponse()).ToList(),
-            success: new("HOTEL_AMENITIES_FOUND", "Hotel amenities were retrieved successfully."));
+            success: new(
+                "HOTEL_AMENITIES_FOUND", "Hotel amenities were retrieved successfully."));
     }
 }

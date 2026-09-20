@@ -2,13 +2,17 @@ using Triply.Api.Extensions;
 using Triply.Application.Features.Search.Queries.SearchHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Search;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the search endpoints.</summary>
 public static class SearchEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the search endpoints.</summary>
         public void MapSearchEndpoints()
         {
             var group = app.MapGroup("")
@@ -36,8 +40,8 @@ public static class SearchEndpoints
                                  Defaults: check-in today, check-out tomorrow, 2 adults, 0 children, 1 room.
                                  Each result contains the lowest price per night and the total price of the stay.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<SearchHotelsResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
         }
     }
 }

@@ -4,13 +4,18 @@ using Triply.Application.Features.Reviews.Commands.UpdateReview;
 using Triply.Application.Features.Reviews.Queries.GetReviews;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Reviews;
 
 namespace Triply.Api.Endpoints;
 
+/// <summary>Maps the review endpoints.</summary>
 public static class ReviewEndpoints
 {
     extension(IEndpointRouteBuilder app)
     {
+        /// <summary>Maps the review endpoints.</summary>
         public void MapReviewEndpoints()
         {
             var group = app.MapGroup("")
@@ -33,8 +38,8 @@ public static class ReviewEndpoints
                                  newest first by default (sorts=-Rating, filters=Rating>=4 are supported).
                                  Returns a not found response when the hotel does not exist.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<PagedResult<ReviewResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPost(Router.HotelRoutes.Reviews, async (
                     Guid id,
@@ -55,8 +60,8 @@ public static class ReviewEndpoints
                                  Adds a rating (1-5) and a comment to a hotel on behalf of the signed-in user.
                                  Each user can review a hotel only once; use the update endpoint to change it.
                                  """)
-                .Produces(StatusCodes.Status201Created)
-                .ProducesValidationProblem();
+                .Produces<ApiResponse<ReviewResponse>>(StatusCodes.Status201Created)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
             group.MapPut(Router.ReviewRoutes.Update, async (
                     Guid id,
@@ -75,9 +80,9 @@ public static class ReviewEndpoints
                                  Updates the rating, title and comment of a review written by the signed-in user.
                                  Returns forbidden when the review belongs to someone else.
                                  """)
-                .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status403Forbidden)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<ReviewResponse>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.ReviewRoutes.Delete, async (
                     Guid id,
@@ -96,8 +101,8 @@ public static class ReviewEndpoints
                                  can delete any review.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status403Forbidden)
-                .Produces(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }
     }
 }

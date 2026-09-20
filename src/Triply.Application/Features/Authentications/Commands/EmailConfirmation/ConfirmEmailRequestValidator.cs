@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Authentications.Commands.EmailConfirmation;
 
+/// <summary>Validates the confirm email request.</summary>
 public class ConfirmEmailRequestValidator : AbstractValidator<ConfirmEmailRequest>
 {
+    /// <summary>Initializes a new instance of the confirm email request validator.</summary>
     public ConfirmEmailRequestValidator(IUserRepository userRepository)
     {
         ApplyValidationRules();

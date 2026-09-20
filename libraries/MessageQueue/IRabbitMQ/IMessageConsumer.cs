@@ -1,7 +1,9 @@
 namespace MessageQueue.IRabbitMQ;
 
+/// <summary>Defines the message consumer operations.</summary>
 public interface IMessageConsumer : IAsyncDisposable
 {
+    /// <summary>Subscribes to the queue and handles every message.</summary>
     Task SubscribeAsync<T>(string topicPattern, Func<T, string, CancellationToken, Task> handler,
         CancellationToken cancellationToken = default);
 

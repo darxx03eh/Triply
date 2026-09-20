@@ -5,10 +5,12 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Search.Queries.SearchHotels;
 
+/// <summary>Validates the search hotels request.</summary>
 public class SearchHotelsRequestValidator : AbstractValidator<SearchHotelsRequest>
 {
     private const int MaxNights = 30;
 
+    /// <summary>Initializes a new instance of the search hotels request validator.</summary>
     public SearchHotelsRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

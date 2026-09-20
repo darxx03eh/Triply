@@ -9,6 +9,7 @@ public class GetCitiesRequestValidator : AbstractValidator<GetCitiesRequest>
     /// <summary>Initializes the city query validation rules.</summary>
     public GetCitiesRequestValidator() => ApplyValidationRules();
 
+    /// <summary>Applies the validation rules.</summary>
     public void ApplyValidationRules()
     {
         RuleFor(request => request.Page)

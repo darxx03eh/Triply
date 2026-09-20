@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Rooms.Commands.UpdateRoom;
 
+/// <summary>Validates the update room request.</summary>
 public class UpdateRoomRequestValidator : AbstractValidator<UpdateRoomRequest>
 {
+    /// <summary>Initializes a new instance of the update room request validator.</summary>
     public UpdateRoomRequestValidator(IRoomRepository roomRepository)
     {
         ApplyValidationRules();

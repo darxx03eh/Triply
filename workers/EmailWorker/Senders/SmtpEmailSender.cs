@@ -7,11 +7,15 @@ using MimeKit;
 
 namespace EmailWorker.Senders;
 
+/// <summary>Gets or sets the SMTP email sender.</summary>
+/// <summary>Represents the SMTP email sender.</summary>
 public class SmtpEmailSender(IOptions<SmtpOptions> options) : IEmailSender
 {
     private readonly SmtpOptions _options = options.Value;
 
-    public async Task SendAsync(string to, string subject, string htmlBody, CancellationToken cancellationToken = default)
+    /// <summary>Sends.</summary>
+    public async Task SendAsync(string to, string subject, string htmlBody,
+        CancellationToken cancellationToken = default)
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_options.FromName, _options.FromAddress));

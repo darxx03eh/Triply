@@ -4,8 +4,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Attractions.Commands.CreateAttraction;
 
+/// <summary>Validates the create attraction request.</summary>
 public class CreateAttractionRequestValidator : AbstractValidator<CreateAttractionRequest>
 {
+    /// <summary>Initializes a new instance of the create attraction request validator.</summary>
     public CreateAttractionRequestValidator(IHotelRepository hotelRepository)
     {
         ApplyValidationRules();

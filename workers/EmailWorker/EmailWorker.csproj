@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\MessageQueue\MessageQueue.csproj" />
+    <ProjectReference Include="..\..\libraries\Logging\Logging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

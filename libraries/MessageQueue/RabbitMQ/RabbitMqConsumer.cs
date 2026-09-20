@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using System.Text.Json;
 using MessageQueue.IRabbitMQ;
@@ -26,8 +28,10 @@ namespace MessageQueue.RabbitMQ;
 ///    <see cref="RabbitMqOptions.MaxRetryCount"/>, the message is published
 ///    directly to the final Dead Letter Exchange/Queue instead of being retried again.
 /// </remarks>
-public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsumer
+public class RabbitMqConsumer(IOptions<RabbitMqOptions> options, ILogger<RabbitMqConsumer>? logger = null)
+    : IMessageConsumer
 {
+    private readonly ILogger _logger = logger ?? NullLogger<RabbitMqConsumer>.Instance;
     private readonly RabbitMqOptions _options
         = options.Value ?? throw new ArgumentNullException(nameof(options));
     private IConnection? _connection;
@@ -78,8 +82,17 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
             TopologyRecoveryEnabled = true
         };
 
-        _connection = await factory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
-        _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        try
+        {
+            _connection = await factory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
+            _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Consumer could not connect to RabbitMQ at {HostName}:{Port}",
+                _options.HostName, _options.Port);
+            throw;
+        }
 
         await _channel.ExchangeDeclareAsync(
             exchange: _options.ExchangeName,
@@ -162,18 +175,28 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
         consumer.ReceivedAsync += async (_, args) =>
         {
             T? payload = default;
+            int attempt = GetRetryCount(args.BasicProperties, retryQueueName) + 1;
+            var started = System.Diagnostics.Stopwatch.GetTimestamp();
             try
             {
                 payload = JsonSerializer.Deserialize<T>(args.Body.Span);
                 if (payload is not null)
                     await handler(payload, args.RoutingKey, cancellationToken).ConfigureAwait(false);
+                else
+                    _logger.LogWarning("Message {RoutingKey} from {Queue} " +
+                                       "was empty after deserializing to {MessageType}, skipped",
+                        args.RoutingKey, queueName, typeof(T).Name);
 
                 await _channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken)
                     .ConfigureAwait(false);
+                _logger.LogInformation("Handled {MessageType} {RoutingKey} from " +
+                                       "{Queue} (attempt {Attempt}) in {ElapsedMs:0} ms",
+                    typeof(T).Name, args.RoutingKey, queueName, attempt,
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             }
             catch (Exception exception)
             {
-                int retryCount = GetRetryCount(args.BasicProperties, retryQueueName);
+                int retryCount = attempt - 1;
 
                 if (retryCount >= _options.MaxRetryCount && !string.IsNullOrWhiteSpace(finalDlxName))
                 {
@@ -183,9 +206,12 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
                         {
                             await onRetriesExhausted(payload, exception, cancellationToken).ConfigureAwait(false);
                         }
-                        catch
+                        catch (Exception compensationException)
                         {
                             // Compensation is best-effort; the message still goes to the DLQ below.
+                            _logger.LogError(compensationException,
+                                "Compensation for {MessageType} {RoutingKey} failed after the retries were exhausted",
+                                typeof(T).Name, args.RoutingKey);
                         }
                     }
 
@@ -200,9 +226,16 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
 
                     await _channel.BasicAckAsync(args.DeliveryTag, multiple: false, cancellationToken)
                         .ConfigureAwait(false);
+                    _logger.LogError(exception,
+                        "{MessageType} {RoutingKey} failed {Attempt} times and was moved to the dead letter exchange {DeadLetterExchange}",
+                        typeof(T).Name, args.RoutingKey, attempt, finalDlxName);
                 }
                 else
                 {
+                    _logger.LogWarning(exception,
+                        "{MessageType} {RoutingKey} failed on attempt {Attempt} of {MaxAttempts}, " +
+                        "retrying in {RetryDelayMs} ms",
+                        typeof(T).Name, args.RoutingKey, attempt, _options.MaxRetryCount + 1, _options.RetryDelayMilliseconds);
                     await _channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false, cancellationToken)
                         .ConfigureAwait(false);
                 }
@@ -211,6 +244,11 @@ public class RabbitMqConsumer(IOptions<RabbitMqOptions> options) : IMessageConsu
 
         await _channel.BasicConsumeAsync(queueName, autoAck: false, consumer, cancellationToken)
             .ConfigureAwait(false);
+
+        _logger.LogInformation(
+            "Consuming {MessageType} from queue {Queue} bound to {Exchange} " +
+            "with {TopicPattern} (retry queue {RetryQueue}, max retries {MaxRetryCount})",
+            typeof(T).Name, queueName, _options.ExchangeName, topicPattern, retryQueueName, _options.MaxRetryCount);
     }
     /// <summary>
     /// Reads the number of times a message has been dead-lettered from the given

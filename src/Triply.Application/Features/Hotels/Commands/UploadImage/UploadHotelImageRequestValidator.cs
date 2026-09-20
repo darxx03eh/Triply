@@ -4,11 +4,13 @@ using Triply.Application.Options;
 
 namespace Triply.Application.Features.Hotels.Commands.UploadImage;
 
+/// <summary>Validates the upload hotel image request.</summary>
 public class UploadHotelImageRequestValidator : AbstractValidator<UploadHotelImageRequest>
 {
     private static readonly HashSet<string> AllowedExtensions =
         new(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
 
+    /// <summary>Initializes a new instance of the upload hotel image request validator.</summary>
     public UploadHotelImageRequestValidator(IOptions<ImageUploadOptions> uploadOptions)
     {
         long maxBytes = uploadOptions.Value.MaxFileSizeBytes;

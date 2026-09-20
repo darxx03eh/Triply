@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Rooms;
 using Triply.Application.Extensions;
@@ -8,6 +9,7 @@ namespace Triply.Infrastructure.Services.Rooms;
 
 public partial class RoomService
 {
+    /// <summary>Gets a paginated list of rooms.</summary>
     public async Task<Result<PagedResult<RoomResponse>>> GetPagedAsync(GetRoomsRequest request,
         bool isAdmin,
         CancellationToken cancellationToken = default)
@@ -15,6 +17,8 @@ public partial class RoomService
         var (rooms, totalCount) = await roomRepository.GetPagedAsync(request, isAdmin,
             cancellationToken: cancellationToken);
 
+        logger.LogDebug("Rooms page {Page} returned {Count} of {TotalCount} (admin: {IsAdmin})",
+            request.Page ?? 1, rooms.Count, totalCount, isAdmin);
         var pagedResult = new PagedResult<RoomResponse>
         {
             Items = rooms.Select(r => r.ToRoomResponse(r.Hotel.Name)).ToList(),

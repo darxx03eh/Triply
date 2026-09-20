@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using MessageQueue.IRabbitMQ;
@@ -13,8 +15,11 @@ namespace MessageQueue.RabbitMQ;
 /// and declares each target exchange only once per process lifetime (cached
 /// in <see cref="_declaredExchanges"/>) to avoid redundant round-trips.
 /// </summary>
-public class RabbitMqPublisher(IOptions<RabbitMqOptions> options) : IMessagePublisher
+public class RabbitMqPublisher(IOptions<RabbitMqOptions> options, ILogger<RabbitMqPublisher>? logger = null)
+    : IMessagePublisher
 {
+    private readonly ILogger _logger = logger ?? NullLogger<RabbitMqPublisher>.Instance;
+
     /// <summary>Resolved RabbitMQ configuration options.</summary>
     private readonly RabbitMqOptions _options
         = options.Value ?? throw new ArgumentNullException(nameof(options));
@@ -70,13 +75,27 @@ public class RabbitMqPublisher(IOptions<RabbitMqOptions> options) : IMessagePubl
             Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds())
         };
 
-        await channel.BasicPublishAsync(
-            exchange: targetExchange,
-            routingKey: topic,
-            mandatory: false,
-            basicProperties: properties,
-            body: payload,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await channel.BasicPublishAsync(
+                exchange: targetExchange,
+                routingKey: topic,
+                mandatory: false,
+                basicProperties: properties,
+                body: payload,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Failed to publish {MessageType} to exchange {Exchange} " +
+                                        "with routing key {RoutingKey}",
+                typeof(T).Name, targetExchange, topic);
+            throw;
+        }
+
+        _logger.LogInformation("Published {MessageType} to exchange {Exchange} with routing key " +
+                               "{RoutingKey} ({PayloadSize} bytes)",
+            typeof(T).Name, targetExchange, topic, payload.Length);
     }
 
     /// <summary>
@@ -97,6 +116,7 @@ public class RabbitMqPublisher(IOptions<RabbitMqOptions> options) : IMessagePubl
             autoDelete: false, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         _declaredExchanges.TryAdd(exchangeName, 0);
+        _logger.LogDebug("Exchange {Exchange} declared", exchangeName);
     }
 
     /// <summary>
@@ -130,10 +150,20 @@ public class RabbitMqPublisher(IOptions<RabbitMqOptions> options) : IMessagePubl
                 TopologyRecoveryEnabled = true
             };
 
-            _connection = await factory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
-            _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                _connection = await factory.CreateConnectionAsync(cancellationToken).ConfigureAwait(false);
+                _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Publisher could not connect to RabbitMQ at {HostName}:{Port}",
+                    _options.HostName, _options.Port);
+                throw;
+            }
 
+            _logger.LogInformation("Publisher connected to RabbitMQ at {HostName}:{Port}", _options.HostName, _options.Port);
             return _channel;
         }
         finally

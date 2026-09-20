@@ -3,8 +3,10 @@ using Triply.Domain.Results;
 
 namespace Triply.Application.Features.Deals.Commands.CreateDeal;
 
+/// <summary>Validates the create deal request.</summary>
 public class CreateDealRequestValidator : AbstractValidator<CreateDealRequest>
 {
+    /// <summary>Initializes a new instance of the create deal request validator.</summary>
     public CreateDealRequestValidator() => ApplyValidationRules();
 
     private void ApplyValidationRules()

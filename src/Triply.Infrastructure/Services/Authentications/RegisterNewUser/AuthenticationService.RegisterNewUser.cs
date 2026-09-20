@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Triply.Application.DTOs.Authentications;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Authentications.Commands.Register;
@@ -24,6 +25,8 @@ public partial class AuthenticationService
             if (!createResult.Succeeded)
             {
                 await transaction.RollbackAsync(cancellationToken);
+                logger.LogWarning("Registration failed for {UserName} ({Email}): {Errors}",
+                    request.Username, request.Email, createResult.Errors.Select(e => e.Code).ToArray());
                 var fields = createResult.Errors
                     .GroupBy(_ => "General")
                     .ToDictionary(
@@ -36,7 +39,10 @@ public partial class AuthenticationService
             if (!roleExists)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                throw new NotFoundException($"Role '{DefaultRole}' does not exist. Check role seeding.",
+                logger.LogError(
+                    "Registration failed: the role {Role} does not exist, check the role seeding", DefaultRole);
+                throw new NotFoundException(
+                    $"Role '{DefaultRole}' does not exist. Check role seeding.",
                     "ROLE_NOT_FOUND");
             }
             
@@ -44,11 +50,15 @@ public partial class AuthenticationService
             if (!roleResult.Succeeded)
             {
                 await transaction.RollbackAsync(cancellationToken);
+                logger.LogError("Registration failed: could not assign the role {Role} to {UserName}: {Errors}",
+                    DefaultRole, user.UserName, roleResult.Errors.Select(e => e.Code).ToArray());
                 return Result<RegisterUserResponse>.Failure(
                     "ROLE_ASSIGNMENT_FAILED", "Failed to assign role to the new user.");
             }
 
             await transaction.CommitAsync(cancellationToken);
+            logger.LogInformation("User {UserId} ({UserName}) registered with the role {Role}", 
+                user.Id, user.UserName, DefaultRole);
             await PublishConfirmationEmail(user);
             
             var response = new RegisterUserResponse(
@@ -70,7 +80,8 @@ public partial class AuthenticationService
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         var httpRequest = httpContextAccessor.HttpContext.Request;
         var link =
-            $"{httpRequest.Scheme}://{httpRequest.Host}/{Router.AuthenticationRoutes.EmailConfirmation}?email={user.Email}&token={Uri.EscapeDataString(token)}";
+            $"{httpRequest.Scheme}://{httpRequest.Host}/{Router.AuthenticationRoutes.EmailConfirmation}" +
+            $"?email={user.Email}&token={Uri.EscapeDataString(token)}";
         return link;
     }
 
@@ -86,5 +97,6 @@ public partial class AuthenticationService
                 ["confirmation_link"] = await GenerateConfirmationLink(user)
             }
         });
+        logger.LogInformation("Confirmation email queued for user {UserId} ({UserName})", user.Id, user.UserName);
     }
 }
