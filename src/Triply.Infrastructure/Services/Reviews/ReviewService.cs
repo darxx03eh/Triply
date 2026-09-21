@@ -10,5 +10,6 @@ namespace Triply.Infrastructure.Services.Reviews;
 public partial class ReviewService(
     IReviewRepository reviewRepository,
     IHotelRepository hotelRepository,
+    IBookingRepository bookingRepository,
     UserManager<TriplyUser> userManager,
     ILogger<ReviewService> logger) : IReviewService{}

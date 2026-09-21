@@ -31,6 +31,9 @@ public class BookingConfigurations : IEntityTypeConfiguration<Booking>
 
             x.HasCheckConstraint("CK_Bookings_Date",
                 $"[{nameof(Booking.CheckOut)}] > [{nameof(Booking.CheckIn)}]");
+
+            x.HasCheckConstraint("CK_Bookings_DiscountAmount",
+                $"[{nameof(Booking.DiscountAmount)}] >= 0");
         });
 
         builder.HasKey(x => x.BookingId);
@@ -40,6 +43,12 @@ public class BookingConfigurations : IEntityTypeConfiguration<Booking>
 
         builder.HasIndex(x => x.UserId)
             .HasDatabaseName("IX_Bookings_UserId");
+
+        builder.HasIndex(x => x.ConfirmationNumber)
+            .HasDatabaseName("IX_Bookings_ConfirmationNumber");
+
+        builder.HasIndex(x => new { x.Status, x.CreatedAt })
+            .HasDatabaseName("IX_Bookings_Status_CreatedAt");
         
         builder.HasOne(x => x.User)
             .WithMany(x => x.Bookings)
@@ -70,6 +79,28 @@ public class BookingConfigurations : IEntityTypeConfiguration<Booking>
 
         builder.Property(x => x.SpecialRequests)
             .HasMaxLength(2000)
+            .IsRequired(false);
+
+        builder.Property(x => x.ConfirmationNumber)
+            .HasMaxLength(20)
+            .IsUnicode(false)
+            .IsRequired();
+
+        builder.Property(x => x.DiscountAmount)
+            .HasPrecision(10, 2)
+            .HasDefaultValue(0m)
+            .IsRequired();
+
+        builder.Property(x => x.GuestFullName)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.Property(x => x.GuestEmail)
+            .HasMaxLength(256)
+            .IsRequired();
+
+        builder.Property(x => x.GuestPhoneNumber)
+            .HasMaxLength(20)
             .IsRequired(false);
     }
 }

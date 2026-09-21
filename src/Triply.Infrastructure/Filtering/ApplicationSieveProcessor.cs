@@ -12,11 +12,13 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
     /// <summary>Maps the properties.</summary>
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
+        // Maps the city properties.
         mapper.Property<City>(c => c.Name).CanFilter().CanSort();
         mapper.Property<City>(c => c.Country).CanFilter().CanSort();
         mapper.Property<City>(c => c.CreatedAt).CanSort();
         mapper.Property<City>(c => c.ModifiedAt).CanSort();
         
+        // Maps the hotel properties.
         mapper.Property<Hotel>(h => h.Name).CanFilter().CanSort();
         mapper.Property<Hotel>(h => h.StarRating).CanFilter().CanSort();
         mapper.Property<Hotel>(h => h.CityId).CanFilter();
@@ -26,6 +28,7 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Hotel>(h => h.CreatedAt).CanSort();
         mapper.Property<Hotel>(h => h.ModifiedAt).CanSort();
 
+        // Maps the room properties.
         mapper.Property<Room>(r => r.Number).CanFilter().CanSort();
         mapper.Property<Room>(r => r.HotelId).CanFilter();
         mapper.Property<Room>(r => r.RoomType)
@@ -46,11 +49,13 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Room>(r => r.CreatedAt).CanSort();
         mapper.Property<Room>(r => r.ModifiedAt).CanSort();
 
+        // Maps the review properties.
         mapper.Property<Review>(r => r.Rating)
             .CanFilter().CanSort()
             .HasName("rate");
         mapper.Property<Review>(r => r.CreatedAt).CanSort();
         
+        // Maps the deal properties.
         mapper.Property<Deal>(d => d.RoomId).CanFilter();
         mapper.Property<Deal>(d => d.Title).CanFilter().CanSort();
         mapper.Property<Deal>(d => d.DiscountPercentage)
@@ -62,6 +67,15 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
         mapper.Property<Deal>(d => d.StartsAt).CanFilter().CanSort();
         mapper.Property<Deal>(d => d.EndsAt).CanFilter().CanSort();
         mapper.Property<Deal>(d => d.CreatedAt).CanSort();
+
+        // Maps the booking properties.
+        mapper.Property<Booking>(b => b.Status).CanFilter().CanSort();
+        mapper.Property<Booking>(b => b.CheckIn).CanFilter().CanSort();
+        mapper.Property<Booking>(b => b.CheckOut).CanFilter().CanSort();
+        mapper.Property<Booking>(b => b.TotalPrice)
+            .CanFilter().CanSort()
+            .HasName("price");
+        mapper.Property<Booking>(b => b.CreatedAt).CanSort();
 
         return mapper;
     }

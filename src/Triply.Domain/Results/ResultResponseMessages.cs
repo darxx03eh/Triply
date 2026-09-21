@@ -549,7 +549,7 @@ public static class ResultResponseMessages
         }
     }
 
-    /// <summary>The messages of the deals cart.</summary>
+    /// <summary>The messages of the cart.</summary>
     public static class Cart
     {
         /// <summary>The validation messages of the cart.</summary>
@@ -579,6 +579,47 @@ public static class ResultResponseMessages
             /// <summary>Message returned when the item already in the cart.</summary>
             public static readonly ResultMessage AlreadyInCart
                 = new("CART_ITEM_ALREADY_EXISTS", "This room is already in your cart for the same dates.");
+        }
+    }
+    
+    /// <summary>The messages of the bookings.</summary>
+    public static class Bookings
+    {
+        /// <summary>The validation messages of the bookings.</summary>
+        public static class Validation
+        {
+            /// <summary>Message returned when the full name is missing.</summary>
+            public static readonly ResultMessage GuestFullNameRequired
+                = new("BOOKING_GUEST_NAME_REQUIRED", "Guest full name is required.");
+            
+            /// <summary>Message returned when the full name is longer than allowed.</summary>
+            public static readonly ResultMessage GuestFullNameMaxLength
+                = new("BOOKING_GUEST_NAME_MAX_LENGTH", "Guest full name must not exceed 100 characters.");
+            
+            /// <summary>Message returned when the email is missing.</summary>
+            public static readonly ResultMessage GuestEmailRequired
+                = new("BOOKING_GUEST_EMAIL_REQUIRED", "Guest email is required.");
+            
+            /// <summary>Message returned when the email is invalid.</summary>
+            public static readonly ResultMessage GuestEmailInvalid
+                = new("BOOKING_GUEST_EMAIL_INVALID", "Guest email is not a valid email address.");
+            
+            /// <summary>Message returned when the phone number is invalid.</summary>
+            public static readonly ResultMessage GuestPhoneNumberInvalid
+                = new("BOOKING_GUEST_PHONE_INVALID", "Guest phone number is not valid.");
+            
+            /// <summary>Message returned when the special request is longer than allowed.</summary>
+            public static readonly ResultMessage SpecialRequestsMaxLength
+                = new("BOOKING_SPECIAL_REQUESTS_MAX_LENGTH", 
+                    "Special requests must not exceed 2000 characters.");
+            
+            /// <summary>Message returned when the page is invalid.</summary>
+            public static readonly ResultMessage PageInvalid
+                = new("BOOKING_PAGE_INVALID", "Page must be greater than or equal to 1.");
+    
+            /// <summary>Message returned when the page size is invalid.</summary>
+            public static readonly ResultMessage PageSizeInvalid
+                = new("BOOKING_PAGE_SIZE_INVALID", "Page size must be between 1 and 50.");
         }
     }
 

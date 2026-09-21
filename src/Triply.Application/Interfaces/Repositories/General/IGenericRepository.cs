@@ -26,6 +26,8 @@ public interface IGenericRepository<TEntity> where TEntity : class
     Task DeleteRangeAsync(ICollection<TEntity> entities);
     /// <summary>Begins a database transaction.</summary>
     Task<IDbContextTransaction> BeginTransactionAsync();
+    /// <summary>Begins a database serializable transaction.</summary>
+    Task<IDbContextTransaction> BeginSerializableTransactionAsync(CancellationToken cancellationToken = default);
     /// <summary>Commits the current database transaction.</summary>
     Task CommitAsync();
     /// <summary>Rolls back the current database transaction.</summary>

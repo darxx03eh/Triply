@@ -27,6 +27,9 @@ public sealed class Booking : BaseEntity
 
     /// <summary>Gets or sets the check-out.</summary>
     public DateTime CheckOut { get; set; }
+    
+    /// <summary>Gets or sets the canceled at.</summary>
+    public DateTime? CanceledAt { get; set; }
 
     /// <summary>Gets or sets the adults.</summary>
     public short Adults { get; set; } = 2;
@@ -34,14 +37,29 @@ public sealed class Booking : BaseEntity
     /// <summary>Gets or sets the children.</summary>
     public short Children { get; set; }
 
+    /// <summary>Gets or sets the confirmation number.</summary>
+    public string ConfirmationNumber { get; set; } = null!;
+
     /// <summary>Gets or sets the total price.</summary>
     public decimal TotalPrice { get; set; }
+    
+    /// <summary>Gets or sets the discount amount.</summary>
+    public decimal DiscountAmount { get; set; }
 
     /// <summary>Gets or sets the status.</summary>
     public BookingStatus Status { get; set; }
 
     /// <summary>Gets or sets the special requests.</summary>
     public string? SpecialRequests { get; set; }
+
+    /// <summary>Gets or sets the guest full name.</summary>
+    public string GuestFullName { get; set; } = null!;
+    
+    /// <summary>Gets or sets the guest email.</summary>
+    public string GuestEmail { get; set; } = null!;
+    
+    /// <summary>Gets or sets the guest phone number.</summary>
+    public string? GuestPhoneNumber { get; set; }
 
     /// <summary>Gets or sets the navigation property for user.</summary>
     public TriplyUser User { get; set; } = null!;

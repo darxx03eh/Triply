@@ -14,6 +14,7 @@ using Sieve.Services;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Application.Interfaces.Repositories.General;
 using Triply.Application.Interfaces.Services;
+using Triply.Application.Options;
 using Triply.Application.Services;
 using Triply.Domain.Constants;
 using Triply.Domain.Entities.Identity;
@@ -34,6 +35,12 @@ public static class InfrastructureServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>Register Booking options.</summary>
+        public IServiceCollection AddBookingOptions(IConfiguration configuration)
+        {
+            services.Configure<BookingOptions>(configuration.GetSection(nameof(BookingOptions)));
+            return  services;
+        }
         /// <summary>Registers the Sieve service services.</summary>
         public IServiceCollection AddSieveService(IConfiguration configuration)
         {
@@ -184,6 +191,7 @@ public static class InfrastructureServiceCollectionExtensions
             services.Decorate<IReviewService, ValidatedReviewService>();
             services.Decorate<IDealService, ValidatedDealService>();
             services.Decorate<ICartService, ValidatedCartService>();
+            services.Decorate<IBookingService, ValidatedBookingService>();
             return services;
         }
     }
