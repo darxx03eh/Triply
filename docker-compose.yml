@@ -204,6 +204,27 @@ services:
         condition: service_completed_successfully
       elasticsearch:
         condition: service_healthy
+        
+  expire-pending-bookings:
+    build:
+      context: .
+      dockerfile: workers/ExpirePendingBookings/Dockerfile
+    container_name: expire-pending-bookings
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
+      Booking__PendingExpiryMinutes: ${BOOKING_PENDING_EXPIRY_MINUTES:-45}
+      Booking__ExpiryCheckIntervalMinutes: ${BOOKING_EXPIRY_CHECK_INTERVAL_MINUTES:-5}
+      Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
+      Elasticsearch__Uri: http://elasticsearch:9200
+    depends_on:
+      triply-db:
+        condition: service_healthy
+      triply-migrations:
+        condition: service_completed_successfully
+      elasticsearch:
+        condition: service_healthy
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0

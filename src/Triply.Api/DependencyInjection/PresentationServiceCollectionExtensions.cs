@@ -107,6 +107,7 @@ public static class PresentationServiceCollectionExtensions
             app.MapDealEndpoints();
             app.MapHomeEndpoints();
             app.MapCartEndpoints();
+            app.MapBookingEndpoints();
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,11 @@ public class GenericRepository<TEntity>(
     /// <inheritdoc />
     public async Task<IDbContextTransaction> BeginTransactionAsync()
         => await context.Database.BeginTransactionAsync();
+    
+    /// <inheritdoc />
+    public async Task<IDbContextTransaction> BeginSerializableTransactionAsync(
+        CancellationToken cancellationToken = default)
+        => await context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
     /// <inheritdoc />
     public async Task CommitAsync()

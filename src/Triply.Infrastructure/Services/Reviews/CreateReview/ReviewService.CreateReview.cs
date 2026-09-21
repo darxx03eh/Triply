@@ -22,6 +22,20 @@ public partial class ReviewService
             return Result<ReviewResponse>.Failure(
                 "USER_NOT_FOUND", "The current user was not found.", ResultErrorType.Unauthorized);
         }
+
+        var hasCompletedBooking = await bookingRepository
+            .HasCompletedBookingAtHotelAsync(request.UserId, request.HotelId, cancellationToken);
+        if (!hasCompletedBooking)
+        {
+            logger.LogWarning(
+                "Create review failed: user {UserId} has no completed booking at hotel {HotelId}",
+                request.UserId, request.HotelId);
+            return Result<ReviewResponse>.Failure(
+                "REVIEW_REQUIRES_COMPLETED_BOOKING",
+                "You can only review hotels where you have completed a stay.",
+                ResultErrorType.Forbidden);
+        }
+
         var review = request.ToReview();
 
         await reviewRepository.AddAsync(review, cancellationToken);
