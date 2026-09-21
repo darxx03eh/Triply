@@ -37,6 +37,9 @@ public class Program
         // Add Serilog (Console + Elasticsearch)
         builder.AddTriplyLogging("api");
         
+        // Add booking options.
+        builder.Services.AddBookingOptions(builder.Configuration);
+        
         // Add Triply DbContext
         builder.Services.AddTriplyDbContext(builder.Configuration);
         

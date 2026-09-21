@@ -17,8 +17,12 @@ public partial class CartService
         var responses = new List<CartItemResponse>();
         foreach (var item in items)
         {
+            var isAvailable = item.Room.IsAvailable
+                              && !await bookingRepository
+                                  .IsRoomBookedAsync(item.RoomId, item.CheckIn, item.CheckOut,
+                                  cancellationToken);
             responses.Add(item.ToCartItemResponse(
-                discounts.TryGetValue(item.RoomId, out var discount) ? discount : null, true));
+                discounts.TryGetValue(item.RoomId, out var discount) ? discount : null, isAvailable));
         }
 
         logger.LogDebug("Cart of user {UserId} retrieved with {ItemCount} items and {DiscountCount} active discounts",

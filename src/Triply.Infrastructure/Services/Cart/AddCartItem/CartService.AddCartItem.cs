@@ -46,6 +46,18 @@ public partial class CartService
 
         var checkIn = request.CheckIn.ToDateTime(TimeOnly.MinValue);
         var checkOut = request.CheckOut.ToDateTime(TimeOnly.MinValue);
+        var isRoomBooked = await bookingRepository.IsRoomBookedAsync(room.RoomId, checkIn, checkOut, cancellationToken);
+        if (isRoomBooked)
+        {
+            logger.LogWarning(
+                "Add cart item failed: room {RoomId} is already booked for {CheckIn:yyyy-MM-dd} to {CheckOut:yyyy-MM-dd}" +
+                " (user {UserId})",
+                room.RoomId, checkIn, checkOut, request.UserId);
+            return Result<CartResponse>.Failure(
+                "ROOM_ALREADY_BOOKED",
+                "This room is already booked for the selected dates.",
+                ResultErrorType.Conflict);
+        }
 
         await cartRepository.AddAsync(request.ToCartItem(checkIn, checkOut, room.RoomId), cancellationToken);
         await cartRepository.SaveChangesAsync(cancellationToken);

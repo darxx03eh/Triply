@@ -157,6 +157,8 @@ public static class Router
         private const string Prefix = $"{Rule}/users/me";
         /// <summary>The recent hotels.</summary>
         public const string RecentHotels = $"{Prefix}/recent-hotels";
+        /// <summary>The get bookings.</summary>
+        public const string Bookings = $"{Prefix}/bookings";
     }
 
     /// <summary>Represents the cart routes.</summary>
@@ -171,5 +173,18 @@ public static class Router
         public const string AddItem = $"{Prefix}/items";
         /// <summary>The remove item from cart.</summary>
         public const string RemoveItem = $"{Prefix}/items/{Id}";
+    }
+
+    /// <summary>Represents the booking routes.</summary>
+    public static class BookingRoutes
+    {
+        private const string Prefix = $"{Rule}/bookings";
+        private const string ConfirmationNumber = "{confirmationNumber}";
+        /// <summary>The checkout.</summary>
+        public const string Checkout = Prefix;
+        /// <summary>The get booking by it confirmation number.</summary>
+        public const string GetByConfirmationNumber = $"{Prefix}/{ConfirmationNumber}";
+        /// <summary>The cancel booking.</summary>
+        public const string Cancel = $"{Prefix}/{ConfirmationNumber}/cancel";
     }
 }

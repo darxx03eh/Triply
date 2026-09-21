@@ -10,4 +10,5 @@ public partial class CartService(
     ICartRepository cartRepository,
     IRoomRepository roomRepository,
     IDealRepository dealRepository,
+    IBookingRepository bookingRepository,
     ILogger<CartService> logger) : ICartService{}
