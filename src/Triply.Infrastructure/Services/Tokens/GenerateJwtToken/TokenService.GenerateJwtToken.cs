@@ -37,7 +37,8 @@ public partial class TokenService
             new(TokenClaims.Jti, Guid.NewGuid().ToString()),
             new(TokenClaims.Id, user.Id.ToString()),
             new(TokenClaims.Username,  user.UserName!),
-            new(TokenClaims.Email, user.Email!)
+            new(TokenClaims.Email, user.Email!),
+            new(TokenClaims.PhoneNumber, user.PhoneNumber ?? string.Empty)
         };
         claims.AddRange(roles.Select(role => new Claim(TokenClaims.Role, role)));
         return claims;
