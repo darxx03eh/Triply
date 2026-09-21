@@ -13,6 +13,8 @@ public static class TokenClaims
     public const string Username = "username";
     /// <summary>Claim containing the email address.</summary>
     public const string Email = "email";
+    /// <summary>Claim containing the user's phone number.</summary>
+    public const string PhoneNumber = "phoneNumber";
     /// <summary>Claim containing a role.</summary>
     public const string Role = "role";
 }
