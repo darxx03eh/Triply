@@ -40,6 +40,7 @@ public class BookingRepository(TriplyDbContext context, ISieveProcessor sievePro
         CancellationToken cancellationToken = default)
         => await context.Bookings
             .IgnoreQueryFilters()
+            .Include(r => r.Payment)
             .Include(b => b.Room)
             .ThenInclude(r => r.Hotel)
             .ThenInclude(h => h.City)

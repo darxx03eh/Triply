@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Triply.Application.Interfaces.Payments;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Application.Interfaces.Services;
 
@@ -10,5 +11,6 @@ public partial class BookingService(
     IBookingRepository bookingRepository,
     ICartRepository cartRepository,
     IDealRepository dealRepository,
+    IPaymentGateway paymentGateway,
     ILogger<BookingService> logger
     ) : IBookingService { }

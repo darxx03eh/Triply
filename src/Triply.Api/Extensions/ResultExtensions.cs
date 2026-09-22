@@ -50,7 +50,6 @@ public static class ResultExtensions
         }
 
         var error = result.Error!;
-
         var errorResponse = new ApiResponse<object>
         {
             Message = error.Message,
@@ -63,7 +62,7 @@ public static class ResultExtensions
             ResultErrorType.Conflict => Results.Conflict(errorResponse),
             ResultErrorType.BusinessRule => Results.BadRequest(errorResponse),
             ResultErrorType.Unauthorized => Results.Json(errorResponse, statusCode: StatusCodes.Status401Unauthorized),
-            ResultErrorType.Forbidden => Results.StatusCode(StatusCodes.Status403Forbidden),
+            ResultErrorType.Forbidden => Results.Json(errorResponse ,statusCode: StatusCodes.Status403Forbidden),
             _ => Results.UnprocessableEntity(errorResponse)
         }, error.Code, error.Message);
     }

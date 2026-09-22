@@ -39,6 +39,12 @@ services:
       DatabaseLoggingSettings__SlowQueryThresholdMs: ${SLOW_QUERY_THRESHOLD_MS:-500}
       Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
       Elasticsearch__Uri: http://elasticsearch:9200
+      PaymentOptions__StripeSecretKey: ${STRIPE_SECRET_KEY}
+      PaymentOptions__StripeWebhookSecret: ${STRIPE_WEBHOOK_SECRET}
+      PaymentOptions__Provider: ${PROVIDER_ID}
+      PaymentOptions__Currency: ${CURRENCY}
+      PaymentOptions__SuccessUrl: ${SUCCESS_URL}
+      PaymentOptions__CancelUrl: ${CANCEL_URL}
     depends_on:
       triply-db:
         condition: service_healthy

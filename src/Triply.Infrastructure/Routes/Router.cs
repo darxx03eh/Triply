@@ -186,5 +186,17 @@ public static class Router
         public const string GetByConfirmationNumber = $"{Prefix}/{ConfirmationNumber}";
         /// <summary>The cancel booking.</summary>
         public const string Cancel = $"{Prefix}/{ConfirmationNumber}/cancel";
+        /// <summary>The pay for booking.</summary>
+        public const string Pay = $"{Prefix}/{ConfirmationNumber}/pay";
+        /// <summary>The generate invoice for booking.</summary>
+        public const string Invoice = $"{Prefix}/{ConfirmationNumber}/invoice";
+    }
+
+    /// <summary>Represents the payment routes.</summary>
+    public static class PaymentRoutes
+    {
+        private const string Prefix = $"{Rule}/payments";
+        /// <summary>The handle webhook payment.</summary>
+        public const string Webhook = $"{Prefix}/webhook";
     }
 }
