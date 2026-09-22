@@ -64,6 +64,12 @@ public class Program
         // Add JWT Authentication Settings
         builder.Services.AddJwtAuthentication(builder.Configuration);
         
+        // Add Generate Invoices PDF Configuration
+        builder.Services.AddGenerateInvoiceConfigurations();
+        
+        // Add Payment Gateway
+        builder.Services.AddPaymentServices(builder.Configuration);
+        
         // Add Health Checks Service
         builder.Services.AddHealthChecks();
 
