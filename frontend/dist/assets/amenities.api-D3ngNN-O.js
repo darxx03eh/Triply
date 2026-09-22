@@ -1,0 +1,1 @@
+import{a as e,i as t}from"./Button-CO87GB6P.js";var n={list:()=>e(t.get(`/amenities`)),create:n=>e(t.post(`/amenities`,{name:n})),update:(n,r)=>e(t.put(`/amenities/${n}`,{name:r})),remove:e=>t.delete(`/amenities/${e}`).then(()=>void 0),byHotel:n=>e(t.get(`/hotels/${n}/amenities`)),setForHotel:(n,r)=>e(t.put(`/hotels/${n}/amenities`,{amenityIds:r}))};export{n as t};
