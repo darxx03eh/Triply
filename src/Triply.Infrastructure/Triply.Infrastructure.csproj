@@ -26,7 +26,9 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
+      <PackageReference Include="QuestPDF" Version="2026.9.0" />
       <PackageReference Include="Scrutor" Version="7.0.0" />
+      <PackageReference Include="Stripe.net" Version="52.4.2" />
     </ItemGroup>
 
 </Project>

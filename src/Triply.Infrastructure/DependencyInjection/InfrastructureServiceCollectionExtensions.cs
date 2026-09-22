@@ -9,9 +9,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using Sieve.Models;
 using Sieve.Services;
 using Triply.Application.Features.Authentications.Commands.Register;
+using Triply.Application.Interfaces.Payments;
 using Triply.Application.Interfaces.Repositories.General;
 using Triply.Application.Interfaces.Services;
 using Triply.Application.Options;
@@ -21,6 +23,7 @@ using Triply.Domain.Entities.Identity;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Filtering;
 using Triply.Infrastructure.Interceptors;
+using Triply.Infrastructure.Payments;
 using Triply.Infrastructure.Repositories;
 using Triply.Infrastructure.Repositories.General;
 using Triply.Infrastructure.Seeders;
@@ -35,6 +38,24 @@ public static class InfrastructureServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>Registers the generate invoice configurations.</summary>
+        public IServiceCollection AddGenerateInvoiceConfigurations()
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+            return services;
+        }
+        /// <summary>Registers the payment service services.</summary>
+        public IServiceCollection AddPaymentServices(IConfiguration configuration)
+        {
+            services.Configure<PaymentOptions>(configuration.GetSection(nameof(PaymentOptions)));
+            
+            var provider = configuration.GetSection(nameof(PaymentOptions))[nameof(PaymentOptions.Provider)];
+            if (string.Equals(provider, "Stripe", StringComparison.OrdinalIgnoreCase))
+                services.AddScoped<IPaymentGateway, StripePaymentGateway>();
+            else services.AddScoped<IPaymentGateway, MockPaymentGateway>();
+            
+            return services;
+        }
         /// <summary>Register Booking options.</summary>
         public IServiceCollection AddBookingOptions(IConfiguration configuration)
         {
