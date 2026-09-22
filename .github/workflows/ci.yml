@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/EmailWorker
+        working-directory: ./workers/EmailWorker/
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/ImageWorker
+        working-directory: ./workers/ImageUploader/
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/ExpirePendingBookings
+        working-directory: ./workers/ExpirePendingBookings/
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -188,13 +188,13 @@ jobs:
         run: docker build -t triply-migrations ./src --file ./src/Dockerfile.Migrations
 
       - name: Build Email Worker image
-        run: docker build -t triply-email-worker ./src/EmailWorker
+        run: docker build -t triply-email-worker ./workers/EmailWorker
 
       - name: Build Image Worker image
-        run: docker build -t triply-image-worker ./src/ImageWorker
+        run: docker build -t triply-image-worker ./workers/ImageWorker
 
       - name: Build Expire Pending Bookings Worker image
-        run: docker build -t triply-expire-bookings-worker ./src/ExpirePendingBookings
+        run: docker build -t triply-expire-bookings-worker ./workers/ExpirePendingBookings
 
       - name: Build Frontend image
         run: docker build -t triply-frontend ./frontend
@@ -206,8 +206,83 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create .env
+        run: |
+          cat > .env <<EOF
+          ASPNETCORE_ENVIRONMENT=Testing
+
+          TRIPLY_DB_CONNECTION=${{ secrets.TRIPLY_DB_CONNECTION }}
+
+          ISSUER=${{ secrets.ISSUER }}
+          AUDIENCE=${{ secrets.AUDIENCE }}
+          SECRETKEY=${{ secrets.SECRETKEY }}
+          VALIDATE_AUDIENCE=true
+          VALIDATE_ISSUER=true
+          VALIDATE_LIFETIME=true
+          VALIDATE_ISSUER_SIGNING_KEY=true
+          EXPIRE_MINUTES=60
+          REFRESH_TOKEN_EXPIRY_DAYS=7
+
+          ACCEPT_EULA=Y
+          MSSQL_USER=sa
+          MSSQL_SA_PASSWORD=${{ secrets.MSSQL_SA_PASSWORD }}
+
+          RABBITMQ_USER=guest
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_HOSTNAME=rabbitmq
+          RABBITMQ_PORT=5672
+          RABBITMQ_EXCHANGE=triply
+          RABBITMQ_EMAIL_QUEUE=email
+          RABBITMQ_IMAGE_QUEUE=image
+          RABBITMQ_MAX_RETRY_COUNT=3
+          RABBITMQ_RETRY_DELAY=5000
+          RABBITMQ_DEAD_LETTER_EXCHANGE=triply.dlx
+          RABBITMQ_EMAIL_DEAD_LETTER_QUEUE=email.dlq
+
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
+          SIEVE_CASE_SENSITIVE=false
+          SIEVE_DEFAULT_PAGE_SIZE=10
+          SIEVE_MAX_PAGE_SIZE=50
+
+          UPLOADS_PATH=/app/uploads
+          UPLOADS_MAX_FILE_SIZE=10485760
+
+          SLOW_QUERY_THRESHOLD_MS=500
+
+          ELASTICSEARCH_ENABLED=true
+
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          PROVIDER_ID=stripe
+          CURRENCY=usd
+          SUCCESS_URL=http://localhost:8080/payment/success
+          CANCEL_URL=http://localhost:8080/payment/cancel
+
+          SMTP_HOST=${{ secrets.SMTP_HOST }}
+          SMTP_PORT=${{ secrets.SMTP_PORT }}
+          SMTP_USER=${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM_ADDRESS=${{ secrets.SMTP_FROM_ADDRESS }}
+          SMTP_FROM_NAME=Triply
+          SMTP_USE_SSL=true
+
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+
+          BOOKING_PENDING_EXPIRY_MINUTES=45
+          BOOKING_EXPIRY_CHECK_INTERVAL_MINUTES=5
+          EOF
+
       - name: Set up Docker Compose
         uses: docker/setup-buildx-action@v2
 
       - name: Run Docker Compose
         run: docker compose build
+
+      - name: Run Docker Compose
+        run: docker compose up -d
+
+      - name: Check containers
+        run: docker compose ps 
