@@ -8,6 +8,8 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
+    networks:
+      - triply-network
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
@@ -65,6 +67,7 @@ services:
     volumes:
       - uploads-temp:/app/uploads
 
+
   triply-db:
     image: mcr.microsoft.com/mssql/server:2025-latest
     container_name: triply-db
@@ -76,6 +79,8 @@ services:
       - "1435:1433"
     volumes:
       - triply-data:/var/opt/mssql
+    networks:
+      - triply-network
     healthcheck:
       test:
         [
@@ -87,6 +92,7 @@ services:
       retries: 10
       start_period: 30s
 
+
   redis:
     image: redis:7-alpine
     container_name: triply-redis
@@ -96,12 +102,15 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    networks:
+      - triply-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
 
   rabbitmq:
     image: rabbitmq:management
@@ -120,6 +129,9 @@ services:
       retries: 5
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - triply-network
+
 
   triply-migrations:
     build:
@@ -141,6 +153,9 @@ services:
     depends_on:
       triply-db:
         condition: service_healthy
+    networks:
+      - triply-network
+
 
   email-worker:
     build:
@@ -148,6 +163,8 @@ services:
       dockerfile: workers/EmailWorker/Dockerfile
     container_name: email-worker
     restart: unless-stopped
+    networks:
+      - triply-network
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -175,14 +192,17 @@ services:
       Elasticsearch__Enabled: ${ELASTICSEARCH_ENABLED:-true}
       Elasticsearch__Uri: http://elasticsearch:9200
 
+
   image-worker:
     build:
       context: .
       dockerfile: workers/ImageUploader/Dockerfile
-    container_name: image-uploader
+    container_name: image-worker
     restart: unless-stopped
     volumes:
       - uploads-temp:/app/uploads
+    networks:
+      - triply-network
     environment:
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
       RabbitMq__HostName: ${RABBITMQ_HOSTNAME}
@@ -211,12 +231,15 @@ services:
       elasticsearch:
         condition: service_healthy
         
+        
   expire-pending-bookings:
     build:
       context: .
       dockerfile: workers/ExpirePendingBookings/Dockerfile
     container_name: expire-pending-bookings
     restart: unless-stopped
+    networks:
+      - triply-network
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
@@ -232,6 +255,7 @@ services:
       elasticsearch:
         condition: service_healthy
 
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: triply-elasticsearch
@@ -245,12 +269,15 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - triply-network
     healthcheck:
       test: ["CMD-SHELL", "curl -fs 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 12
       start_period: 30s
+
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.11.0
@@ -260,6 +287,8 @@ services:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
     ports:
       - "5601:5601"
+    networks:
+      - triply-network
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -270,10 +299,13 @@ services:
       retries: 30
       start_period: 40s
 
+
   # One-shot: creates the "Triply logs" data view (logs-triply.*) in Kibana, then exits.
   kibana-setup:
     image: docker.elastic.co/kibana/kibana:8.11.0
     container_name: triply-kibana-setup
+    networks:
+      - triply-network
     restart: "no"
     depends_on:
       kibana:
@@ -286,17 +318,20 @@ services:
         -d '{"override": true, "data_view": {"id": "triply-logs", "title": "logs-triply.*", "name": "Triply logs", "timeFieldName": "@timestamp"}}'
         && echo ' -> Triply logs data view is ready'
         
-  #frontend:
-    #build:
-      #context: ./frontend
-      #dockerfile: Dockerfile
-    #container_name: triply-frontend
-    #restart: unless-stopped
-    #ports:
-      #- "3000:80"
-    #depends_on:
-      #triply:
-        #condition: service_healthy
+        
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: triply-frontend
+    networks:
+      - triply-network
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      triply:
+        condition: service_healthy
 
 volumes:
   triply-data:
@@ -304,3 +339,7 @@ volumes:
   redis-data:
   uploads-temp:
   elasticsearch-data:
+    
+networks:
+  triply-network:
+    driver: bridge
