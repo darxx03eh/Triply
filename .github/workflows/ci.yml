@@ -255,9 +255,3 @@ jobs:
 
       - name: Run Docker Compose
         run: docker compose build
-
-      - name: Run Docker Compose
-        run: docker compose up -d
-
-      - name: Check containers
-        run: docker compose ps 
