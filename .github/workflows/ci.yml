@@ -174,31 +174,6 @@ jobs:
         - name: Build frontend
           run: npm run build
 
-  docker:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build Backend image
-        run: docker build -t triply-backend ./src
-
-      - name: Build Migrations image
-        run: docker build -t triply-migrations ./src --file ./src/Dockerfile.Migrations
-
-      - name: Build Email Worker image
-        run: docker build -t triply-email-worker ./workers/EmailWorker
-
-      - name: Build Image Worker image
-        run: docker build -t triply-image-worker ./workers/ImageWorker
-
-      - name: Build Expire Pending Bookings Worker image
-        run: docker build -t triply-expire-bookings-worker ./workers/ExpirePendingBookings
-
-      - name: Build Frontend image
-        run: docker build -t triply-frontend ./frontend
-
   docker-compose:
     name: Build Docker Compose images
     runs-on: ubuntu-latest
