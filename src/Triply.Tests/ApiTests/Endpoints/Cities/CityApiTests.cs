@@ -68,7 +68,7 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
     {
         var token = await LoginAsAdminAsync();
         var request = ApiTestFixture.BuildCityRequest();
-        using var httpRequest = ApiTestFixture.CreateAuthorizedRequest(HttpMethod.Post, 
+        using var httpRequest = ApiTestFixture.CreateRequest(HttpMethod.Post, 
             Router.CityRoutes.Create, token, request);
 
         var response = await _client.SendAsync(httpRequest);
@@ -90,12 +90,12 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
         var token = await LoginAsAdminAsync();
         var request = ApiTestFixture.BuildCityRequest();
 
-        using var firstRequest = ApiTestFixture.CreateAuthorizedRequest(HttpMethod.Post, 
+        using var firstRequest = ApiTestFixture.CreateRequest(HttpMethod.Post, 
             Router.CityRoutes.Create, token, request);
         var firstResponse = await _client.SendAsync(firstRequest);
         Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
 
-        using var duplicateRequest = ApiTestFixture.CreateAuthorizedRequest(HttpMethod.Post, 
+        using var duplicateRequest = ApiTestFixture.CreateRequest(HttpMethod.Post, 
             Router.CityRoutes.Create, token, request);
         var response = await _client.SendAsync(duplicateRequest);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
@@ -113,7 +113,7 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
         var token = await LoginAsAdminAsync();
         var createRequest = ApiTestFixture.BuildCityRequest();
 
-        using var createHttpRequest = ApiTestFixture.CreateAuthorizedRequest(HttpMethod.Post, 
+        using var createHttpRequest = ApiTestFixture.CreateRequest(HttpMethod.Post, 
             Router.CityRoutes.Create, token, createRequest);
         var createResponse = await _client.SendAsync(createHttpRequest);
         var created = await createResponse.Content.ReadFromJsonAsync<ApiResponse<CityResponse>>();
@@ -122,7 +122,7 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
         Assert.NotNull(created?.Data);
         var city = created!.Data!;
 
-        using var getRequest = ApiTestFixture.CreateAuthorizedRequest(
+        using var getRequest = ApiTestFixture.CreateRequest(
             HttpMethod.Get, Router.CityRoutes.GetById.Replace("{id:guid}", city.CityId.ToString()), token);
         var getResponse = await _client.SendAsync(getRequest);
         var fetched = await getResponse.Content.ReadFromJsonAsync<ApiResponse<CityResponse>>();
@@ -138,7 +138,7 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
             PostOffice = "12345",
             RowVersion = city.RowVersion
         };
-        using var updateHttpRequest = ApiTestFixture.CreateAuthorizedRequest(
+        using var updateHttpRequest = ApiTestFixture.CreateRequest(
             HttpMethod.Put,
             Router.CityRoutes.Update.Replace("{id:guid}", city.CityId.ToString()),
             token,
@@ -151,13 +151,13 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
         Assert.Equal("CITY_UPDATED", updated!.Code);
         Assert.Equal(updateRequest.Name, updated.Data!.Name);
 
-        using var deleteRequest = ApiTestFixture.CreateAuthorizedRequest(
+        using var deleteRequest = ApiTestFixture.CreateRequest(
             HttpMethod.Delete, Router.CityRoutes.Delete.Replace("{id:guid}", city.CityId.ToString()), token);
         var deleteResponse = await _client.SendAsync(deleteRequest);
 
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
 
-        using var deletedGetRequest = ApiTestFixture.CreateAuthorizedRequest(
+        using var deletedGetRequest = ApiTestFixture.CreateRequest(
             HttpMethod.Get, Router.CityRoutes.GetById.Replace("{id:guid}", city.CityId.ToString()), token);
         var deletedGetResponse = await _client.SendAsync(deletedGetRequest);
         var deletedBody = await deletedGetResponse.Content.ReadFromJsonAsync<ApiResponse<object>>();
@@ -172,7 +172,7 @@ public class CityApiTests : IClassFixture<ApiTestFixture>
     {
         var token = await LoginAsAdminAsync();
         var endpoint = Router.CityRoutes.GetById.Replace("{id:guid}", Guid.NewGuid().ToString());
-        using var request = ApiTestFixture.CreateAuthorizedRequest(HttpMethod.Get, endpoint, token);
+        using var request = ApiTestFixture.CreateRequest(HttpMethod.Get, endpoint, token);
 
         var response = await _client.SendAsync(request);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();

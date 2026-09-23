@@ -42,19 +42,19 @@ public class ApiTestFixture : IDisposable
             PostOffice = "12345",
         };
 
-    public static HttpRequestMessage CreateAuthorizedRequest(
+    public static HttpRequestMessage CreateRequest(
         HttpMethod method,
         string endpoint,
-        string token,
+        string? token = null,
         object? content = null)
     {
         var request = new HttpRequestMessage(method, endpoint);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (token is not null)
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         if (content is not null)
             request.Content = JsonContent.Create(content);
         return request;
     }
-
-
+    
     public void Dispose() => Client.Dispose();
 }
