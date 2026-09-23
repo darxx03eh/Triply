@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Triply.Application.Features.Cities.Commands.CreateCity;
 using Triply.Application.Features.Amenities.Commands.CreateAmenity;
+using Triply.Application.Features.Attractions.Commands.CreateAttraction;
 using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Domain.Enums.Hotels;
@@ -75,6 +76,15 @@ public class ApiTestFixture : IDisposable
 
     public static CreateAmenityRequest BuildAmenityRequest()
         => new() { Name = $"Test Amenity {Guid.NewGuid():N}" };
+
+    public static CreateAttractionRequest BuildAttractionRequest(Guid hotelId)
+        => new()
+        {
+            HotelId = hotelId,
+            Name = $"Test Attraction {Guid.NewGuid():N}",
+            Category = "Landmark",
+            DistanceKm = 2.50m
+        };
     
     public static HttpRequestMessage CreateRequest(HttpMethod method, string endpoint,
         string? token = null, object? content = null)
