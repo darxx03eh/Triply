@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Triply.Application.Features.Cities.Commands.CreateCity;
 using Triply.Application.Features.Amenities.Commands.CreateAmenity;
 using Triply.Application.Features.Attractions.Commands.CreateAttraction;
+using Triply.Application.Features.Deals.Commands.CreateDeal;
 using Triply.Application.Features.Hotels.Commands.CreateHotel;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Domain.Enums.Hotels;
@@ -85,6 +86,20 @@ public class ApiTestFixture : IDisposable
             Category = "Landmark",
             DistanceKm = 2.50m
         };
+
+    public static CreateDealRequest BuildDealRequest(Guid roomId, DateTime? startsAt = null)
+    {
+        var start = startsAt ?? DateTime.UtcNow.AddDays(1);
+        return new CreateDealRequest
+        {
+            RoomId = roomId,
+            Title = $"Test Deal {Guid.NewGuid():N}",
+            DiscountPercentage = 15.00m,
+            StartsAt = start,
+            EndsAt = start.AddDays(7),
+            IsFeatured = true
+        };
+    }
     
     public static HttpRequestMessage CreateRequest(HttpMethod method, string endpoint,
         string? token = null, object? content = null)
