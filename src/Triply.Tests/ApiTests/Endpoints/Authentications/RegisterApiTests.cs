@@ -8,6 +8,7 @@ using Triply.Infrastructure.Routes;
 namespace Triply.Tests.ApiTests.Endpoints.Authentications;
 
 [Collection("Authentication API")]
+[Trait("collection", "Authentication API")]
 public class RegisterApiTests : IClassFixture<ApiTestFixture>
 {
     private const string RegisterEndpoint = Router.AuthenticationRoutes.Register;
@@ -19,7 +20,7 @@ public class RegisterApiTests : IClassFixture<ApiTestFixture>
     {
         var request = ApiTestFixture.BuildValidRegistrationRequest();
         
-        var response = await _client.PostAsJsonAsync(RegisterEndpoint, request);
+        var response = await _client.PostAsJsonAsync(Router.AuthenticationRoutes.Register, request);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<RegisterUserResponse>>();
         
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -39,7 +40,7 @@ public class RegisterApiTests : IClassFixture<ApiTestFixture>
         var suffix = Guid.NewGuid().ToString("N")[..3];
         var request = ApiTestFixture.BuildValidRegistrationRequest(suffix);
 
-        var firstResponse = await _client.PostAsJsonAsync(RegisterEndpoint, request);
+        var firstResponse = await _client.PostAsJsonAsync(Router.AuthenticationRoutes.Register, request);
         Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
 
         var newSuffix = Guid.NewGuid().ToString("N")[..3];
@@ -55,7 +56,7 @@ public class RegisterApiTests : IClassFixture<ApiTestFixture>
             DateOfBirth = new DateTime(2003, 2, 18)
         };
         
-        var response = await _client.PostAsJsonAsync(RegisterEndpoint, duplicateRequest);
+        var response = await _client.PostAsJsonAsync(Router.AuthenticationRoutes.Register, duplicateRequest);
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<RegisterUserResponse>>();
         
         Assert.NotNull(body);
@@ -70,7 +71,7 @@ public class RegisterApiTests : IClassFixture<ApiTestFixture>
     [Fact]
     public async Task Register_WithInvalidPayload_ShouldReturnValidationError()
     {
-        var response = await _client.PostAsJsonAsync(RegisterEndpoint, new
+        var response = await _client.PostAsJsonAsync(Router.AuthenticationRoutes.Register, new
         {
             FirstName = "",
             LastName = "x",

@@ -1,3 +1,7 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Triply.Application.Features.Cities.Commands.CreateCity;
+
 namespace Triply.Tests.ApiTests;
 
 public class ApiTestFixture : IDisposable
@@ -29,6 +33,28 @@ public class ApiTestFixture : IDisposable
             DateOfBirth = new DateTime(2003, 2, 18)
         };
     }
+
+    public static CreateCityRequest BuildCityRequest()
+        => new CreateCityRequest()
+        {
+            Name = $"Test City {Guid.NewGuid():N}",
+            Country = "Testland",
+            PostOffice = "12345",
+        };
+
+    public static HttpRequestMessage CreateAuthorizedRequest(
+        HttpMethod method,
+        string endpoint,
+        string token,
+        object? content = null)
+    {
+        var request = new HttpRequestMessage(method, endpoint);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        if (content is not null)
+            request.Content = JsonContent.Create(content);
+        return request;
+    }
+
 
     public void Dispose() => Client.Dispose();
 }

@@ -7,7 +7,8 @@ using Triply.Infrastructure.Routes;
 
 namespace Triply.Tests.ApiTests.Endpoints.Authentications;
 
-[Collection("Authentication API")]
+[Collection("Auth")]
+[Trait("collection", "Authentication API")]
 public class RefreshAndLogoutApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;
