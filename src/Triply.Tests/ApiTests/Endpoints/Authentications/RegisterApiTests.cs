@@ -37,13 +37,13 @@ public class RegisterApiTests : IClassFixture<ApiTestFixture>
     [Fact]
     public async Task Register_WithDuplicateEmail_ShouldReturnsValidationError()
     {
-        var suffix = Guid.NewGuid().ToString("N")[..3];
+        var suffix = Guid.NewGuid().ToString("N")[..8];
         var request = ApiTestFixture.BuildValidRegistrationRequest(suffix);
 
         var firstResponse = await _client.PostAsJsonAsync(Router.AuthenticationRoutes.Register, request);
         Assert.Equal(HttpStatusCode.Created, firstResponse.StatusCode);
 
-        var newSuffix = Guid.NewGuid().ToString("N")[..3];
+        var newSuffix = Guid.NewGuid().ToString("N")[..8];
         var duplicateRequest = new
         {
             Username = $"test_user_{newSuffix}",

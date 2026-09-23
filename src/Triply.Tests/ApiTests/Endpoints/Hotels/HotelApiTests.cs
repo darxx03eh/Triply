@@ -100,17 +100,7 @@ public sealed class HotelApiTests : IClassFixture<ApiTestFixture>
     {
         var token = await LoginAsAdminAsync();
         var city = await CreateCityAsync(token);
-        var createRequest = new
-        {
-            Name = $"Test Hotel {Guid.NewGuid():N}",
-            CityId = city,
-            StarRating = (byte)4,
-            HotelType = HotelType.Boutique,
-            Address = "1 Test Street",
-            Description = "A hotel created by the API test suite.",
-            Latitude = 31.95m,
-            Longitude = 35.91m
-        };
+        var createRequest = ApiTestFixture.BuildHotelRequest(city);
 
         using var createHttpRequest = ApiTestFixture.CreateRequest(HttpMethod.Post, 
             Router.HotelRoutes.Create, token, createRequest);

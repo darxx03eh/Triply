@@ -1,6 +1,10 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Triply.Application.Features.Cities.Commands.CreateCity;
+using Triply.Application.Features.Hotels.Commands.CreateHotel;
+using Triply.Application.Features.Rooms.Commands.CreateRoom;
+using Triply.Domain.Enums.Hotels;
+using Triply.Domain.Enums.Rooms;
 
 namespace Triply.Tests.ApiTests;
 
@@ -29,7 +33,7 @@ public class ApiTestFixture : IDisposable
             ConfirmPassword = "StrongPassword123!",
             FirstName = "Test",
             LastName = "User",
-            PhoneNumber = $"+972568{Random.Shared.Next(100, 1000)}540",
+            PhoneNumber = $"+97256{Random.Shared.Next(1_000_000_000, 2_000_000_000)}",
             DateOfBirth = new DateTime(2003, 2, 18)
         };
     }
@@ -40,6 +44,32 @@ public class ApiTestFixture : IDisposable
             Name = $"Test City {Guid.NewGuid():N}",
             Country = "Testland",
             PostOffice = "12345",
+        };
+
+    public static CreateHotelRequest BuildHotelRequest(Guid cityId)
+        => new()
+        {
+            Name = $"Test Hotel {Guid.NewGuid():N}",
+            CityId = cityId,
+            StarRating = 4,
+            HotelType = HotelType.Boutique,
+            Address = "1 Test Street",
+            Description = "A hotel created by the API test suite.",
+            Latitude = 30m + Random.Shared.Next(0, 5000) / 100m,
+            Longitude = 30m + Random.Shared.Next(0, 10000) / 100m
+        };
+
+    public static CreateRoomRequest BuildRoomRequest(Guid hotelId)
+        => new()
+        {
+            HotelId = hotelId,
+            Number = $"R-{Guid.NewGuid():N}"[..3],
+            RoomType = RoomType.Double,
+            AdultCapacity = 2,
+            ChildCapacity = 1,
+            PricePerNight = 125.50m,
+            IsAvailable = true,
+            Description = "A room created by the API test suite."
         };
 
     public static HttpRequestMessage CreateRequest(
