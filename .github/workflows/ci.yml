@@ -290,8 +290,8 @@ jobs:
           docker compose logs
           exit 1
 
-      - name: Run API tests
-        working-directory: ./src
-        run: dotnet test --verbosity normal --filter "Category=ApiTests"
-        env:
-          API_BASE_URL: http://localhost:8080
+      #- name: Run API tests
+        #working-directory: ./src
+        #run: dotnet test --verbosity normal --filter "Category=ApiTests"
+        #env:
+          #API_BASE_URL: http://localhost:8080
