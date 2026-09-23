@@ -171,7 +171,7 @@ public static class AuthenticationEndpoints
         private static void RemoveRefreshTokenCookie(HttpContext context)
         {
             context.Response.Cookies.Delete("refresh",
-                new CookieOptions { Path = Router.AuthenticationRoutes.Refresh });
+                new CookieOptions { Path = Router.AuthenticationRoutes.CookiePath });
         }
         private static void SetRefreshTokenCookie(
             HttpContext context,
@@ -185,7 +185,7 @@ public static class AuthenticationEndpoints
                 Secure = !env.IsDevelopment(),
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(jwtSettings.RefreshTokenExpiryDays),
-                Path = Router.AuthenticationRoutes.Refresh
+                Path = Router.AuthenticationRoutes.CookiePath
             });
         }
     }

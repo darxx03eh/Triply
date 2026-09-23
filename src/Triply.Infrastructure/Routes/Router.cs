@@ -11,6 +11,8 @@ public static class Router
     public static class AuthenticationRoutes
     {
         private const string Prefix = $"{Rule}/auth";
+        /// <summary>Cookie path shared by authenticated endpoints.</summary>
+        public const string CookiePath = Prefix;
         /// <summary>Route for user registration.</summary>
         public const string Register = $"{Prefix}/register";
         /// <summary>Route for user login.</summary>
