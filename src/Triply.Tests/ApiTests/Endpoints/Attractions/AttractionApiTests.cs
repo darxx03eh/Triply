@@ -11,6 +11,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Attractions;
 
 [Collection("Attraction API")]
 [Trait("collection", "Attraction API")]
+[Trait("Category", "ApiTests")]
 public sealed class AttractionApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

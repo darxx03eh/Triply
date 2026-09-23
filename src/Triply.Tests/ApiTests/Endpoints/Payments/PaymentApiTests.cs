@@ -9,6 +9,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Payments;
 
 [Collection("Payment API")]
 [Trait("collection", "Payment API")]
+[Trait("Category", "ApiTests")]
 public sealed class PaymentApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

@@ -13,6 +13,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Search;
 
 [Collection("Search API")]
 [Trait("collection", "Search API")]
+[Trait("Category", "ApiTests")]
 public sealed class SearchApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

@@ -10,6 +10,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Home;
 
 [Collection("Home API")]
 [Trait("collection", "Home API")]
+[Trait("Category", "ApiTests")]
 public sealed class HomeApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

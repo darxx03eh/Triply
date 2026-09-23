@@ -12,6 +12,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Reviews;
 
 [Collection("Review API")]
 [Trait("collection", "Review API")]
+[Trait("Category", "ApiTests")]
 public sealed class ReviewApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

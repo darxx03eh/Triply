@@ -9,6 +9,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Authentications;
 
 [Collection("Authentication API")]
 [Trait("collection", "Authentication API")]
+[Trait("Category", "ApiTests")]
 public class RegisterApiTests : IClassFixture<ApiTestFixture>
 {
     private const string RegisterEndpoint = Router.AuthenticationRoutes.Register;

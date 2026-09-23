@@ -10,6 +10,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Bookings;
 
 [Collection("Booking API")]
 [Trait("collection", "Booking API")]
+[Trait("Category", "ApiTests")]
 public sealed class BookingApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

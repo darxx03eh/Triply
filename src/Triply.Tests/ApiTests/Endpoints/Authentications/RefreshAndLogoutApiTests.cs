@@ -9,6 +9,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Authentications;
 
 [Collection("Auth")]
 [Trait("collection", "Authentication API")]
+[Trait("Category", "ApiTests")]
 public class RefreshAndLogoutApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

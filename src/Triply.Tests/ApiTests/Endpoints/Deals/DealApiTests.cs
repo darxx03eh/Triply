@@ -13,6 +13,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Deals;
 
 [Collection("Deal API")]
 [Trait("collection", "Deal API")]
+[Trait("Category", "ApiTests")]
 public sealed class DealApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

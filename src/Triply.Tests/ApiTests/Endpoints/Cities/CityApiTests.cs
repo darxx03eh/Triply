@@ -12,6 +12,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Cities;
 
 [Collection("City API")]
 [Trait("collection", "City API")]
+[Trait("Category", "ApiTests")]
 public class CityApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

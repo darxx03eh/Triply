@@ -9,6 +9,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Cart;
 
 [Collection("Cart API")]
 [Trait("collection", "Cart API")]
+[Trait("Category", "ApiTests")]
 public sealed class CartApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

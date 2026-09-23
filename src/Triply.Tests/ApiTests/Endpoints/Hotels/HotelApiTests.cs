@@ -14,6 +14,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Hotels;
 
 [Collection("Hotel API")]
 [Trait("collection", "Hotel API")]
+[Trait("Category", "ApiTests")]
 public sealed class HotelApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

@@ -12,6 +12,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Amenities;
 
 [Collection("Amenity API")]
 [Trait("collection", "Amenity API")]
+[Trait("Category", "ApiTests")]
 public sealed class AmenityApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;

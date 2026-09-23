@@ -13,6 +13,7 @@ namespace Triply.Tests.ApiTests.Endpoints.Rooms;
 
 [Collection("Room API")]
 [Trait("collection", "Room API")]
+[Trait("Category", "ApiTests")]
 public sealed class RoomApiTests : IClassFixture<ApiTestFixture>
 {
     private readonly HttpClient _client;
