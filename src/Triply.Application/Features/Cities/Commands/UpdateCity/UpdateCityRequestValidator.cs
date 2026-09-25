@@ -42,7 +42,7 @@ public class UpdateCityRequestValidator : AbstractValidator<UpdateCityRequest>
             .WithMessage(ResultResponseMessages.Cities.Validation.RowVersionRequired.Message)
             .Must(rowVersion => rowVersion.Length == 8)
             .WithMessage(ResultResponseMessages.Cities.Validation.RowVersionInvalidLength.Message)
-            .When(request => request.RowVersion is { Length: > 0 });
+            .When(request => request.RowVersion is { Length: > 0 }, ApplyConditionTo.CurrentValidator);
     }
 
     private void ApplyCustomValidationRules(ICityRepository cityRepository)

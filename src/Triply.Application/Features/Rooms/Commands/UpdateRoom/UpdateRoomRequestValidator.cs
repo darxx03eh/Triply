@@ -46,7 +46,7 @@ public class UpdateRoomRequestValidator : AbstractValidator<UpdateRoomRequest>
             .NotEmpty().WithMessage(ResultResponseMessages.Rooms.Validation.RowVersionRequired.Message)
             .Must(rowVersion => rowVersion.Length == 8)
             .WithMessage(ResultResponseMessages.Rooms.Validation.RowVersionInvalidLength.Message)
-            .When(x => x.RowVersion is { Length: > 0 });
+            .When(x => x.RowVersion is { Length: > 0 }, ApplyConditionTo.CurrentValidator);
     }
 
     private void ApplyCustomValidationRules(IRoomRepository roomRepository)
