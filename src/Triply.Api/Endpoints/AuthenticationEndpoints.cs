@@ -45,8 +45,8 @@ public static class AuthenticationEndpoints
                 .Produces<ApiResponse<RegisterUserResponse>>(StatusCodes.Status201Created);
             
             group.MapGet(Router.AuthenticationRoutes.EmailConfirmation, async (
-                [FromQuery] string? email,
-                [FromQuery] string? token,
+                [FromQuery] string email,
+                [FromQuery] string token,
                 IAuthenticationService authenticationService,
                 CancellationToken cancellationToken) =>
             {
