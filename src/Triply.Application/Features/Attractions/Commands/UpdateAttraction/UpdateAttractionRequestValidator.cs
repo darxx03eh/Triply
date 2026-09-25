@@ -20,7 +20,7 @@ public class UpdateAttractionRequestValidator : AbstractValidator<UpdateAttracti
             .MaximumLength(50).WithMessage(ResultResponseMessages.Attractions.Validation.CategoryMaxLength.Message);
 
         RuleFor(x => x.DistanceKm)
-            .InclusiveBetween(0, 100)
+            .InclusiveBetween(0, 100).WithMessage(ResultResponseMessages.Attractions.Validation.DistanceInvalid.Message)
             .PrecisionScale(5, 2, true)
             .WithMessage(ResultResponseMessages.Attractions.Validation.DistanceInvalid.Message);
     }

@@ -20,7 +20,7 @@ public class SetHotelAmenitiesRequestValidator : AbstractValidator<SetHotelAmeni
             .NotNull().WithMessage(ResultResponseMessages.Hotels.Validation.AmenityIdsRequired.Message)
             .Must(ids => ids.Distinct().Count() == ids.Count)
             .WithMessage(ResultResponseMessages.Hotels.Validation.AmenityIdsDuplicated.Message)
-            .When(x => x.AmenityIds is not null);
+            .When(x => x.AmenityIds is not null, ApplyConditionTo.CurrentValidator);
     }
 
     private void ApplyCustomValidationRules(IAmenityRepository amenityRepository)
