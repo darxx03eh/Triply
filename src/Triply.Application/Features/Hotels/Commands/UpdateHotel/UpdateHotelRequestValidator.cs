@@ -50,7 +50,7 @@ public class UpdateHotelRequestValidator : AbstractValidator<UpdateHotelRequest>
             .NotEmpty().WithMessage(ResultResponseMessages.Hotels.Validation.RowVersionRequired.Message)
             .Must(rowVersion => rowVersion.Length == 8)
             .WithMessage(ResultResponseMessages.Hotels.Validation.RowVersionInvalidLength.Message)
-            .When(x => x.RowVersion is { Length: > 0 });
+            .When(x => x.RowVersion is { Length: > 0 }, ApplyConditionTo.CurrentValidator);
     }
 
     private void ApplyCustomValidationRules(IHotelRepository hotelRepository, ICityRepository cityRepository)

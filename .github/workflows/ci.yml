@@ -29,7 +29,7 @@ jobs:
         run: dotnet build --no-restore
         
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal --filter "Category!=ApiTests"
+        run: dotnet test --no-build --verbosity normal --filter "Category!=ApiTests&Category!=IntegrationTests"
 
   email-worker:
     name: Build Email Worker

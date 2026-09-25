@@ -8,16 +8,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.4"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
-        <PackageReference Include="xunit" Version="2.9.3"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"/>
+        <PackageReference Include="Moq" Version="4.21.0" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="Xunit"/>
+        <Using Include="Xunit" />
     </ItemGroup>
 
     <ItemGroup>
@@ -25,6 +27,8 @@
       <ProjectReference Include="..\Triply.Application\Triply.Application.csproj" />
       <ProjectReference Include="..\Triply.Domain\Triply.Domain.csproj" />
       <ProjectReference Include="..\Triply.Infrastructure\Triply.Infrastructure.csproj" />
+      <ProjectReference Include="..\..\workers\EmailWorker\EmailWorker.csproj" />
+      <ProjectReference Include="..\..\workers\ImageUploader\ImageUploader.csproj" />
     </ItemGroup>
 
 </Project>
