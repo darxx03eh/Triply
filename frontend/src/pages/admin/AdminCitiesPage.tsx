@@ -183,6 +183,7 @@ function CityFormModal({ open, onClose, onSaved }: { open: boolean; onClose: () 
 
 function CityDrawer({ city, onClose, onSaved }: { city: City; onClose: () => void; onSaved: () => void }) {
   const [current, setCurrent] = useState(city)
+  const [confirmingThumbnailRemoval, setConfirmingThumbnailRemoval] = useState(false)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { name: city.name, country: city.country, postOffice: city.postOffice ?? '' },
@@ -217,6 +218,7 @@ function CityDrawer({ city, onClose, onSaved }: { city: City; onClose: () => voi
     mutationFn: () => citiesApi.removeThumbnail(city.cityId),
     onSuccess: async () => {
       toast.success('Thumbnail removed')
+      setConfirmingThumbnailRemoval(false)
       setCurrent(await citiesApi.get(city.cityId))
       onSaved()
     },
@@ -224,7 +226,8 @@ function CityDrawer({ city, onClose, onSaved }: { city: City; onClose: () => voi
   })
 
   return (
-    <Drawer
+    <>
+      <Drawer
       open
       onClose={onClose}
       title={`Edit ${city.name}`}
@@ -250,7 +253,7 @@ function CityDrawer({ city, onClose, onSaved }: { city: City; onClose: () => voi
                 variant="danger"
                 size="sm"
                 className="absolute top-3 right-3"
-                onClick={() => removeThumbnail.mutate()}
+                onClick={() => setConfirmingThumbnailRemoval(true)}
                 loading={removeThumbnail.isPending}
               >
                 <Trash2 className="size-3.5" /> Remove
@@ -265,6 +268,16 @@ function CityDrawer({ city, onClose, onSaved }: { city: City; onClose: () => voi
           <p className="mt-2 text-xs text-slate-400">Shown in “Trending destinations” on the home page.</p>
         </section>
       </div>
-    </Drawer>
+      </Drawer>
+      <ConfirmDialog
+        open={confirmingThumbnailRemoval}
+        onClose={() => setConfirmingThumbnailRemoval(false)}
+        onConfirm={() => removeThumbnail.mutate()}
+        loading={removeThumbnail.isPending}
+        title="Remove thumbnail?"
+        description="The city thumbnail will be permanently removed."
+        confirmLabel="Remove"
+      />
+    </>
   )
 }

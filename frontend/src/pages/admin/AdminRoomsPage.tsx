@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Search } from 'lucide-react'
+import { AlertCircle, Clock, Loader2, Plus, Search, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { roomsApi } from '@/api/rooms.api'
 import { AdminPageHeader, AdminTableCard, DateCell } from '@/components/admin/AdminPage'
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { Field, Input, Select, Switch, Textarea } from '@/components/ui/Field'
 import { Badge, PageLoader } from '@/components/ui/Feedback'
 import { ConfirmDialog, Drawer, Modal } from '@/components/ui/Overlay'
+import { ImageUploadBox } from '@/components/admin/ImageUploadBox'
 import { Pagination } from '@/components/ui/Pagination'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useHotelOptions } from '@/hooks/useLookups'
@@ -273,12 +274,95 @@ function RoomEditForm({ room, onClose, onSaved }: { room: Room; onClose: () => v
   })
 
   return (
-    <form onSubmit={form.handleSubmit((v) => update.mutate(v))} className="space-y-6">
-      <RoomFields form={form} lockHotel />
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-5">
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-        <Button type="submit" loading={update.isPending}>Save changes</Button>
+    <div className="space-y-8">
+      <form onSubmit={form.handleSubmit((v) => update.mutate(v))} className="space-y-6">
+        <RoomFields form={form} lockHotel />
+        <div className="flex justify-end gap-2 border-t border-slate-100 pt-5">
+          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button type="submit" loading={update.isPending}>Save changes</Button>
+        </div>
+      </form>
+      <RoomImagesManager roomId={room.roomId} onChanged={onSaved} />
+    </div>
+  )
+}
+
+function RoomImagesManager({ roomId, onChanged }: { roomId: string; onChanged: () => void }) {
+  const queryClient = useQueryClient()
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
+  const images = useQuery({
+    queryKey: ['admin', 'room', roomId, 'images'],
+    queryFn: () => roomsApi.images(roomId),
+    refetchInterval: (query) => (query.state.data?.some((image) => image.status === 'Pending') ? 2500 : false),
+  })
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin', 'room', roomId] })
+    onChanged()
+  }
+
+  const upload = useMutation({
+    mutationFn: (file: File) => roomsApi.uploadImage(roomId, file),
+    onSuccess: () => {
+      toast.success('Image queued for upload')
+      invalidate()
+    },
+    onError: toastError,
+  })
+
+  const remove = useMutation({
+    mutationFn: (imageId: string) => roomsApi.removeImage(roomId, imageId),
+    onSuccess: () => {
+      toast.success('Image deleted')
+      setDeletingImageId(null)
+      invalidate()
+    },
+    onError: toastError,
+  })
+
+  return (
+    <>
+      <section className="space-y-4 border-t border-slate-100 pt-6">
+      <div>
+        <h3 className="font-bold text-slate-900">Room images</h3>
+        <p className="mt-1 text-sm text-slate-500">The first uploaded image appears on the hotel room card.</p>
       </div>
-    </form>
+      <ImageUploadBox onFile={(file) => upload.mutate(file)} loading={upload.isPending} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {images.data?.map((image) => (
+          <div key={image.imageId} className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-100">
+            {image.url ? (
+              <img src={image.url} alt="" className="size-full object-cover" />
+            ) : (
+              <div className="flex size-full items-center justify-center text-slate-400">
+                {image.status === 'Pending' ? <Loader2 className="size-6 animate-spin text-brand-500" /> : <AlertCircle className="size-6 text-red-500" />}
+              </div>
+            )}
+            <div className="absolute top-2 left-2 flex gap-1.5">
+              <Badge className="bg-white/95">#{image.displayOrder}</Badge>
+              {image.status !== 'Uploaded' && <Badge tone={image.status === 'Pending' ? 'amber' : 'red'} className="bg-white/95">{image.status === 'Pending' && <Clock className="size-3" />} {image.status}</Badge>}
+            </div>
+            <button
+              type="button"
+              onClick={() => setDeletingImageId(image.imageId)}
+              className="absolute top-2 right-2 rounded-lg bg-white/95 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
+              aria-label="Delete image"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+      {images.data?.length === 0 && <p className="text-center text-sm text-slate-400">No images yet.</p>}
+      </section>
+      <ConfirmDialog
+        open={deletingImageId !== null}
+        onClose={() => setDeletingImageId(null)}
+        onConfirm={() => deletingImageId && remove.mutate(deletingImageId)}
+        loading={remove.isPending}
+        title="Delete image?"
+        description="This room image will be permanently deleted."
+      />
+    </>
   )
 }

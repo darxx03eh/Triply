@@ -9,7 +9,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Field, Input, Textarea } from '@/components/ui/Field'
-import { EmptyState, SoonBadge } from '@/components/ui/Feedback'
+import { EmptyState } from '@/components/ui/Feedback'
+import { ConfirmDialog } from '@/components/ui/Overlay'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { useAuth } from '@/features/auth/useAuth'
 import { useCart } from '@/features/cart/useCart'
@@ -32,6 +33,7 @@ export function CheckoutPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [isClearing, setIsClearing] = useState(false)
+  const [clearCartConfirmationOpen, setClearCartConfirmationOpen] = useState(false)
   const [first = '', ...rest] = (user?.name ?? '').split(' ')
 
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutInput>({
@@ -54,7 +56,6 @@ export function CheckoutPage() {
   })
 
   const clearCart = async () => {
-    if (!window.confirm('Remove all rooms from your cart?')) return
     setIsClearing(true)
     try {
       await cart.clear()
@@ -85,7 +86,6 @@ export function CheckoutPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Secure checkout</h1>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500"><Lock className="size-4 text-emerald-600" /> Your details are encrypted and never shared.</p>
         </div>
-        <SoonBadge />
       </div>
 
       <form onSubmit={handleSubmit((values) => booking.mutate(values))} className="grid gap-8 lg:grid-cols-[1fr_24rem]">
@@ -138,7 +138,7 @@ export function CheckoutPage() {
                 <span>Total</span>
                 <span>{formatMoney(cart.subtotal, true)}</span>
               </div>
-              <Button type="button" variant="ghost" size="sm" className="mt-2 w-full text-red-600 hover:bg-red-50 hover:text-red-700" loading={isClearing} onClick={() => void clearCart()}>
+              <Button type="button" variant="ghost" size="sm" className="mt-2 w-full text-red-600 hover:bg-red-50 hover:text-red-700" loading={isClearing} onClick={() => setClearCartConfirmationOpen(true)}>
                 <Trash2 className="size-4" /> Clear cart
               </Button>
               <Button type="submit" variant="accent" size="lg" className="mt-4 w-full" loading={booking.isPending}>
@@ -149,6 +149,17 @@ export function CheckoutPage() {
           </Card>
         </aside>
       </form>
+      <ConfirmDialog
+        open={clearCartConfirmationOpen}
+        onClose={() => setClearCartConfirmationOpen(false)}
+        onConfirm={() => {
+          setClearCartConfirmationOpen(false)
+          void clearCart()
+        }}
+        title="Clear cart?"
+        description="All rooms will be removed from your cart."
+        confirmLabel="Clear cart"
+      />
     </div>
   )
 }

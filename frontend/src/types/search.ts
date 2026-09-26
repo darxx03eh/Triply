@@ -27,6 +27,8 @@ export interface HotelSearchItem {
   cityName: string
   country: string
   starRating: number
+  averageRating: number | null
+  reviewsCount: number
   hotelType: HotelType
   address: string | null
   description: string | null
