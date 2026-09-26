@@ -45,6 +45,8 @@ public class TriplyDbContext : IdentityDbContext<TriplyUser, TriplyRole, Guid,
     public DbSet<HotelAmenities> HotelAmenities { get; set; }
     /// <summary>Gets or sets the hotel images.</summary>
     public DbSet<HotelImage> HotelImages { get; set; }
+    /// <summary>Gets or sets the room images.</summary>
+    public DbSet<RoomImage> RoomImages { get; set; }
     /// <summary>Gets or sets the payments.</summary>
     public DbSet<Payment> Payments { get; set; }
     /// <summary>Gets or sets the rooms.</summary>

@@ -463,6 +463,10 @@ namespace Triply.Infrastructure.Migrations
 
             modelBuilder.Entity("Triply.Domain.Entities.Hotel", b =>
                 {
+                    b.Property<decimal?>("AverageRating")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("decimal(3,1)");
+
                     b.Property<Guid>("HotelId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
@@ -519,6 +523,11 @@ namespace Triply.Infrastructure.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
+
+                    b.Property<int>("ReviewsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasDefaultValue(0)
+                        .HasColumnType("int");
 
                     b.Property<byte>("StarRating")
                         .HasColumnType("tinyint");
@@ -957,6 +966,45 @@ namespace Triply.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.RoomImage", b =>
+                {
+                    b.Property<Guid>("ImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<short>("DisplayOrder")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("PublicId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("ImageId");
+
+                    b.HasIndex("RoomId")
+                        .HasDatabaseName("IX_RoomImages_RoomId");
+
+                    b.ToTable("RoomImages", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_DisplayOrder_Positive", "[DisplayOrder] > 0")
+                                .HasName("CK_DisplayOrder_Positive1");
+
+                            t.HasCheckConstraint("CK_Images_Status", "[Status] IN ('Pending', 'Uploaded', 'Failed')")
+                                .HasName("CK_Images_Status1");
+                        });
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.UserRecentVisit", b =>
                 {
                     b.Property<Guid>("VisitId")
@@ -1217,6 +1265,18 @@ namespace Triply.Infrastructure.Migrations
                     b.Navigation("Hotel");
                 });
 
+            modelBuilder.Entity("Triply.Domain.Entities.RoomImage", b =>
+                {
+                    b.HasOne("Triply.Domain.Entities.Room", "Room")
+                        .WithMany("Images")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_RoomImages_Rooms");
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("Triply.Domain.Entities.UserRecentVisit", b =>
                 {
                     b.HasOne("Triply.Domain.Entities.Hotel", "Hotel")
@@ -1290,6 +1350,8 @@ namespace Triply.Infrastructure.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("Deals");
+
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

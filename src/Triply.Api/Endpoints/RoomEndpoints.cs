@@ -9,6 +9,7 @@ using Triply.Infrastructure.Routes;
 using Triply.Api.Responses;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Rooms;
+using Triply.Application.Features.Rooms.Commands.UploadImage;
 
 namespace Triply.Api.Endpoints;
 
@@ -132,6 +133,64 @@ public static class RoomEndpoints
                 .WithDescription("""
                                  Deletes an existing room using its unique identifier.
                                  Returns a not found response when the specified room does not exist.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+
+            group.MapPost(Router.RoomRoutes.AddImage, async (
+                    Guid id, [FromForm] UploadRoomImageRequest request,
+                    IRoomService roomService, CancellationToken cancellationToken) =>
+                {
+                    var result = await roomService.InitiateUploadAsync(id, request, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .DisableAntiforgery()
+                .WithName("UploadRoomImage")
+                .WithDisplayName("Upload Room Image")
+                .WithSummary("Queues an image upload for a room")
+                .WithDescription("""
+                                 Accepts a JPG, PNG or WEBP image as multipart/form-data and queues it
+                                 for background upload to cloud storage. The image is created with the
+                                 Pending status and becomes Uploaded (or Failed) once processed.
+                                 When no display order is given, the image is appended to the gallery.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Accepts<UploadRoomImageRequest>("multipart/form-data")
+                .Produces<ApiResponse<RoomImageResponse>>(StatusCodes.Status202Accepted)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
+
+            group.MapGet(Router.RoomRoutes.GetImages, async (
+                    Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
+                {
+                    var result = await roomService.GetImagesAsync(id, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .WithName("GetRoomImages")
+                .WithDisplayName("Get Room Images")
+                .WithSummary("Lists all images of a room with their upload status")
+                .WithDescription("""
+                                 Returns every image of the room, including Pending and Failed ones,
+                                 ordered by display order. Use it to track background uploads.
+                                 This endpoint is restricted to users with the Admin role.
+                                 """)
+                .Produces<ApiResponse<IReadOnlyList<RoomImageResponse>>>(StatusCodes.Status200OK)
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+
+            group.MapDelete(Router.RoomRoutes.DeleteImage, async (
+                    Guid id, Guid imageId, IRoomService roomService, CancellationToken cancellationToken) =>
+                {
+                    var result = await roomService.DeleteImageAsync(id, imageId, cancellationToken);
+                    return result.ToMinimalApiResult();
+                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                .WithName("DeleteRoomImage")
+                .WithDisplayName("Delete Room Image")
+                .WithSummary("Deletes an image from a room's gallery")
+                .WithDescription("""
+                                 Removes the image from the room's gallery immediately and queues
+                                 the removal of the stored file from cloud storage.
+                                 Returns a not found response when the image does not belong to the room.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)

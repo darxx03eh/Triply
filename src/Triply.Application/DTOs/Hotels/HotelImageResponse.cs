@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 
 namespace Triply.Application.DTOs.Hotels;
 
@@ -16,5 +16,5 @@ public record HotelImageResponse
     public short DisplayOrder { get; init; }
     /// <summary>Gets the status.</summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public HotelImageStatus Status { get; init; }
+    public ImageStatus Status { get; init; }
 }

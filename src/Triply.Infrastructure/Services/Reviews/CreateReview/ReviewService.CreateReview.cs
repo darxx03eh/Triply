@@ -40,6 +40,7 @@ public partial class ReviewService
 
         await reviewRepository.AddAsync(review, cancellationToken);
         await reviewRepository.SaveChangesAsync(cancellationToken);
+        await RefreshHotelRatingAsync(review.HotelId, cancellationToken);
         logger.LogInformation("Review {ReviewId} ({Rating} stars) added to hotel {HotelId} by user {UserId}",
             review.ReviewId, review.Rating, review.HotelId, review.UserId);
 

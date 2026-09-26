@@ -4,7 +4,7 @@ using Triply.Domain.Entities;
 using Triply.Domain.Entities.Identity;
 using Triply.Domain.Enums.Bookings;
 using Triply.Domain.Enums.Hotels;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Enums.Rooms;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
@@ -61,7 +61,7 @@ public class SearchRepositoryTests : IDisposable
             new HotelAmenities { Hotel = _boutique, Amenity = _spa });
         _db.HotelImages.AddRange(
             TestData.Image(_rotana, 2, url: "rotana-2.png"),
-            TestData.Image(_rotana, 1, HotelImageStatus.Pending),
+            TestData.Image(_rotana, 1, ImageStatus.Pending),
             TestData.Image(_rotana, 3, url: "rotana-3.png"));
         _db.SaveChanges();
     }

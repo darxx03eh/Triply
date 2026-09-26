@@ -1,6 +1,6 @@
 using Sieve.Models;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
 using Triply.Tests.UnitTests.Common.Builders;
@@ -84,7 +84,7 @@ public class HotelRepositoryTests : IDisposable
     public async Task GetThumbnailsAsync_ReturnsFirstUploadedImageByDisplayOrder()
     {
         _db.HotelImages.AddRange(
-            TestData.Image(_hotel, 1, HotelImageStatus.Failed),
+            TestData.Image(_hotel, 1, ImageStatus.Failed),
             TestData.Image(_hotel, 3, url: "third.png"),
             TestData.Image(_hotel, 2, url: "second.png"));
         _db.SaveChanges();
@@ -97,7 +97,7 @@ public class HotelRepositoryTests : IDisposable
     [Fact]
     public async Task GetByIdWithImagesAsync_LoadsCityUploadedImagesAndAmenities()
     {
-        _db.HotelImages.AddRange(TestData.Image(_hotel, 1, HotelImageStatus.Pending), 
+        _db.HotelImages.AddRange(TestData.Image(_hotel, 1, ImageStatus.Pending), 
             TestData.Image(_hotel, 2, url: "ok.png"));
         _db.HotelAmenities.Add(new HotelAmenities { Hotel = _hotel, Amenity = TestData.Amenity("Spa") });
         _db.SaveChanges();

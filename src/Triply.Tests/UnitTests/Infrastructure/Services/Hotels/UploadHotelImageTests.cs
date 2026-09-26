@@ -3,7 +3,7 @@ using Triply.Application.Features.Hotels.Commands.UploadImage;
 using Triply.Domain.Contracts;
 using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Results.Enums;
 using Triply.Tests.UnitTests.Common.Assertions;
 using Triply.Tests.UnitTests.Common.Fakes;
@@ -40,11 +40,11 @@ public class UploadHotelImageTests : HotelServiceTestBase
         var result = await Service.InitiateUploadAsync(_hotel.HotelId, Request(order: 2));
 
         var response = result.AssertSuccess(ResultSuccessType.Accepted);
-        Assert.Equal(HotelImageStatus.Pending, response.Status);
+        Assert.Equal(ImageStatus.Pending, response.Status);
         Assert.Equal(2, _saved!.DisplayOrder);
         Assert.Equal(ImageTarget.HotelImage, message!.Target);
         Assert.Equal(_saved.ImageId, message.ImageId);
-        Assert.Equal(_hotel.HotelId, message.HotelId);
+        Assert.Equal(_hotel.HotelId, message.Id);
         Assert.Equal(Path.Combine(Storage.Path, $"{_saved.ImageId}.png"), message.FilePath);
         Assert.True(File.Exists(message.FilePath));
     }
@@ -110,7 +110,7 @@ public class UploadHotelImageTests : HotelServiceTestBase
         var result = await Service.InitiateUploadAsync(_hotel.HotelId, Request());
 
         result.AssertFailure("HOTEL_IMAGE_QUEUE_FAILED", ResultErrorType.BusinessRule);
-        Assert.Equal(HotelImageStatus.Failed, _saved!.Status);
+        Assert.Equal(ImageStatus.Failed, _saved!.Status);
         Assert.Empty(Storage.Files);
         ImageRepository.Verify(r => r.SaveChangesAsync(
             It.IsAny<CancellationToken>()), Times.Exactly(2));

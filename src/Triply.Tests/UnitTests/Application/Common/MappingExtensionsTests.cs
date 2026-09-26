@@ -2,7 +2,7 @@ using Triply.Application.DTOs.Authentications;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Tests.UnitTests.Common.Builders;
 
 namespace Triply.Tests.UnitTests.Application.Common;
@@ -70,12 +70,12 @@ public class MappingExtensionsTests
     [Fact]
     public void ToHotelImageResponse_MapsStatus()
     {
-        var image = TestData.Image(TestData.Hotel(TestData.City()), order: 2, status: HotelImageStatus.Pending);
+        var image = TestData.Image(TestData.Hotel(TestData.City()), order: 2, status: ImageStatus.Pending);
 
         var response = image.ToHotelImageResponse();
 
         Assert.Equal(2, response.DisplayOrder);
-        Assert.Equal(HotelImageStatus.Pending, response.Status);
+        Assert.Equal(ImageStatus.Pending, response.Status);
         Assert.Null(response.Url);
     }
 
@@ -84,7 +84,7 @@ public class MappingExtensionsTests
     {
         var room = TestData.Room(TestData.Hotel(TestData.City()), number: "305", price: 159.5m);
 
-        var response = room.ToRoomResponse("Red Sea");
+        var response = room.ToRoomResponse("Red Sea", false, []);
 
         Assert.Equal("Red Sea", response.HotelName);
         Assert.Equal("305", response.Number);

@@ -1,5 +1,5 @@
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
 using Triply.Tests.UnitTests.Common.Builders;
@@ -33,8 +33,8 @@ public class HotelImageRepositoryTests : IDisposable
     {
         _db.HotelImages.AddRange(
             TestData.Image(_hotel, 1),
-            TestData.Image(_hotel, 5, HotelImageStatus.Failed),
-            TestData.Image(_hotel, 3, HotelImageStatus.Pending));
+            TestData.Image(_hotel, 5, ImageStatus.Failed),
+            TestData.Image(_hotel, 3, ImageStatus.Pending));
         _db.SaveChanges();
 
         Assert.Equal(6, await _repository.GetNextDisplayOrderAsync(_hotel.HotelId));
@@ -44,7 +44,7 @@ public class HotelImageRepositoryTests : IDisposable
     public async Task GetByHotelIdAsync_ReturnsAllStatusesOrderedByDisplayOrder()
     {
         _db.HotelImages.AddRange(
-            TestData.Image(_hotel, 2, HotelImageStatus.Pending),
+            TestData.Image(_hotel, 2, ImageStatus.Pending),
             TestData.Image(_hotel, 1),
             TestData.Image(TestData.Hotel(TestData.City("Other")), 1));
         _db.SaveChanges();

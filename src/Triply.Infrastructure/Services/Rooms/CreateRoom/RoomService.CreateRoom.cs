@@ -34,7 +34,7 @@ public partial class RoomService
             room.RoomId, room.Number, room.RoomType, room.PricePerNight, hotel.HotelId, hotel.Name);
 
         return Result<RoomResponse>.Success(
-            room.ToRoomResponse(hotel.Name), ResultSuccessType.Created,
+            room.ToRoomResponse(hotel.Name, false, []), ResultSuccessType.Created,
             new ResultSuccess("ROOM_CREATED", "Room created successfully."));
     }
 }

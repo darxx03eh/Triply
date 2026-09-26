@@ -1,0 +1,56 @@
+using Microsoft.Extensions.Logging;
+using Triply.Domain.Contracts;
+using Triply.Domain.Results;
+using Triply.Domain.Results.Enums;
+
+namespace Triply.Infrastructure.Services.Rooms;
+
+public partial class RoomService
+{
+    private const string ImageDeleteTopic = "image.delete";
+    /// <summary>Deletes the image.</summary>
+    public async Task<Result<bool>> DeleteImageAsync(Guid roomId, Guid imageId, CancellationToken cancellationToken = default)
+    {
+        var image = await imageRepository.GetByIdAsync(imageId, cancellationToken);
+        if (image is null || image.RoomId != roomId)
+        {
+            logger.LogWarning("Delete image failed: image {ImageId} was not found for room {RoomId}", imageId,
+                roomId);
+            return Result<bool>.Failure(
+                "ROOM_IMAGE_NOT_FOUND",
+                $"The image with id: {imageId.ToString()} was not found for this room.",
+                ResultErrorType.NotFound);
+        }
+
+        string? publicId = image.PublicId;
+
+        await imageRepository.DeleteAsync(image);
+        await imageRepository.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Image {ImageId} removed from room {HotelId}", imageId, roomId);
+
+        // Pending/Failed images were never stored in Cloudinary. A Pending image's staged file is
+        // cleaned up by the upload worker once it sees the row is gone.
+        if (publicId is not null)
+        {
+            try
+            {
+                await publisher.PublishAsync(ImageDeleteTopic,
+                    new ImageDeleteMessage { ImageId = imageId, Id = roomId, PublicId = publicId },
+                    cancellationToken: cancellationToken);
+                logger.LogInformation("Cloudinary asset {PublicId} of image {ImageId} queued for deletion", publicId,
+                    imageId);
+            }
+            catch (Exception exception)
+            {
+                // The image is already gone from the gallery; only the remote asset is left behind.
+                logger.LogError(exception,
+                    "Image {ImageId} was deleted but its Cloudinary asset {PublicId} could not be queued for removal",
+                    imageId, publicId);
+            }
+        }
+
+        return Result<bool>.Success(
+            true, ResultSuccessType.NoContent,
+            new ResultSuccess("ROOM_IMAGE_DELETED", "Image deleted successfully."));
+    }
+}

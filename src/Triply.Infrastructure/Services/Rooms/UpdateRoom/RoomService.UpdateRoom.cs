@@ -14,7 +14,7 @@ public partial class RoomService
     public async Task<Result<RoomResponse>> UpdateAsync(Guid roomId, UpdateRoomRequest request,
         CancellationToken cancellationToken = default)
     {
-        var room = await roomRepository.GetByIdWithHotelAsync(roomId, cancellationToken);
+        var room = await roomRepository.GetByIdWithHotelAndImagesAsync(roomId, cancellationToken);
         if (room is null)
         {
             logger.LogWarning("Update room failed: room {RoomId} was not found", roomId);
@@ -51,7 +51,11 @@ public partial class RoomService
         logger.LogInformation("Room {RoomId} (#{RoomNumber}) of hotel {HotelId} updated, price {PricePerNight}/night, available: {IsAvailable}",
             roomId, room.Number, room.HotelId, room.PricePerNight, room.IsAvailable);
         return Result<RoomResponse>.Success(
-            room.ToRoomResponse(room.Hotel.Name), ResultSuccessType.Ok,
+            room.ToRoomResponse(room.Hotel.Name, false,
+                room.Images
+                    .OrderBy(image => image.DisplayOrder)
+                    .Select(image => image.Url!)
+                    .ToList()), ResultSuccessType.Ok,
             new ResultSuccess("ROOM_UPDATED", "Room updated successfully."));
     }
 }
