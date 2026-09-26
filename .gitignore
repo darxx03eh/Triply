@@ -13,6 +13,10 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Local environment variables and secrets
+.env
+.env.local
+
 # Visual Studio files
 .vs/
 *.suo
