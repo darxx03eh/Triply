@@ -8,7 +8,8 @@ namespace Triply.Application.Extensions;
 public static class RoomExtensions
 {
     /// <summary>Maps the room to a room response.</summary>
-    public static RoomResponse ToRoomResponse(this Room room, string hotelName)
+    public static RoomResponse ToRoomResponse(this Room room, string hotelName, bool isBooked,
+        IReadOnlyList<string> imageUrls)
         => new RoomResponse()
         {
             RoomId = room.RoomId,
@@ -25,6 +26,8 @@ public static class RoomExtensions
             CreatedAt = room.CreatedAt,
             ModifiedAt = room.ModifiedAt,
             RowVersion = room.RowVersion,
+            IsBooked = isBooked,
+            ImageUrls = imageUrls
         };
 
     /// <summary>Maps the Create room request to a room.</summary>
@@ -39,5 +42,15 @@ public static class RoomExtensions
             PricePerNight = request.PricePerNight,
             IsAvailable = request.IsAvailable,
             Description = request.Description
+        };
+    /// <summary>Maps the hotel to a hotel image response.</summary>
+    public static RoomImageResponse ToRoomImageResponse(this RoomImage image)
+        => new RoomImageResponse
+        {
+            ImageId = image.ImageId,
+            RoomId = image.RoomId,
+            Url = image.Url,
+            DisplayOrder = image.DisplayOrder,
+            Status = image.Status
         };
 }

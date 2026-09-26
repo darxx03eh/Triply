@@ -2,7 +2,7 @@ using Triply.Domain.Entities;
 using Triply.Domain.Entities.Identity;
 using Triply.Domain.Enums.Bookings;
 using Triply.Domain.Enums.Hotels;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Enums.Rooms;
 
 namespace Triply.Tests.UnitTests.Common.Builders;
@@ -60,7 +60,7 @@ public static class TestData
 
     public static Amenity Amenity(string name = "Free WiFi") => new() { Name = name };
 
-    public static HotelImage Image(Hotel hotel, short order = 1, HotelImageStatus status = HotelImageStatus.Uploaded,
+    public static HotelImage Image(Hotel hotel, short order = 1, ImageStatus status = ImageStatus.Uploaded,
         string? url = "https://cdn.test/image.png", string? publicId = "triply/hotels/image")
         => new()
         {
@@ -68,8 +68,8 @@ public static class TestData
             HotelId = hotel.HotelId,
             DisplayOrder = order,
             Status = status,
-            Url = status == HotelImageStatus.Uploaded ? url : null,
-            PublicId = status == HotelImageStatus.Uploaded ? publicId : null
+            Url = status == ImageStatus.Uploaded ? url : null,
+            PublicId = status == ImageStatus.Uploaded ? publicId : null
         };
 
     public static TriplyUser User(string username = "mahmoud", string email = "mahmoud@triply.com",

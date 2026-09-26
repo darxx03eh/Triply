@@ -81,8 +81,11 @@ public class Program
         // Correlation id + one log per request
         app.UseTriplyRequestLogging();
         app.UseHttpsRedirection();
+        // Use registered policy
+        app.UseCors("FrontendCORSPolicy");
+        // Middleware to handles error
         app.UseMiddleware<ErrorHandlerMiddleware>();
-        
+        // Endpoint to check if the backend is healthy
         app.MapHealthChecks("/health");
         app.UseAuthentication();
         app.UseAuthorization();
@@ -114,6 +117,8 @@ public class Program
         services.AddIdentityServices();
         // Add JWT Authentication Settings
         services.AddJwtAuthentication(configuration);
+        // Add frontend CORS
+        services.AllowFrontendCors(configuration);
         // Add Generate Invoices PDF Configuration
         services.AddGenerateInvoiceConfigurations();
         // Add Payment Gateway

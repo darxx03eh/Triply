@@ -36,6 +36,7 @@ public partial class ReviewService
         review.Comment = request.Comment.Trim();
         review.ModifiedAt = DateTime.UtcNow;
         await reviewRepository.SaveChangesAsync(cancellationToken);
+        await RefreshHotelRatingAsync(review.HotelId, cancellationToken);
         logger.LogInformation("Review {ReviewId} of hotel {HotelId} updated by user {UserId}, rating {Rating}",
             reviewId, review.HotelId, userId, review.Rating);
 

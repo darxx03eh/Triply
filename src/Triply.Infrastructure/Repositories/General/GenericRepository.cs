@@ -1,6 +1,5 @@
 using System.Data;
 using System.Linq.Expressions;
-using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -27,24 +26,30 @@ public class GenericRepository<TEntity>(
         => await context.Set<TEntity>().AddAsync(entity, cancellationToken);
 
     /// <inheritdoc />
-    public async Task AddRangeAsync(ICollection<TEntity> entities)
-        => await context.BulkInsertAsync(entities);
+    public Task AddRangeAsync(ICollection<TEntity> entities)
+        => context.Set<TEntity>().AddRangeAsync(entities);
 
     /// <inheritdoc />
     public virtual async Task UpdateAsync(TEntity entity)
         => context.Set<TEntity>().Update(entity);
 
     /// <inheritdoc />
-    public virtual async Task UpdateRangeAsync(ICollection<TEntity> entities)
-        => await context.BulkInsertOrUpdateAsync(entities);
+    public virtual Task UpdateRangeAsync(ICollection<TEntity> entities)
+    {
+        context.Set<TEntity>().UpdateRange(entities);
+        return Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public virtual async Task DeleteAsync(TEntity entity)
         => context.Set<TEntity>().Remove(entity);
 
     /// <inheritdoc />
-    public virtual async Task DeleteRangeAsync(ICollection<TEntity> entities)
-        => await context.BulkDeleteAsync(entities);
+    public virtual Task DeleteRangeAsync(ICollection<TEntity> entities)
+    {
+        context.Set<TEntity>().RemoveRange(entities);
+        return Task.CompletedTask;
+    }
 
     /// <inheritdoc />
     public async Task<IDbContextTransaction> BeginTransactionAsync()

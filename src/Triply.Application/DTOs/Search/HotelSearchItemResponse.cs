@@ -18,6 +18,10 @@ public record HotelSearchItemResponse
     public string Country { get; init; }
     /// <summary>Gets the star rating.</summary>
     public byte StarRating { get; init; }
+    /// <summary>Gets the average rating submitted by guests.</summary>
+    public decimal? AverageRating { get; init; }
+    /// <summary>Gets the number of guest reviews.</summary>
+    public int ReviewsCount { get; init; }
     /// <summary>Gets the hotel type.</summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public HotelType HotelType { get; init; }

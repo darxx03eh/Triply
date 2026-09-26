@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, CheckCircle2, Download, Mail, MapPin, Printer, Users } from 'lucide-react'
 import { toast } from 'sonner'
@@ -6,6 +7,7 @@ import { Logo } from '@/components/layout/Logo'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Badge, EmptyState, PageLoader } from '@/components/ui/Feedback'
+import { ConfirmDialog } from '@/components/ui/Overlay'
 import { formatDate, formatDateTime, formatMoney } from '@/lib/format'
 import { toastError } from '@/lib/forms'
 import { bookingService } from '@/services/booking.service'
@@ -13,13 +15,17 @@ import { bookingService } from '@/services/booking.service'
 export function ConfirmationPage() {
   const { confirmationNumber = '' } = useParams()
   const queryClient = useQueryClient()
+  const [cancelConfirmationOpen, setCancelConfirmationOpen] = useState(false)
   const booking = useQuery({
     queryKey: ['booking', confirmationNumber],
     queryFn: () => bookingService.getByConfirmationNumber(confirmationNumber),
   })
   const cancel = useMutation({
     mutationFn: () => bookingService.cancel(confirmationNumber),
-    onSuccess: (result) => queryClient.setQueryData(['booking', confirmationNumber], result),
+    onSuccess: (result) => {
+      setCancelConfirmationOpen(false)
+      queryClient.setQueryData(['booking', confirmationNumber], result)
+    },
     onError: toastError,
   })
   const pay = useMutation({
@@ -126,12 +132,19 @@ export function ConfirmationPage() {
           <Button loading={pay.isPending} onClick={() => pay.mutate()}>Pay now</Button>
         )}
         {(b.status === 'Pending' || b.status === 'Confirmed') && (
-          <Button variant="danger" loading={cancel.isPending} onClick={() => {
-            if (window.confirm('Cancel this booking?')) cancel.mutate()
-          }}>Cancel booking</Button>
+          <Button variant="danger" loading={cancel.isPending} onClick={() => setCancelConfirmationOpen(true)}>Cancel booking</Button>
         )}
         <Link to="/search"><Button variant="ghost">Continue exploring</Button></Link>
       </div>
+      <ConfirmDialog
+        open={cancelConfirmationOpen}
+        onClose={() => setCancelConfirmationOpen(false)}
+        onConfirm={() => cancel.mutate()}
+        loading={cancel.isPending}
+        title="Cancel booking?"
+        description="This booking will be cancelled and cannot be restored."
+        confirmLabel="Cancel booking"
+      />
     </div>
   )
 }

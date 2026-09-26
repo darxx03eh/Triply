@@ -4,7 +4,7 @@ using Triply.Domain.Entities;
 using Triply.Domain.Entities.Identity;
 using Triply.Domain.Enums.Bookings;
 using Triply.Domain.Enums.Hotels;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Enums.Rooms;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
@@ -40,6 +40,12 @@ public class SearchRepositoryTests : IDisposable
         _rotana = TestData.Hotel(_amman, "Amman Rotana", 5, HotelType.Luxury);
         _budget = TestData.Hotel(_amman, "Downtown Budget", 2, HotelType.Budget);
         _boutique = TestData.Hotel(_paris, "Le Marais Boutique", 4, HotelType.Boutique);
+        _rotana.AverageRating = 5.0m;
+        _rotana.ReviewsCount = 12;
+        _budget.AverageRating = 2.0m;
+        _budget.ReviewsCount = 3;
+        _boutique.AverageRating = 4.0m;
+        _boutique.ReviewsCount = 8;
 
         _rotanaSingle = TestData.Room(_rotana, "101", 150m, RoomType.Single, adults: 1);
         _rotanaSuite = TestData.Room(_rotana, "501", 400m, RoomType.Suite, adults: 4, children: 2);
@@ -61,7 +67,7 @@ public class SearchRepositoryTests : IDisposable
             new HotelAmenities { Hotel = _boutique, Amenity = _spa });
         _db.HotelImages.AddRange(
             TestData.Image(_rotana, 2, url: "rotana-2.png"),
-            TestData.Image(_rotana, 1, HotelImageStatus.Pending),
+            TestData.Image(_rotana, 1, ImageStatus.Pending),
             TestData.Image(_rotana, 3, url: "rotana-3.png"));
         _db.SaveChanges();
     }
@@ -129,6 +135,24 @@ public class SearchRepositoryTests : IDisposable
         Assert.Equal("Jordan", rotana.Country);
         Assert.Equal("rotana-2.png", rotana.ThumbnailUrl);
         Assert.Equal(["Free WiFi", "Spa", "Swimming Pool"], rotana.Amenities);
+    }
+
+    [Fact]
+    public async Task Search_UsesStoredGuestRatingForProjectionAndRatingSort()
+    {
+        _rotana.AverageRating = 3.7m;
+        _rotana.ReviewsCount = 9;
+        _boutique.AverageRating = 4.8m;
+        _boutique.ReviewsCount = 21;
+        _budget.AverageRating = 2.4m;
+        _db.SaveChanges();
+
+        var (hotels, _) = await _repository.SearchHotelsAsync(Criteria(r => r.Sort = "stars_desc"));
+
+        Assert.Equal(["Le Marais Boutique", "Amman Rotana", "Downtown Budget"], hotels.Select(h => h.Name));
+        var boutique = hotels[0];
+        Assert.Equal(4.8m, boutique.AverageRating);
+        Assert.Equal(21, boutique.ReviewsCount);
     }
 
     // Case-insensitivity comes from the SQL Server collation; the in-memory provider compares case-sensitively.

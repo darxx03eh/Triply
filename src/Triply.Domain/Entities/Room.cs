@@ -13,6 +13,7 @@ public sealed class Room : BaseEntity
         Bookings =  new HashSet<Booking>();
         Deals = new HashSet<Deal>();
         CartItems = new HashSet<CartItem>();
+        Images = new HashSet<RoomImage>();
         AdultCapacity = 2;
         IsAvailable = true;
         IsDeleted = false;
@@ -58,4 +59,6 @@ public sealed class Room : BaseEntity
     public ICollection<Deal> Deals { get; set; }
     /// <summary>Get or sets the navigation property for cart items.</summary>
     public ICollection<CartItem> CartItems { get; set; }
+    /// <summary>Gets or sets the navigation property for images.</summary>
+    public ICollection<RoomImage> Images { get; set; }
 }

@@ -12,6 +12,7 @@ services:
       - triply-network
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      FrontendUrl: ${FRONTEND_BASE_URL}
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
       JwtSettings__Issuer: ${ISSUER}
       JwtSettings__Audience: ${AUDIENCE}

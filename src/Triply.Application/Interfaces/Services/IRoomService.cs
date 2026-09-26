@@ -1,7 +1,9 @@
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Rooms;
+using Triply.Application.Features.Hotels.Commands.UploadImage;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Application.Features.Rooms.Commands.UpdateRoom;
+using Triply.Application.Features.Rooms.Commands.UploadImage;
 using Triply.Application.Features.Rooms.Queries.GetRooms;
 using Triply.Domain.Results;
 
@@ -30,4 +32,14 @@ public interface IRoomService
 
     /// <summary>Deletes the room.</summary>
     Task<Result<bool>> DeleteAsync(Guid roomId, CancellationToken cancellationToken = default);
+    /// <summary>Initiates the upload.</summary>
+    Task<Result<RoomImageResponse>> InitiateUploadAsync(
+        Guid roomId, UploadRoomImageRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>Gets the images.</summary>
+    Task<Result<IReadOnlyList<RoomImageResponse>>> GetImagesAsync(
+        Guid roomId, CancellationToken cancellationToken = default);
+
+    /// <summary>Deletes the image.</summary>
+    Task<Result<bool>> DeleteImageAsync(Guid roomId, Guid imageId, CancellationToken cancellationToken = default);
 }

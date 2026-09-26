@@ -33,6 +33,12 @@ public sealed class Hotel : BaseEntity
     /// <summary>Gets or sets the star rating.</summary>
     public byte StarRating { get; set; }
 
+    /// <summary>Gets or sets the average rating submitted by guests.</summary>
+    public decimal? AverageRating { get; set; }
+
+    /// <summary>Gets or sets the number of guest reviews used for the average rating.</summary>
+    public int ReviewsCount { get; set; }
+
     /// <summary>Gets or sets the hotel type.</summary>
     public HotelType HotelType { get; set; }
 

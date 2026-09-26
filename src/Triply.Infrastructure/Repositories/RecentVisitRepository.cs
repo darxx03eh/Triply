@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Triply.Application.DTOs.Home;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -34,8 +34,10 @@ public class RecentVisitRepository(TriplyDbContext context) : GenericRepository<
                 CityName = v.Hotel.City.Name,
                 Country = v.Hotel.City.Country,
                 StarRating = v.Hotel.StarRating,
+                AverageRating = v.Hotel.AverageRating,
+                ReviewsCount = v.Hotel.ReviewsCount,
                 ThumbnailUrl = v.Hotel.Images
-                    .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+                    .Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
                     .OrderBy(i => i.DisplayOrder)
                     .Select(i => i.Url)
                     .FirstOrDefault(),

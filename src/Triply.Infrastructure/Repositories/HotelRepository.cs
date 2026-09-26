@@ -3,7 +3,7 @@ using Sieve.Models;
 using Sieve.Services;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -36,7 +36,7 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
     public async Task<Dictionary<Guid, string>> GetThumbnailsAsync(IEnumerable<Guid> hotelIds,
         CancellationToken cancellationToken = default)
         => await context.HotelImages
-            .Where(i => hotelIds.Contains(i.HotelId) && i.Status == HotelImageStatus.Uploaded && i.Url != null)
+            .Where(i => hotelIds.Contains(i.HotelId) && i.Status == ImageStatus.Uploaded && i.Url != null)
             .GroupBy(i => i.HotelId)
             .Select(g => new
             {
@@ -72,7 +72,7 @@ public class HotelRepository(TriplyDbContext context, ISieveProcessor sieveProce
     => await context.Hotels
         .Include(h => h.City)
         .Include(h => h.Images
-            .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+            .Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
             .OrderBy(i => i.DisplayOrder))
         .Include(h => h.HotelAmenities)
             .ThenInclude(ha => ha.Amenity)

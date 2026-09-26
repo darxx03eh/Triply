@@ -89,6 +89,12 @@ public static class Router
         public const string Update = $"{Prefix}/{Id}";
         /// <summary>The delete.</summary>
         public const string Delete = $"{Prefix}/{Id}";
+        /// <summary>The add image.</summary>
+        public const string AddImage = $"{Prefix}/{Id}/images";
+        /// <summary>The get images.</summary>
+        public const string GetImages = $"{Prefix}/{Id}/images";
+        /// <summary>The delete image.</summary>
+        public const string DeleteImage = $"{Prefix}/{Id}/images/{{imageId:guid}}";
     }
 
     /// <summary>Represents the amenity routes.</summary>

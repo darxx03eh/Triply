@@ -28,8 +28,10 @@ public partial class ReviewService
                 "REVIEW_NOT_OWNED", "You can only delete your own reviews.", ResultErrorType.Forbidden);
         }
 
+        var hotelId = review.HotelId;
         await reviewRepository.DeleteAsync(review);
         await reviewRepository.SaveChangesAsync(cancellationToken);
+        await RefreshHotelRatingAsync(hotelId, cancellationToken);
         logger.LogInformation("Review {ReviewId} of hotel {HotelId} deleted by user {UserId} (admin: {IsAdmin})",
             reviewId, review.HotelId, userId, isAdmin);
 

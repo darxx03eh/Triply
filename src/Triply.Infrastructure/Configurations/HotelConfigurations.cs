@@ -58,6 +58,13 @@ public class HotelConfigurations : IEntityTypeConfiguration<Hotel>
         builder.Property(x => x.StarRating)
             .IsRequired();
 
+        builder.Property(x => x.AverageRating)
+            .HasPrecision(3, 1);
+
+        builder.Property(x => x.ReviewsCount)
+            .HasDefaultValue(0)
+            .IsRequired();
+
         builder.Property(x => x.Description)
             .HasMaxLength(2000);
 

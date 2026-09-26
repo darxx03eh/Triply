@@ -37,7 +37,7 @@ public partial class HotelService
             try
             {
                 await publisher.PublishAsync(ImageDeleteTopic,
-                    new ImageDeleteMessage { ImageId = imageId, HotelId = hotelId, PublicId = publicId },
+                    new ImageDeleteMessage { ImageId = imageId, Id = hotelId, PublicId = publicId },
                     cancellationToken: cancellationToken);
                 logger.LogInformation("Cloudinary asset {PublicId} of image {ImageId} queued for deletion", publicId,
                     imageId);

@@ -1,5 +1,6 @@
 using Sieve.Models;
 using Triply.Domain.Entities;
+using Triply.Domain.Enums.Bookings;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories;
 using Triply.Tests.UnitTests.Common.Builders;
@@ -65,7 +66,7 @@ public class RoomRepositoryTests : IDisposable
     {
         _db.ChangeTracker.Clear();
 
-        var room = await _repository.GetByIdWithHotelAsync(_room101.RoomId);
+        var room = await _repository.GetByIdWithHotelAndImagesAsync(_room101.RoomId);
 
         Assert.Equal("Main", room!.Hotel.Name);
     }
@@ -97,6 +98,28 @@ public class RoomRepositoryTests : IDisposable
             new SieveModel { Filters = "available==true", Sorts = "-price" }, false);
 
         Assert.Equal([100m, 70m], rooms.Select(r => r.PricePerNight));
+    }
+
+    [Fact]
+    public async Task IsBookedAsync_ReturnsTrueOnlyForOverlappingPendingOrConfirmedBookings()
+    {
+        var user = TestData.User();
+        _db.Users.Add(user);
+        _db.Bookings.AddRange(
+            TestData.Booking(_room101, user, new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 3), BookingStatus.Cancelled),
+            TestData.Booking(_room101, user, new DateOnly(2026, 10, 5), new DateOnly(2026, 10, 7), BookingStatus.Confirmed));
+        _db.SaveChanges();
+
+        Assert.True(await _repository.IsBookedAsync(_room101.RoomId,
+            new DateTime(2026, 10, 6), new DateTime(2026, 10, 8)));
+        Assert.False(await _repository.IsBookedAsync(_room101.RoomId,
+            new DateTime(2026, 10, 7), new DateTime(2026, 10, 9)));
+        Assert.False(await _repository.IsBookedAsync(_room101.RoomId,
+            new DateTime(2026, 10, 3), new DateTime(2026, 10, 5)));
+
+        var otherRoom = _db.Rooms.Single(room => room.HotelId == _other.HotelId);
+        Assert.False(await _repository.IsBookedAsync(otherRoom.RoomId,
+            new DateTime(2026, 10, 6), new DateTime(2026, 10, 8)));
     }
 
     public void Dispose() => _db.Dispose();

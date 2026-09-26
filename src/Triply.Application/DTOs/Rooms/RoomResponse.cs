@@ -25,6 +25,8 @@ public record RoomResponse
     public decimal PricePerNight { get; init; }
     /// <summary>Gets whether the room is available.</summary>
     public bool IsAvailable { get; init; }
+    /// <summary>Gets whether the room is booked.</summary>
+    public bool IsBooked { get; init; }
     /// <summary>Gets the description.</summary>
     public string? Description { get; init; }
     /// <summary>Gets whether the room is deleted.</summary>
@@ -35,4 +37,6 @@ public record RoomResponse
     public DateTime? ModifiedAt { get; init; }
     /// <summary>Gets the row version.</summary>
     public byte[] RowVersion { get; init; } = [];
+    /// <summary>Gets the image urls.</summary>
+    public IReadOnlyList<string> ImageUrls { get; init; } = [];
 }

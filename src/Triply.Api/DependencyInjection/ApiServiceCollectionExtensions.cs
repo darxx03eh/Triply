@@ -8,7 +8,7 @@ using Triply.Infrastructure.Services.Blacklist;
 namespace Triply.Api.DependencyInjection;
 
 /// <summary>Extension methods for presentation service collection.</summary>
-public static class PresentationServiceCollectionExtensions
+public static class ApiServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
@@ -67,6 +67,23 @@ public static class PresentationServiceCollectionExtensions
             });
 
             services.AddScoped<ITokenBlacklistService, RedisTokenBlacklistService>();
+            return services;
+        }
+
+        /// <summary>Registers the frontend CORS policy.</summary>
+        public IServiceCollection AllowFrontendCors(IConfiguration configuration)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("FrontendCORSPolicy", policy =>
+                {
+                    policy.WithOrigins(configuration.GetValue<string>("FrontendUrl"))
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Content-Type", "Authorization", "Content-Length");
+                });
+            });
             return services;
         }
     }

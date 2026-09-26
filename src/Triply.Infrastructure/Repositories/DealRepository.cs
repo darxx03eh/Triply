@@ -4,7 +4,7 @@ using Sieve.Services;
 using Triply.Application.DTOs.Deals;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -58,8 +58,10 @@ public class DealRepository(TriplyDbContext context, ISieveProcessor sieveProces
                 CityName = d.Room.Hotel.City.Name,
                 Country = d.Room.Hotel.City.Country,
                 StarRating = d.Room.Hotel.StarRating,
+                AverageRating = d.Room.Hotel.AverageRating,
+                ReviewsCount = d.Room.Hotel.ReviewsCount,
                 ThumbnailUrl = d.Room.Hotel.Images
-                    .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+                    .Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
                     .OrderBy(i => i.DisplayOrder)
                     .Select(i => i.Url)
                     .FirstOrDefault(),

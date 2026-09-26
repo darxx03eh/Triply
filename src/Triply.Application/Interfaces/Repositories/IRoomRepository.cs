@@ -8,7 +8,7 @@ namespace Triply.Application.Interfaces.Repositories;
 public interface IRoomRepository : IGenericRepository<Room>
 {
     /// <summary>Gets the room by its identifier including the hotel.</summary>
-    Task<Room?> GetByIdWithHotelAsync(Guid roomId, CancellationToken cancellationToken = default);
+    Task<Room?> GetByIdWithHotelAndImagesAsync(Guid roomId, CancellationToken cancellationToken = default);
 
     /// <summary>Gets a paginated list of rooms.</summary>
     Task<(List<Room> Rooms, int TotalCount)> GetPagedAsync(SieveModel sieveModel,
@@ -21,6 +21,9 @@ public interface IRoomRepository : IGenericRepository<Room>
 
     /// <summary>Checks whether the room number exists exclude identifier.</summary>
     Task<bool> IsRoomNumberExistsExcludeIdAsync(string number, Guid roomId,
+        CancellationToken cancellationToken = default);
+    /// <summary>Checks whether the room is booked during the requested stay.</summary>
+    Task<bool> IsBookedAsync(Guid roomId, DateTime checkIn, DateTime checkOut,
         CancellationToken cancellationToken = default);
     /// <summary>Sets the original row version.</summary>
     void SetOriginalRowVersion(Room room, byte[] rowVersion);
