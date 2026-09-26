@@ -1,5 +1,4 @@
-using Triply.Domain.Enums.HotleImages;
-
+using Triply.Domain.Enums.Images;
 namespace Triply.Domain.Entities;
 
 /// <summary>Represents the hotel image.</summary>
@@ -9,7 +8,7 @@ public sealed class HotelImage
     public HotelImage()
     {
         ImageId = Guid.NewGuid();
-        Status = HotelImageStatus.Pending;
+        Status = ImageStatus.Pending;
     }
     /// <summary>Gets or sets the identifier of the image.</summary>
     public Guid ImageId { get; set; }
@@ -22,7 +21,7 @@ public sealed class HotelImage
     /// <summary>Gets or sets the display order.</summary>
     public short DisplayOrder { get; set; }
     /// <summary>Gets or sets the status.</summary>
-    public HotelImageStatus Status { get; set; }
+    public ImageStatus Status { get; set; }
     /// <summary>Gets or sets the navigation property for hotel.</summary>
     public Hotel Hotel { get; set; } = null!;
 }

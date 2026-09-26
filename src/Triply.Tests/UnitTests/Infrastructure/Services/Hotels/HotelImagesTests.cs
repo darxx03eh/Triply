@@ -1,7 +1,7 @@
 using Moq;
 using Triply.Domain.Contracts;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Results.Enums;
 using Triply.Tests.UnitTests.Common.Assertions;
 using Triply.Tests.UnitTests.Common.Builders;
@@ -17,14 +17,14 @@ public class HotelImagesTests : HotelServiceTestBase
         ImageRepository.Setup(r => r.GetByHotelIdAsync(hotel.HotelId, It.IsAny<CancellationToken>())).ReturnsAsync(
         [
             TestData.Image(hotel, 1),
-            TestData.Image(hotel, 2, HotelImageStatus.Pending),
-            TestData.Image(hotel, 3, HotelImageStatus.Failed)
+            TestData.Image(hotel, 2, ImageStatus.Pending),
+            TestData.Image(hotel, 3, ImageStatus.Failed)
         ]);
 
         var result = await Service.GetImagesAsync(hotel.HotelId);
 
         var images = result.AssertSuccess();
-        Assert.Equal([HotelImageStatus.Uploaded, HotelImageStatus.Pending, HotelImageStatus.Failed], 
+        Assert.Equal([ImageStatus.Uploaded, ImageStatus.Pending, ImageStatus.Failed], 
             images.Select(i => i.Status));
     }
 
@@ -58,7 +58,7 @@ public class HotelImagesTests : HotelServiceTestBase
     public async Task DeleteImageAsync_PendingImage_DeletesRowWithoutQueueing()
     {
         var hotel = TestData.Hotel(City);
-        var image = TestData.Image(hotel, status: HotelImageStatus.Pending);
+        var image = TestData.Image(hotel, status: ImageStatus.Pending);
         ImageRepository.Setup(r => r.GetByIdAsync(image.ImageId, It.IsAny<CancellationToken>())).ReturnsAsync(image);
 
         var result = await Service.DeleteImageAsync(hotel.HotelId, image.ImageId);

@@ -2,6 +2,7 @@ using Moq;
 using Triply.Application.Exceptions;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Application.Features.Rooms.Commands.UpdateRoom;
+using Triply.Application.Features.Rooms.Commands.UploadImage;
 using Triply.Application.Features.Rooms.Queries.GetRooms;
 using Triply.Application.Interfaces.Services;
 using Triply.Application.Services;
@@ -17,7 +18,8 @@ public class ValidatedRoomServiceTests
         _inner.Object,
         valid ? FakeValidators.Passing<CreateRoomRequest>() : FakeValidators.Failing<CreateRoomRequest>(),
         valid ? FakeValidators.Passing<UpdateRoomRequest>() : FakeValidators.Failing<UpdateRoomRequest>(),
-        valid ? FakeValidators.Passing<GetRoomsRequest>() : FakeValidators.Failing<GetRoomsRequest>());
+        valid ? FakeValidators.Passing<GetRoomsRequest>() : FakeValidators.Failing<GetRoomsRequest>(),
+        valid ? FakeValidators.Passing<UploadRoomImageRequest>() : FakeValidators.Failing<UploadRoomImageRequest>());
 
     [Fact]
     public async Task ValidatedMethods_Valid_CallInner()

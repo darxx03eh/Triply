@@ -11,11 +11,23 @@ export interface Room {
   childCapacity: number
   pricePerNight: number
   isAvailable: boolean
+  isBooked: boolean
+  imageUrls: string[]
   description: string | null
   isDeleted: boolean
   createdAt: string
   modifiedAt: string | null
   rowVersion: string
+}
+
+export type RoomImageStatus = 'Pending' | 'Uploaded' | 'Failed'
+
+export interface RoomImage {
+  imageId: string
+  roomId: string
+  url: string | null
+  displayOrder: number
+  status: RoomImageStatus
 }
 
 export interface RoomInput {

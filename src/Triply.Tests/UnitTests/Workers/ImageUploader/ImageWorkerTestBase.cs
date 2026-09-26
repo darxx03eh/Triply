@@ -28,6 +28,8 @@ public abstract class ImageWorkerTestBase : IDisposable
         services.AddScoped(_ => TestDbContextFactory.Create(_databaseName));
         services.AddScoped<IHotelImageRepository>(sp => new HotelImageRepository(
             sp.GetRequiredService<TriplyDbContext>()));
+        services.AddScoped<IRoomImageRepository>(sp => new RoomImageRepository(
+            sp.GetRequiredService<TriplyDbContext>()));
         services.AddScoped<ICityRepository>(sp =>
             new CityRepository(sp.GetRequiredService<TriplyDbContext>(), 
                 TestDbContextFactory.CreateSieveProcessor()));

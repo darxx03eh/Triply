@@ -6,7 +6,7 @@ using Moq;
 using Triply.Domain.Contracts;
 using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Tests.UnitTests.Common.Builders;
 using Triply.XUnitTests.Workers.ImageUploader;
 
@@ -18,6 +18,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
     private Func<ImageUploadMessage, Exception, CancellationToken, Task> _onExhausted = null!;
     private readonly Hotel _hotel;
     private readonly City _city;
+    private readonly Room _room;
 
     public ImageUploadConsumerTests()
     {
@@ -36,9 +37,10 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
 
         _city = TestData.City();
         _hotel = TestData.Hotel(_city);
+        _room = TestData.Room(_hotel);
         using (var db = Db())
         {
-            db.AddRange(_city, _hotel);
+            db.AddRange(_city, _hotel, _room);
             db.SaveChanges();
         }
 
@@ -49,7 +51,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
         worker.ExecuteTask!.GetAwaiter().GetResult();
     }
 
-    private HotelImage SeedImage(HotelImageStatus status = HotelImageStatus.Pending)
+    private HotelImage SeedImage(ImageStatus status = ImageStatus.Pending)
     {
         var image = TestData.Image(_hotel, status: status);
         image.Hotel = null!;
@@ -65,9 +67,30 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
         return db.HotelImages.Single(i => i.ImageId == imageId);
     }
 
+    private RoomImage SeedRoomImage(ImageStatus status = ImageStatus.Pending)
+    {
+        var image = new RoomImage { RoomId = _room.RoomId, DisplayOrder = 1, Status = status };
+        using var db = Db();
+        db.RoomImages.Add(image);
+        db.SaveChanges();
+        return image;
+    }
+
+    private RoomImage ReloadRoomImage(Guid imageId)
+    {
+        using var db = Db();
+        return db.RoomImages.Single(image => image.ImageId == imageId);
+    }
+
     private static ImageUploadMessage HotelMessage(HotelImage image, string path) => new()
     {
-        ImageId = image.ImageId, HotelId = image.HotelId, FilePath = path, OriginalFileName = "photo.png"
+        ImageId = image.ImageId, Id = image.HotelId, FilePath = path, OriginalFileName = "photo.png"
+    };
+
+    private static ImageUploadMessage RoomMessage(RoomImage image, string path) => new()
+    {
+        ImageId = image.ImageId, Id = image.RoomId, Target = ImageTarget.RoomImage, FilePath = path,
+        OriginalFileName = "room.png"
     };
 
     [Fact]
@@ -79,7 +102,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
         await _handle(HotelMessage(image, path), "image.upload", CancellationToken.None);
 
         var saved = Reload(image.ImageId);
-        Assert.Equal(HotelImageStatus.Uploaded, saved.Status);
+        Assert.Equal(ImageStatus.Uploaded, saved.Status);
         Assert.Equal("https://cdn.test/new.png", saved.Url);
         Assert.Equal("folder/new", saved.PublicId);
         Assert.False(File.Exists(path));
@@ -102,7 +125,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
     [Fact]
     public async Task HotelImage_AlreadyUploaded_IsIdempotent()
     {
-        var image = SeedImage(HotelImageStatus.Uploaded);
+        var image = SeedImage(ImageStatus.Uploaded);
         var path = StageFile();
 
         await _handle(HotelMessage(image, path), "image.upload", CancellationToken.None);
@@ -120,7 +143,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
         await _handle(HotelMessage(image, Path.Combine(Storage.Path, "missing.png")), "image.upload", 
             CancellationToken.None);
 
-        Assert.Equal(HotelImageStatus.Failed, Reload(image.ImageId).Status);
+        Assert.Equal(ImageStatus.Failed, Reload(image.ImageId).Status);
         Cloudinary.VerifyNoOtherCalls();
     }
 
@@ -136,7 +159,7 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
         await Assert.ThrowsAsync<HttpRequestException>(() => _handle(HotelMessage(image, path), 
             "image.upload", CancellationToken.None));
 
-        Assert.Equal(HotelImageStatus.Pending, Reload(image.ImageId).Status);
+        Assert.Equal(ImageStatus.Pending, Reload(image.ImageId).Status);
         Assert.True(File.Exists(path));
     }
 
@@ -148,18 +171,62 @@ public class ImageUploadConsumerTests : ImageWorkerTestBase
 
         await _onExhausted(HotelMessage(image, path), new HttpRequestException(), CancellationToken.None);
 
-        Assert.Equal(HotelImageStatus.Failed, Reload(image.ImageId).Status);
+        Assert.Equal(ImageStatus.Failed, Reload(image.ImageId).Status);
         Assert.False(File.Exists(path));
     }
 
     [Fact]
     public async Task HotelImage_RetriesExhaustedAfterUpload_KeepsUploadedStatus()
     {
-        var image = SeedImage(HotelImageStatus.Uploaded);
+        var image = SeedImage(ImageStatus.Uploaded);
 
         await _onExhausted(HotelMessage(image, StageFile()), new Exception(), CancellationToken.None);
 
-        Assert.Equal(HotelImageStatus.Uploaded, Reload(image.ImageId).Status);
+        Assert.Equal(ImageStatus.Uploaded, Reload(image.ImageId).Status);
+    }
+
+    [Fact]
+    public async Task RoomImage_Pending_UploadsToRoomsFolderAndMarksUploaded()
+    {
+        var image = SeedRoomImage();
+        var path = StageFile();
+
+        await _handle(RoomMessage(image, path), "image.upload", CancellationToken.None);
+
+        var saved = ReloadRoomImage(image.ImageId);
+        Assert.Equal(ImageStatus.Uploaded, saved.Status);
+        Assert.Equal("https://cdn.test/new.png", saved.Url);
+        Assert.Equal("folder/new", saved.PublicId);
+        Assert.False(File.Exists(path));
+        Cloudinary.Verify(cloudinary => cloudinary.UploadAsync(path, "room.png", "triply/rooms",
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RoomImage_RetriesExhausted_MarksFailedAndDeletesFile()
+    {
+        var image = SeedRoomImage();
+        var path = StageFile();
+
+        await _onExhausted(RoomMessage(image, path), new HttpRequestException(), CancellationToken.None);
+
+        Assert.Equal(ImageStatus.Failed, ReloadRoomImage(image.ImageId).Status);
+        Assert.False(File.Exists(path));
+    }
+
+    [Fact]
+    public async Task UnsupportedTarget_DiscardsFileWithoutUploading()
+    {
+        var path = StageFile();
+        var message = new ImageUploadMessage
+        {
+            ImageId = Guid.NewGuid(), Target = (ImageTarget)99, FilePath = path, OriginalFileName = "bad.png"
+        };
+
+        await _handle(message, "image.upload", CancellationToken.None);
+
+        Assert.False(File.Exists(path));
+        Cloudinary.VerifyNoOtherCalls();
     }
 
     private ImageUploadMessage CityMessage(string path) => new()

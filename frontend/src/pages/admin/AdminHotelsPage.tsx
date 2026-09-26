@@ -310,6 +310,7 @@ function HotelDetailsForm({ hotel, onSaved, onClose }: { hotel: HotelDetails; on
 
 function HotelImagesManager({ hotelId, onChanged }: { hotelId: string; onChanged: () => void }) {
   const queryClient = useQueryClient()
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
   const images = useQuery({
     queryKey: ['admin', 'hotel', hotelId, 'images'],
     queryFn: () => hotelsApi.images(hotelId),
@@ -335,13 +336,15 @@ function HotelImagesManager({ hotelId, onChanged }: { hotelId: string; onChanged
     mutationFn: (imageId: string) => hotelsApi.removeImage(hotelId, imageId),
     onSuccess: () => {
       toast.success('Image deleted')
+      setDeletingImageId(null)
       invalidate()
     },
     onError: toastError,
   })
 
   return (
-    <div className="space-y-5">
+    <>
+      <div className="space-y-5">
       <ImageUploadBox onFile={(file) => upload.mutate(file)} loading={upload.isPending} />
       <p className="text-xs text-slate-500">The first image (lowest order) is used as the hotel thumbnail in search results.</p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -363,7 +366,7 @@ function HotelImagesManager({ hotelId, onChanged }: { hotelId: string; onChanged
               )}
             </div>
             <button
-              onClick={() => remove.mutate(image.imageId)}
+              onClick={() => setDeletingImageId(image.imageId)}
               className="absolute top-2 right-2 rounded-lg bg-white/95 p-1.5 text-red-600 opacity-0 shadow transition group-hover:opacity-100"
               aria-label="Delete image"
             >
@@ -373,7 +376,16 @@ function HotelImagesManager({ hotelId, onChanged }: { hotelId: string; onChanged
         ))}
       </div>
       {images.data?.length === 0 && <p className="text-center text-sm text-slate-400">No images yet.</p>}
-    </div>
+      </div>
+      <ConfirmDialog
+        open={deletingImageId !== null}
+        onClose={() => setDeletingImageId(null)}
+        onConfirm={() => deletingImageId && remove.mutate(deletingImageId)}
+        loading={remove.isPending}
+        title="Delete image?"
+        description="This hotel image will be permanently deleted."
+      />
+    </>
   )
 }
 

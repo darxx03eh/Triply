@@ -18,7 +18,8 @@ export const hotelService = {
     }
   },
 
-  getRooms: (hotelId: string) => roomsApi.byHotel(hotelId, { sorts: 'price', pageSize: 50 }),
+  getRooms: (hotelId: string, checkIn: string, checkOut: string) =>
+    roomsApi.byHotel(hotelId, { sorts: 'price', pageSize: 50, checkIn, checkOut }),
 
   getReviews: (hotelId: string, page: number, sorts: string) =>
     reviewsApi.byHotel(hotelId, { sorts, page, pageSize: REVIEWS_PAGE_SIZE }),

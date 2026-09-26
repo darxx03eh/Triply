@@ -22,6 +22,26 @@ public class GetRoomTests : RoomServiceTestBase
     }
 
     [Fact]
+    public async Task GetByIdAsync_Existing_ReturnsBookingStateAndUploadedImageUrls()
+    {
+        var room = ExistingRoom();
+        room.Images.Add(new RoomImage { RoomId = room.RoomId, Url = "https://cdn.test/room.jpg", DisplayOrder = 1 });
+        HotelRepository.Setup(repository => repository.IsHotelIdExistsAsync(Hotel.HotelId,
+            It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        RoomRepository.Setup(repository => repository.GetPagedAsync(It.IsAny<SieveModel>(), false, Hotel.HotelId,
+            It.IsAny<CancellationToken>())).ReturnsAsync((new List<Room> { room }, 1));
+        RoomRepository.Setup(r => r.IsBookedAsync(room.RoomId, It.IsAny<DateTime>(), It.IsAny<DateTime>(),
+            It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+        var response = (await Service.GetHotelRoomsAsync(Hotel.HotelId,
+            new GetRoomsRequest { CheckIn = new DateOnly(2026, 10, 10), CheckOut = new DateOnly(2026, 10, 12) }))
+            .AssertSuccess().Items.Single();
+
+        Assert.True(response.IsBooked);
+        Assert.Equal(["https://cdn.test/room.jpg"], response.ImageUrls);
+    }
+
+    [Fact]
     public async Task GetByIdAsync_Missing_ReturnsNotFound()
     {
         var result = await Service.GetByIdAsync(Guid.NewGuid());

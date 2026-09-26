@@ -3,6 +3,8 @@ using Sieve.Models;
 using Sieve.Services;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
+using Triply.Domain.Enums.Bookings;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -15,9 +17,11 @@ public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProces
     IRoomRepository
 {
     /// <summary>Gets the room by its identifier including the hotel.</summary>
-    public async Task<Room?> GetByIdWithHotelAsync(Guid roomId, CancellationToken cancellationToken = default)
+    public async Task<Room?> GetByIdWithHotelAndImagesAsync(Guid roomId, CancellationToken cancellationToken = default)
         => await context.Rooms
             .Include(r => r.Hotel)
+            .Include(r => r.Images.Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
+                .OrderBy(i => i.DisplayOrder))
             .FirstOrDefaultAsync(r => r.RoomId == roomId, cancellationToken);
 
     /// <summary>Gets a paginated list of rooms.</summary>
@@ -26,7 +30,11 @@ public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProces
         Guid? hotelId = null,
         CancellationToken cancellationToken = default)
     {
-        var query = context.Rooms.Include(r => r.Hotel).AsQueryable();
+        var query = context.Rooms
+            .Include(r => r.Hotel)
+            .Include(r => r.Images.Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
+                .OrderBy(i => i.DisplayOrder))
+            .AsQueryable();
 
         if (isAdmin) query = query.IgnoreQueryFilters();
         if (hotelId.HasValue) query = query.Where(r => r.HotelId == hotelId.Value);
@@ -56,6 +64,15 @@ public class RoomRepository(TriplyDbContext context, ISieveProcessor sieveProces
                     .Where(x => x.RoomId == roomId)
                     .Select(x => x.HotelId)
                     .FirstOrDefault(),
+            cancellationToken);
+
+    /// <summary>Checks whether a room has a pending or confirmed booking that overlaps the requested stay.</summary>
+    public Task<bool> IsBookedAsync(Guid roomId, DateTime checkIn, DateTime checkOut,
+        CancellationToken cancellationToken = default)
+        => context.Bookings.AnyAsync(booking =>
+            booking.RoomId == roomId &&
+            (booking.Status == BookingStatus.Pending || booking.Status == BookingStatus.Confirmed) &&
+            booking.CheckIn < checkOut && booking.CheckOut > checkIn,
             cancellationToken);
 
     /// <summary>Sets the original row version.</summary>

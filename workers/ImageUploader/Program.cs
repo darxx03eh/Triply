@@ -29,6 +29,7 @@ builder.Services.AddOptions<CloudinaryOptions>()
 
 builder.Services.AddSingleton<ICloudinaryUploader, CloudinaryUploader>();
 builder.Services.AddScoped<IHotelImageRepository, HotelImageRepository>();
+builder.Services.AddScoped<IRoomImageRepository, RoomImageRepository>();
 builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddHostedService<ImageUploadConsumerHostedService>();
 

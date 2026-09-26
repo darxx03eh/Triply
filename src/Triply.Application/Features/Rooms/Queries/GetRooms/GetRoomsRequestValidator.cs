@@ -20,5 +20,12 @@ public class GetRoomsRequestValidator : AbstractValidator<GetRoomsRequest>
             .InclusiveBetween(1, 50)
             .When(request => request.PageSize.HasValue)
             .WithMessage(ResultResponseMessages.Rooms.Validation.PageSizeInvalid.Message);
+
+        RuleFor(request => request)
+            .Must(request => (!request.CheckIn.HasValue && !request.CheckOut.HasValue) ||
+                             (request.CheckIn.HasValue && request.CheckOut.HasValue &&
+                              request.CheckOut.Value > request.CheckIn.Value))
+            .WithMessage("Check-in and check-out must both be supplied, and check-out must be after check-in.")
+            .OverridePropertyName(nameof(GetRoomsRequest.CheckOut));
     }
 }

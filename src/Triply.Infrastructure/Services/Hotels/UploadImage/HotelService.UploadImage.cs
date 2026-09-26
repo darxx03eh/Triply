@@ -3,8 +3,9 @@ using Triply.Application.DTOs.Hotels;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Hotels.Commands.UploadImage;
 using Triply.Domain.Contracts;
+using Triply.Domain.Contracts.Enums;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Domain.Results;
 using Triply.Domain.Results.Enums;
 using Triply.Infrastructure.Helpers;
@@ -46,7 +47,7 @@ public partial class HotelService
             HotelId = hotelId,
             DisplayOrder = request.DisplayOrder
                            ?? await imageRepository.GetNextDisplayOrderAsync(hotelId, cancellationToken),
-            Status = HotelImageStatus.Pending
+            Status = ImageStatus.Pending
         };
 
         // Stage the file first so a DB row never points to a file that was never written.
@@ -74,7 +75,8 @@ public partial class HotelService
                 new ImageUploadMessage
                 {
                     ImageId = image.ImageId,
-                    HotelId = hotelId,
+                    Id = hotelId,
+                    Target = ImageTarget.HotelImage,
                     FilePath = filePath,
                     OriginalFileName = request.File.FileName,
                 },
@@ -88,7 +90,7 @@ public partial class HotelService
             logger.LogError(exception, "Failed to queue upload of image {ImageId} for hotel {HotelId}",
                 image.ImageId, hotelId);
 
-            image.Status = HotelImageStatus.Failed;
+            image.Status = ImageStatus.Failed;
             await imageRepository.SaveChangesAsync(CancellationToken.None);
             TryDeleteFile(filePath);
 

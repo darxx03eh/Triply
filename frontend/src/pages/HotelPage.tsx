@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -28,7 +28,10 @@ export function HotelPage() {
   const nights = nightsBetween(search.checkIn, search.checkOut)
 
   const hotel = useQuery({ queryKey: ['hotel', hotelId], queryFn: () => hotelService.getDetails(hotelId) })
-  const rooms = useQuery({ queryKey: ['hotel', hotelId, 'rooms'], queryFn: () => hotelService.getRooms(hotelId) })
+  const rooms = useQuery({
+    queryKey: ['hotel', hotelId, 'rooms', search.checkIn, search.checkOut],
+    queryFn: () => hotelService.getRooms(hotelId, search.checkIn, search.checkOut),
+  })
   const nearby = useQuery({ queryKey: ['hotel', hotelId, 'nearby'], queryFn: () => hotelService.getNearbyAttractions(hotelId) })
 
   const priceFrom = rooms.data?.items.find((r) => r.isAvailable)?.pricePerNight ?? null
@@ -60,7 +63,7 @@ export function HotelPage() {
         <div className="mt-4 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <Stars value={h.starRating} size="md" />
+              <Stars value={h.averageRating ?? h.starRating} size="md" />
               <Badge tone="brand">{h.hotelType}</Badge>
             </div>
             <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">{h.name}</h1>
@@ -260,7 +263,6 @@ function RoomCard({ room, checkIn, checkOut, adults, children }: {
   const nights = nightsBetween(checkIn, checkOut)
   const inCart = cart.has(room.roomId)
   const fits = room.adultCapacity >= adults && room.childCapacity >= children
-  const image = useMemo(() => stockImages.rooms[room.roomType === 'Suite' ? 1 : 0], [room.roomType])
 
   const add = async () => {
     if (!isAuthenticated) {
@@ -283,20 +285,21 @@ function RoomCard({ room, checkIn, checkOut, adults, children }: {
 
   return (
     <div className={cn('flex flex-col overflow-hidden rounded-3xl border bg-white shadow-soft sm:flex-row', inCart ? 'border-brand-300 ring-2 ring-brand-500/20' : 'border-slate-200/70')}>
-      <SmartImage src={image} alt={room.roomType} seed={room.roomId} className="h-44 shrink-0 sm:h-auto sm:w-56" />
+      <RoomImagesGallery room={room} />
       <div className="flex flex-1 flex-col gap-4 p-5 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-bold text-slate-900">{room.roomType} room</h3>
             <Badge>#{room.number}</Badge>
             {!room.isAvailable && <Badge tone="red">Unavailable</Badge>}
+            {room.isBooked && <Badge tone="amber">Booked</Badge>}
           </div>
           <p className="mt-1.5 line-clamp-2 text-sm text-slate-600">{room.description ?? 'Comfortable room with everything you need.'}</p>
           <p className="mt-3 flex items-center gap-1.5 text-sm text-slate-500">
             <Users className="size-4" /> Up to {room.adultCapacity} adult{room.adultCapacity > 1 ? 's' : ''}
             {room.childCapacity > 0 && ` · ${room.childCapacity} child${room.childCapacity > 1 ? 'ren' : ''}`}
           </p>
-          {!fits && room.isAvailable && <p className="mt-1 text-xs font-medium text-amber-600">Smaller than your party — you may need another room.</p>}
+          {!fits && room.isAvailable && !room.isBooked && <p className="mt-1 text-xs font-medium text-amber-600">Smaller than your party — you may need another room.</p>}
         </div>
         <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
           <div className="sm:text-right">
@@ -305,11 +308,42 @@ function RoomCard({ room, checkIn, checkOut, adults, children }: {
           </div>
           {inCart ? (
             <Button variant="outline" onClick={() => void cart.remove(room.roomId)}><Check className="size-4 text-emerald-600" /> In cart</Button>
+          ) : room.isBooked ? (
+            <Button disabled variant="outline">Booked</Button>
           ) : (
             <Button onClick={add} disabled={!room.isAvailable}><ShoppingBag className="size-4" /> Add to cart</Button>
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function RoomImagesGallery({ room }: { room: Room }) {
+  const images = room.imageUrls
+  const [active, setActive] = useState(0)
+  const fallback = stockImages.rooms[room.roomType === 'Suite' ? 1 : 0]
+
+  if (images.length === 0)
+    return <SmartImage src={fallback} alt={room.roomType} seed={room.roomId} className="h-44 shrink-0 sm:h-auto sm:w-56" />
+
+  const previous = () => setActive((index) => (index - 1 + images.length) % images.length)
+  const next = () => setActive((index) => (index + 1) % images.length)
+
+  return (
+    <div className="relative h-44 shrink-0 overflow-hidden bg-slate-100 sm:h-auto sm:w-56">
+      <img src={images[active]} alt={`${room.roomType} room ${active + 1}`} className="size-full object-cover" />
+      {images.length > 1 && (
+        <>
+          <button type="button" onClick={previous} aria-label="Previous room image" className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-slate-950/60 p-1.5 text-white transition hover:bg-slate-950/80">
+            <ChevronLeft className="size-4" />
+          </button>
+          <button type="button" onClick={next} aria-label="Next room image" className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-slate-950/60 p-1.5 text-white transition hover:bg-slate-950/80">
+            <ChevronRight className="size-4" />
+          </button>
+          <span className="absolute right-2 bottom-2 rounded-lg bg-slate-950/70 px-2 py-1 text-xs font-semibold text-white">{active + 1} / {images.length}</span>
+        </>
+      )}
     </div>
   )
 }

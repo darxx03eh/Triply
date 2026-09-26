@@ -19,9 +19,20 @@ public partial class RoomService
 
         logger.LogDebug("Rooms page {Page} returned {Count} of {TotalCount} (admin: {IsAdmin})",
             request.Page ?? 1, rooms.Count, totalCount, isAdmin);
+        var items = new List<RoomResponse>(rooms.Count);
+        foreach (var room in rooms)
+        {
+            var isBooked = await IsBookedForRequestedStayAsync(room.RoomId, request, cancellationToken);
+            items.Add(room.ToRoomResponse(room.Hotel.Name, isBooked,
+                room.Images
+                    .OrderBy(image => image.DisplayOrder)
+                    .Select(image => image.Url!)
+                    .ToList()));
+        }
+
         var pagedResult = new PagedResult<RoomResponse>
         {
-            Items = rooms.Select(r => r.ToRoomResponse(r.Hotel.Name)).ToList(),
+            Items = items,
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10,
             TotalCount = totalCount

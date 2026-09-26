@@ -3,7 +3,7 @@ using Triply.Application.DTOs.Search;
 using Triply.Application.Features.Search.Queries.SearchHotels;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Enums.Bookings;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 
 namespace Triply.Infrastructure.Repositories;
@@ -32,7 +32,8 @@ public class SearchRepository(TriplyDbContext context) : ISearchRepository
 
         var roomStats = availableRooms
             .GroupBy(r => r.HotelId)
-            .Select(g => new { HotelId = g.Key, MinPrice = g.Min(r => r.PricePerNight), Count = g.Count() })
+            .Select(g => new { HotelId = g.Key,
+                MinPrice = g.Min(r => r.PricePerNight), Count = g.Count() })
             .Where(s => s.Count >= criteria.Rooms);
 
         var hotels = context.Hotels.AsNoTracking();
@@ -58,12 +59,16 @@ public class SearchRepository(TriplyDbContext context) : ISearchRepository
 
         query = criteria.Sort switch
         {
-            SearchSorts.PriceAsc => query.OrderBy(x => x.MinPrice).ThenBy(x => x.Hotel.Name),
-            SearchSorts.PriceDesc => query.OrderByDescending(x => x.MinPrice).ThenBy(x => x.Hotel.Name),
-            SearchSorts.StarsDesc => query.OrderByDescending(x => x.Hotel.StarRating).ThenBy(x => x.MinPrice),
-            SearchSorts.StarsAsc => query.OrderBy(x => x.Hotel.StarRating).ThenBy(x => x.MinPrice),
+            SearchSorts.PriceAsc => query.OrderBy(x => x.MinPrice)
+                .ThenBy(x => x.Hotel.Name),
+            SearchSorts.PriceDesc => query.OrderByDescending(x => x.MinPrice)
+                .ThenBy(x => x.Hotel.Name),
+            SearchSorts.StarsDesc => query.OrderByDescending(x => x.Hotel.AverageRating ?? 0)
+                .ThenBy(x => x.MinPrice),
+            SearchSorts.StarsAsc => query.OrderBy(x => x.Hotel.AverageRating ?? 0)
+                .ThenBy(x => x.MinPrice),
             SearchSorts.Name => query.OrderBy(x => x.Hotel.Name),
-            _ => query.OrderByDescending(x => x.Hotel.StarRating)
+            _ => query.OrderByDescending(x => x.Hotel.AverageRating ?? 0)
                 .ThenBy(x => x.MinPrice)
                 .ThenBy(x => x.Hotel.Name)
         };
@@ -79,13 +84,15 @@ public class SearchRepository(TriplyDbContext context) : ISearchRepository
                 CityName = x.Hotel.City.Name,
                 Country = x.Hotel.City.Country,
                 StarRating = x.Hotel.StarRating,
+                AverageRating = x.Hotel.AverageRating,
+                ReviewsCount = x.Hotel.ReviewsCount,
                 HotelType = x.Hotel.HotelType,
                 Address = x.Hotel.Address,
                 Description = x.Hotel.Description,
                 Latitude = x.Hotel.Latitude,
                 Longitude = x.Hotel.Longitude,
                 ThumbnailUrl = x.Hotel.Images
-                    .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+                    .Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
                     .OrderBy(i => i.DisplayOrder)
                     .Select(i => i.Url)
                     .FirstOrDefault(),

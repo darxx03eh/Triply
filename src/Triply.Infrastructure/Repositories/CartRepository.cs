@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Triply.Application.Interfaces.Repositories;
 using Triply.Domain.Entities;
-using Triply.Domain.Enums.HotleImages;
+using Triply.Domain.Enums.Images;
 using Triply.Infrastructure.Db;
 using Triply.Infrastructure.Repositories.General;
 
@@ -21,7 +21,7 @@ public class CartRepository(TriplyDbContext context) : GenericRepository<CartIte
             .Include(c => c.Room)
             .ThenInclude(r => r.Hotel)
             .ThenInclude(h => h.Images
-                .Where(i => i.Status == HotelImageStatus.Uploaded && i.Url != null)
+                .Where(i => i.Status == ImageStatus.Uploaded && i.Url != null)
                 .OrderBy(i => i.DisplayOrder)
                 .Take(1))
             .Where(c => c.UserId == userId && !c.Room.Hotel.IsDeleted)

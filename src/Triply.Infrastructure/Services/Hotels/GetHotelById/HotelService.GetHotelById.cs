@@ -26,12 +26,11 @@ public partial class HotelService
             .Select(i => i.Url!)
             .ToList();
 
-        var stats = await hotelRepository.GetReviewStatsAsync(hotelId, cancellationToken);
         logger.LogDebug("Hotel {HotelId} loaded with {ImagesCount} images and {ReviewsCount} reviews",
-            hotelId, imageUrls.Count, stats.ReviewsCount);
+            hotelId, imageUrls.Count, hotel.ReviewsCount);
         return Result<HotelResponse>.Success(hotel.ToHotelResponse(
                 hotel.City.Name, imageUrls,
-                stats.AverageRating, stats.ReviewsCount),
+                hotel.AverageRating, hotel.ReviewsCount),
             success: new(
                 "HOTEL_FOUND", 
                 $"The requested hotel with id: {hotelId.ToString()} was found."));

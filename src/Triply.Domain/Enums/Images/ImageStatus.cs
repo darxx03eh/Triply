@@ -1,7 +1,7 @@
-namespace Triply.Domain.Enums.HotleImages;
+namespace Triply.Domain.Enums.Images;
 
 /// <summary>The hotel image status values.</summary>
-public enum HotelImageStatus : byte
+public enum ImageStatus : byte
 {
     /// <summary>The pending.</summary>
     Pending = 0,

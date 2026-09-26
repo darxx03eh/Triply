@@ -38,7 +38,7 @@ export function HotelResultCard({ hotel, query, nights, rooms }: {
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <Stars value={hotel.starRating} />
+            <GuestRating averageRating={hotel.averageRating} reviewsCount={hotel.reviewsCount} fallbackRating={hotel.starRating} />
             <h3 className="mt-1.5 truncate text-lg font-bold text-slate-900 transition group-hover:text-brand-700">{hotel.name}</h3>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
               <MapPin className="size-4 shrink-0" />
@@ -109,7 +109,7 @@ export function DealCard({ deal }: { deal: FeaturedDeal }) {
           {deal.title}
         </span>
         <div className="absolute right-4 bottom-4 left-4 text-white">
-          <Stars value={deal.starRating} />
+          <GuestRating averageRating={deal.averageRating} reviewsCount={deal.reviewsCount} fallbackRating={deal.starRating} className="text-white" />
           <h3 className="mt-1 truncate text-lg font-bold">{deal.hotelName}</h3>
         </div>
       </div>
@@ -141,7 +141,7 @@ export function RecentHotelCard({ hotel }: { hotel: RecentHotel }) {
     >
       <SmartImage src={hotel.thumbnailUrl} alt={hotel.name} seed={hotel.hotelId} className="size-20 shrink-0 rounded-xl" />
       <div className="min-w-0">
-        <Stars value={hotel.starRating} />
+        <GuestRating averageRating={hotel.averageRating} reviewsCount={hotel.reviewsCount} fallbackRating={hotel.starRating} />
         <p className="mt-1 truncate font-bold text-slate-900 group-hover:text-brand-700">{hotel.name}</p>
         <p className="truncate text-sm text-slate-500">{hotel.cityName}, {hotel.country}</p>
         {hotel.minPricePerNight !== null && (
@@ -152,6 +152,26 @@ export function RecentHotelCard({ hotel }: { hotel: RecentHotel }) {
         )}
       </div>
     </Link>
+  )
+}
+
+function GuestRating({
+  averageRating,
+  reviewsCount,
+  fallbackRating,
+  className,
+}: {
+  averageRating: number | null
+  reviewsCount: number
+  fallbackRating: number
+  className?: string
+}) {
+  const rating = averageRating ?? fallbackRating
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500', className)}>
+      <Stars value={rating} />
+      {averageRating === null ? 'New' : `${averageRating.toFixed(1)} · ${reviewsCount} review${reviewsCount === 1 ? '' : 's'}`}
+    </span>
   )
 }
 

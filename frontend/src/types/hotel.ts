@@ -76,6 +76,8 @@ export interface FeaturedDeal {
   cityName: string
   country: string
   starRating: number
+  averageRating: number | null
+  reviewsCount: number
   thumbnailUrl: string | null
   roomId: string
   roomType: RoomType
@@ -92,6 +94,8 @@ export interface RecentHotel {
   cityName: string
   country: string
   starRating: number
+  averageRating: number | null
+  reviewsCount: number
   thumbnailUrl: string | null
   minPricePerNight: number | null
   visitedAt: string
