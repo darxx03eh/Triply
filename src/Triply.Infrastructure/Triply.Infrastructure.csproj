@@ -28,6 +28,7 @@
       </PackageReference>
       <PackageReference Include="QuestPDF" Version="2026.9.0" />
       <PackageReference Include="Scrutor" Version="7.0.0" />
+      <PackageReference Include="StackExchange.Redis" Version="3.3.1" />
       <PackageReference Include="Stripe.net" Version="52.4.2" />
     </ItemGroup>
 

@@ -1,12 +1,12 @@
 using Triply.Api.Extensions;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Amenities;
+using Triply.Application.Features.Hotels.Commands.SetHotelAmenities;
 using Triply.Application.Features.Amenities.Commands.CreateAmenity;
 using Triply.Application.Features.Amenities.Commands.UpdateAmenity;
-using Triply.Application.Features.Hotels.Commands.SetHotelAmenities;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
-using Triply.Api.Responses;
-using Triply.Application.DTOs.Amenities;
 
 namespace Triply.Api.Endpoints;
 
@@ -28,7 +28,8 @@ public static class AmenityEndpoints
                 {
                     var result = await amenityService.CreateAsync(request, cancellationToken);
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("CreateAmenity")
                 .WithDisplayName("Create Amenity")
                 .WithSummary("Creates a new amenity")
@@ -37,6 +38,11 @@ public static class AmenityEndpoints
                                  assigned to hotels. Amenity names must be unique.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "create-amenity",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.CreateRateLimited)
                 .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status201Created)
                 .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
@@ -54,14 +60,22 @@ public static class AmenityEndpoints
                                  Retrieves all available amenities ordered by name.
                                  Used to build the amenities filter in the search page.
                                  """)
+                .WithRateLimit(
+                    "get-all-amenities",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.GetAllRateLimited)
                 .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.AmenityRoutes.GetById, async (
-                    Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IAmenityService amenityService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await amenityService.GetByIdAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("GetAmenityById")
                 .WithDisplayName("Get Amenity by id")
                 .WithSummary("Retrieves an amenity by its ID")
@@ -69,18 +83,30 @@ public static class AmenityEndpoints
                                  Retrieves the details of a specific amenity using its unique identifier.
                                  Returns a not found response if the amenity does not exist.
                                  """)
+                .WithRateLimit(
+                    "get-amenity-by-id",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.GetByIdRateLimited)
                 .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.AmenityRoutes.Update, async (
-                    Guid id, UpdateAmenityRequest request,
+                    Guid id,
+                    UpdateAmenityRequest request,
                     IAmenityService amenityService,
                     CancellationToken cancellationToken) =>
                 {
                     request.AmenityId = id;
-                    var result = await amenityService.UpdateAsync(id, request, cancellationToken);
+
+                    var result = await amenityService.UpdateAsync(
+                        id,
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("UpdateAmenity")
                 .WithDisplayName("Update Amenity")
                 .WithSummary("Updates an existing amenity")
@@ -88,15 +114,23 @@ public static class AmenityEndpoints
                                  Renames an existing amenity using its unique identifier.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "update-amenity",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.UpdateRateLimited)
                 .Produces<ApiResponse<AmenityResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.AmenityRoutes.Delete, async (
-                    Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IAmenityService amenityService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await amenityService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("DeleteAmenity")
                 .WithDisplayName("Delete Amenity")
                 .WithSummary("Deletes an amenity")
@@ -104,13 +138,23 @@ public static class AmenityEndpoints
                                  Deletes an amenity and removes it from every hotel it was assigned to.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "delete-amenity",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.DeleteRateLimited)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapGet(Router.HotelRoutes.Amenities, async (
-                    Guid id, IAmenityService amenityService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IAmenityService amenityService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await amenityService.GetHotelAmenitiesAsync(id, cancellationToken);
+                    var result = await amenityService.GetHotelAmenitiesAsync(
+                        id,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithTags("Hotels")
@@ -121,17 +165,28 @@ public static class AmenityEndpoints
                                  Retrieves the amenities offered by a specific hotel ordered by name.
                                  Returns a not found response when the hotel does not exist.
                                  """)
+                .WithRateLimit(
+                    "get-hotel-amenities",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.GetHotelAmenitiesRateLimited)
                 .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPut(Router.HotelRoutes.Amenities, async (
-                    Guid id, SetHotelAmenitiesRequest request,
+                    Guid id,
+                    SetHotelAmenitiesRequest request,
                     IAmenityService amenityService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await amenityService.SetHotelAmenitiesAsync(id, request, cancellationToken);
+                    var result = await amenityService.SetHotelAmenitiesAsync(
+                        id,
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithTags("Hotels")
                 .WithName("SetHotelAmenities")
                 .WithDisplayName("Set Hotel Amenities")
@@ -142,6 +197,11 @@ public static class AmenityEndpoints
                                  Send an empty list to remove all amenities.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "set-hotel-amenities",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Amenity.SetHotelAmenitiesRateLimited)
                 .Produces<ApiResponse<IReadOnlyList<AmenityResponse>>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
                 .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);

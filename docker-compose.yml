@@ -13,6 +13,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       FrontendUrl: ${FRONTEND_BASE_URL}
+      LocalFrontendUrl: ${FRONTEND_BASE_URL_LOCAL}
       ConnectionStrings__TriplyDbLocalConnection: ${TRIPLY_DB_CONNECTION}
       JwtSettings__Issuer: ${ISSUER}
       JwtSettings__Audience: ${AUDIENCE}

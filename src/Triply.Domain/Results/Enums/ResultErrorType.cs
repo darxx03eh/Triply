@@ -14,5 +14,7 @@ public enum ResultErrorType
     /// <summary>The caller is authenticated but not allowed to do this (403).</summary>
     Forbidden,
     /// <summary>A business rule rejected the request (400).</summary>
-    BusinessRule
+    BusinessRule,
+    /// <summary>The caller has sent too many requests in a given amount of time (429).</summary>
+    ToManyRequest,
 }

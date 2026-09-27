@@ -11,7 +11,7 @@ namespace Triply.Infrastructure.Services.Authentications;
 public partial class AuthenticationService
 {
     /// <inheritdoc />
-    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request,
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ip,
         CancellationToken cancellationToken = default)
     {
         var user = await FindUserByIdentifierAsync(request.Identifier, cancellationToken);
@@ -22,6 +22,17 @@ public partial class AuthenticationService
             return Result<LoginResponse>.Failure(
                 "INVALID_CREDENTIALS", "Invalid credentials",
                 ResultErrorType.Unauthorized);
+        }
+
+        if (await failedLoginRateLimitService.IsBlockedAsync(ip, user.Id.ToString(), cancellationToken))
+        {
+            logger.LogWarning(
+                "Login blocked: user {UserId} ({UserName}) from IP {Ip} exceeded failed login attempts",
+                user.Id, user.UserName, ip);
+            return Result<LoginResponse>.Failure(
+                "FAILED_LOGIN_RATE_LIMITED",
+                "Too many failed login attempts. Please try again in a few minutes.",
+                ResultErrorType.ToManyRequest);
         }
 
         if (await userManager.IsLockedOutAsync(user))
@@ -38,6 +49,21 @@ public partial class AuthenticationService
         var signInResult = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
         if (!signInResult.Succeeded)
         {
+            var count = await failedLoginRateLimitService.RecordFailureAsync(ip, user.Id.ToString(), cancellationToken);
+            logger.LogInformation(
+                "Failed login attempt recorded for user {UserId} ({UserName}) from IP {Ip}, count is now {Count}",
+                user.Id, user.UserName, ip, count);
+
+            if (count > 3)
+            {
+                logger.LogWarning(
+                    "Login blocked: user {UserId} ({UserName}) from IP {Ip} reached failed login threshold, count {Count}",
+                    user.Id, user.UserName, ip, count);
+                return Result<LoginResponse>.Failure(
+                    "FAILED_LOGIN_RATE_LIMITED",
+                    "Too many failed login attempts. Please try again in a few minutes.",
+                    ResultErrorType.ToManyRequest);
+            }
             if (!user.EmailConfirmed)
             {
                 logger.LogWarning(

@@ -121,5 +121,5 @@ Keep the return type and no page has to change.
   The refresh token is never readable from JS; it's an HttpOnly cookie set by the API.
 - `POST /auth/refresh` requires a *valid* access token, so `AuthProvider` refreshes silently 60 seconds before it expires.
 - Roles come from the JWT `role` claim. `/admin/*` is guarded by `RequireAdmin`.
-- The confirmation e-mail links to `/api/v1/auth/confirm-email`. nginx serves the SPA for browser navigations
-  (`Accept: text/html`), and `/confirm-email` then calls the API with XHR.
+- The confirmation e-mail links to `/confirm-email` on `FRONTEND_BASE_URL`; that SPA page calls
+  `/api/v1/auth/confirm-email` with XHR. nginx still redirects browser visits to the legacy API link.

@@ -96,38 +96,39 @@ public partial class AuthenticationService
             ResultResponseMessages.Authentication.Api.TokenRegenerated.Code,
             ResultResponseMessages.Authentication.Api.TokenRegenerated.Message));
     }
-    private async Task<(bool Success, string? Reason)> ValidateDetails(JwtSecurityToken jwtToken, 
+
+    private async Task<(bool Success, string? Reason)> ValidateDetails(JwtSecurityToken jwtToken,
         string refresh, CancellationToken cancellationToken)
     {
 
         if (jwtToken is null || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256))
             return (false, "WRONG_ALGORITHM");
-        
-            var jti = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals(TokenClaims.Jti))?.Value;
 
-            var refreshToken = await refreshTokenRepository.GetTableNoTracking()
-                .Where(r => r.Jti.Equals(jti)).FirstOrDefaultAsync(cancellationToken);
-            if (refreshToken is null)
-                return (false, "NOT_FOUND");
+        var jti = jwtToken.Claims.FirstOrDefault(claim => claim.Type.Equals(TokenClaims.Jti))?.Value;
 
-            if (refreshToken.IsRevoked)
-                return (false, "REVOKED");
+        var refreshToken = await refreshTokenRepository.GetTableNoTracking()
+            .Where(r => r.Jti.Equals(jti)).FirstOrDefaultAsync(cancellationToken);
+        if (refreshToken is null)
+            return (false, "NOT_FOUND");
 
-            if (!refreshToken.IsActive)
-                return (false, "NOT_ACTIVE");
-           
-            if (refreshToken.ExpiryDate < DateTime.UtcNow)
-            {
-                logger.LogInformation(
-                    "Refresh token {Jti} of user {UserId} expired and was revoked", 
-                    jti, refreshToken.UserId);
-                refreshToken.IsRevoked = true;
-                refreshToken.IsActive = false;
-                await refreshTokenRepository.UpdateAsync(refreshToken);
-                await refreshTokenRepository.SaveChangesAsync(cancellationToken);
-                return (false, "EXPIRED");
-            }
-            
-            return (true, null);
+        if (refreshToken.IsRevoked)
+            return (false, "REVOKED");
+
+        if (!refreshToken.IsActive)
+            return (false, "NOT_ACTIVE");
+
+        if (refreshToken.ExpiryDate < DateTime.UtcNow)
+        {
+            logger.LogInformation(
+                "Refresh token {Jti} of user {UserId} expired and was revoked",
+                jti, refreshToken.UserId);
+            refreshToken.IsRevoked = true;
+            refreshToken.IsActive = false;
+            await refreshTokenRepository.UpdateAsync(refreshToken);
+            await refreshTokenRepository.SaveChangesAsync(cancellationToken);
+            return (false, "EXPIRED");
         }
+
+        return (true, null);
+    }
 }
