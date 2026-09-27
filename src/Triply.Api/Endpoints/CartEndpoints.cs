@@ -20,11 +20,14 @@ public static class CartEndpoints
                 .RequireAuthorization();
 
             group.MapGet(Router.CartRoutes.Get, async (
-                    ICurrentUserAccessor user, 
-                    ICartService cartService, 
+                    ICurrentUserAccessor user,
+                    ICartService cartService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cartService.GetAsync(user.UserId, cancellationToken);
+                    var result = await cartService.GetAsync(
+                        user.UserId,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetCart")
@@ -35,16 +38,25 @@ public static class CartEndpoints
                                  deal discount, the price of every room and the total price of the cart.
                                  Every item shows whether the room is still available for its dates.
                                  """)
+                .WithRateLimit(
+                    "get-cart",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Cart.GetRateLimited)
                 .Produces<ApiResponse<CartResponse>>(StatusCodes.Status200OK);
 
             group.MapPost(Router.CartRoutes.AddItem, async (
-                    AddCartItemRequest request, 
-                    ICurrentUserAccessor user, 
+                    AddCartItemRequest request,
+                    ICurrentUserAccessor user,
                     ICartService cartService,
                     CancellationToken cancellationToken) =>
                 {
                     request.UserId = user.UserId;
-                    var result = await cartService.AddItemAsync(request, cancellationToken);
+
+                    var result = await cartService.AddItemAsync(
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("AddCartItem")
@@ -54,18 +66,27 @@ public static class CartEndpoints
                                  Adds a room to the signed-in user's cart for the given dates and guests.
                                  Checks the room capacity and that the room is not booked for these dates.
                                  """)
+                .WithRateLimit(
+                    "add-cart-item",
+                    30,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Cart.AddItemRateLimited)
                 .Produces<ApiResponse<CartResponse>>(StatusCodes.Status201Created)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
                 .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
                 .ProducesValidationProblem();
 
             group.MapDelete(Router.CartRoutes.RemoveItem, async (
-                    Guid id, 
-                    ICurrentUserAccessor user, 
+                    Guid id,
+                    ICurrentUserAccessor user,
                     ICartService cartService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cartService.RemoveItemAsync(id, user.UserId, cancellationToken);
+                    var result = await cartService.RemoveItemAsync(
+                        id,
+                        user.UserId,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("RemoveCartItem")
@@ -74,15 +95,23 @@ public static class CartEndpoints
                 .WithDescription("""
                                  Removes a single item from the signed-in user's cart.
                                  """)
+                .WithRateLimit(
+                    "remove-cart-item",
+                    30,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Cart.RemoveItemRateLimited)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.CartRoutes.Clear, async (
-                    ICurrentUserAccessor user, 
-                    ICartService cartService, 
+                    ICurrentUserAccessor user,
+                    ICartService cartService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cartService.ClearAsync(user.UserId, cancellationToken);
+                    var result = await cartService.ClearAsync(
+                        user.UserId,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("ClearCart")
@@ -91,6 +120,11 @@ public static class CartEndpoints
                 .WithDescription("""
                                  Removes all the items from the signed-in user's cart.
                                  """)
+                .WithRateLimit(
+                    "clear-cart",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Cart.ClearRateLimited)
                 .Produces(StatusCodes.Status204NoContent);
         }
     }

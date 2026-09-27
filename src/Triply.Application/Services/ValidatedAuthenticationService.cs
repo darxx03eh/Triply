@@ -34,10 +34,11 @@ public class ValidatedAuthenticationService(
     }
 
     /// <summary>Logs the user in and issues the tokens.</summary>
-    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ip,
+        CancellationToken cancellationToken = default)
     {
         await loginValidator.ValidateAndThrowAsync(request, cancellationToken);
-        return await inner.LoginAsync(request, cancellationToken);
+        return await inner.LoginAsync(request, ip, cancellationToken);
     }
 
     /// <summary>Logs the user out and revokes the tokens.</summary>

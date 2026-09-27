@@ -1,12 +1,12 @@
 using Triply.Api.Extensions;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Reviews;
 using Triply.Application.Features.Reviews.Commands.CreateReview;
 using Triply.Application.Features.Reviews.Commands.UpdateReview;
 using Triply.Application.Features.Reviews.Queries.GetReviews;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
-using Triply.Api.Responses;
-using Triply.Application.Common.Models;
-using Triply.Application.DTOs.Reviews;
 
 namespace Triply.Api.Endpoints;
 
@@ -39,7 +39,12 @@ public static class ReviewEndpoints
                                  Returns a not found response when the hotel does not exist.
                                  """)
                 .Produces<ApiResponse<PagedResult<ReviewResponse>>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "get-hotel-reviews",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Review.GetHotelReviewsRateLimited);
 
             group.MapPost(Router.HotelRoutes.Reviews, async (
                     Guid id,
@@ -61,7 +66,12 @@ public static class ReviewEndpoints
                                  Each user can review a hotel only once; use the update endpoint to change it.
                                  """)
                 .Produces<ApiResponse<ReviewResponse>>(StatusCodes.Status201Created)
-                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity)
+                .WithRateLimit(
+                    "create-review",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Review.CreateRateLimited);
 
             group.MapPut(Router.ReviewRoutes.Update, async (
                     Guid id,
@@ -82,7 +92,12 @@ public static class ReviewEndpoints
                                  """)
                 .Produces<ApiResponse<ReviewResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "update-review",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Review.UpdateRateLimited);
 
             group.MapDelete(Router.ReviewRoutes.Delete, async (
                     Guid id,
@@ -102,7 +117,12 @@ public static class ReviewEndpoints
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status403Forbidden)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "delete-review",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Review.DeleteRateLimited);
         }
     }
 }

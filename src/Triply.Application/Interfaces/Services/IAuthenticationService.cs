@@ -27,8 +27,10 @@ public interface IAuthenticationService
     /// <summary>Authenticates a user and creates access and refresh tokens.</summary>
     /// <param name="request">The user's identifier and password.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <param name="ip">Ip for the user.</param>
     /// <returns>The authenticated user's name and tokens.</returns>
-    Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
+    Task<Result<LoginResponse>> LoginAsync(LoginRequest request, string ip,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Invalidates the current access token and refresh token.</summary>
     /// <param name="user">The authenticated principal.</param>

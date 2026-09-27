@@ -19,9 +19,14 @@ public static class HomeEndpoints
                 .WithTags("Home");
 
             group.MapGet(Router.DealRoutes.Featured, async (
-                    int? count, IHomeService homeService, CancellationToken cancellationToken) =>
+                    int? count,
+                    IHomeService homeService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetFeaturedDealsAsync(count, cancellationToken);
+                    var result = await homeService.GetFeaturedDealsAsync(
+                        count,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetFeaturedDeals")
@@ -31,12 +36,23 @@ public static class HomeEndpoints
                                  Retrieves the running featured deals (default 5, max 20) with the hotel
                                  thumbnail, location, star rating, original price and discounted price.
                                  """)
-                .Produces<ApiResponse<IReadOnlyList<FeaturedDealResponse>>>(StatusCodes.Status200OK);
+                .WithRateLimit(
+                    "get-featured-deals",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Home.GetFeaturedDealsRateLimited)
+                .Produces<ApiResponse<IReadOnlyList<FeaturedDealResponse>>>(
+                    StatusCodes.Status200OK);
 
             group.MapGet(Router.CityRoutes.Trending, async (
-                    int? count, IHomeService homeService, CancellationToken cancellationToken) =>
+                    int? count,
+                    IHomeService homeService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetTrendingCitiesAsync(count, cancellationToken);
+                    var result = await homeService.GetTrendingCitiesAsync(
+                        count,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetTrendingCities")
@@ -46,15 +62,28 @@ public static class HomeEndpoints
                                  Retrieves the most visited cities in the last 30 days (default 5, max 20)
                                  with their thumbnails, used for the trending destinations section.
                                  """)
-                .Produces<ApiResponse<IReadOnlyList<TrendingCityResponse>>>(StatusCodes.Status200OK);
+                .WithRateLimit(
+                    "get-trending-cities",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Home.GetTrendingCitiesRateLimited)
+                .Produces<ApiResponse<IReadOnlyList<TrendingCityResponse>>>(
+                    StatusCodes.Status200OK);
 
             group.MapGet(Router.UserRoutes.RecentHotels, async (
-                    int? count, ICurrentUserAccessor user, IHomeService homeService,
+                    int? count,
+                    ICurrentUserAccessor user,
+                    IHomeService homeService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetRecentHotelsAsync(user.UserId, count, cancellationToken);
+                    var result = await homeService.GetRecentHotelsAsync(
+                        user.UserId,
+                        count,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization()
+                })
+                .RequireAuthorization()
                 .WithName("GetRecentHotels")
                 .WithDisplayName("Get Recently Visited Hotels")
                 .WithSummary("Retrieves the hotels the user visited recently")
@@ -62,7 +91,13 @@ public static class HomeEndpoints
                                  Retrieves the last hotels the signed-in user opened (default 5, max 20)
                                  with the thumbnail, city, star rating and the lowest room price.
                                  """)
-                .Produces<ApiResponse<IReadOnlyList<RecentHotelResponse>>>(StatusCodes.Status200OK)
+                .WithRateLimit(
+                    "get-recent-hotels",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Home.GetRecentHotelsRateLimited)
+                .Produces<ApiResponse<IReadOnlyList<RecentHotelResponse>>>(
+                    StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status401Unauthorized);
         }
     }

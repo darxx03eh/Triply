@@ -2,6 +2,7 @@ using MessageQueue.IRabbitMQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Triply.Application.Interfaces.Repositories;
@@ -26,6 +27,7 @@ public abstract class AuthenticationServiceTestBase : IDisposable
     protected readonly Mock<IMessagePublisher> Publisher = new();
     protected readonly Mock<ITokenBlacklistService> Blacklist = new();
     protected readonly Mock<IDbContextTransaction> Transaction = new();
+    protected readonly Mock<IFailedLoginRateLimitService> FailedLoginRateLimitService = new();
     protected readonly TriplyDbContext Db = TestDbContextFactory.Create();
     protected readonly AuthenticationService Service;
 
@@ -41,6 +43,12 @@ public abstract class AuthenticationServiceTestBase : IDisposable
         httpContext.Request.Host = new HostString("localhost:3000");
         var accessor = new Mock<IHttpContextAccessor>();
         accessor.Setup(a => a.HttpContext).Returns(httpContext);
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["FrontendUrl"] = "https://triply.example"
+            })
+            .Build();
 
         Service = new AuthenticationService(
             UserRepository.Object,
@@ -52,7 +60,9 @@ public abstract class AuthenticationServiceTestBase : IDisposable
             Publisher.Object,
             Blacklist.Object,
             accessor.Object,
-            NullLogger<AuthenticationService>.Instance);
+            configuration,
+            NullLogger<AuthenticationService>.Instance,
+            FailedLoginRateLimitService.Object);
     }
 
     public void Dispose() => Db.Dispose();

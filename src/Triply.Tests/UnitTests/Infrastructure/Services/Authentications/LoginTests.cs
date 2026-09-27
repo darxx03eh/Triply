@@ -37,7 +37,7 @@ public class LoginTests : AuthenticationServiceTestBase
     [InlineData("+970591234567")]
     public async Task LoginAsync_ValidCredentials_ReturnsTokensAndStampsLastLogin(string identifier)
     {
-        var result = await Service.LoginAsync(Request(identifier));
+        var result = await Service.LoginAsync(Request(identifier), "unknown");
 
         var response = result.AssertSuccess();
         Assert.Equal("Mahmoud Darawsheh", response.Name);
@@ -50,7 +50,7 @@ public class LoginTests : AuthenticationServiceTestBase
     [Fact]
     public async Task LoginAsync_UnknownUser_ReturnsInvalidCredentials()
     {
-        var result = await Service.LoginAsync(Request("ghost"));
+        var result = await Service.LoginAsync(Request("ghost"), "unknown");
 
         result.AssertFailure("INVALID_CREDENTIALS", ResultErrorType.Unauthorized);
         TokenService.VerifyNoOtherCalls();
@@ -62,7 +62,7 @@ public class LoginTests : AuthenticationServiceTestBase
         SignInManager.Setup(s => s.CheckPasswordSignInAsync(_user, 
             "WrongPass1", true)).ReturnsAsync(SignInResult.Failed);
 
-        var result = await Service.LoginAsync(Request(password: "WrongPass1"));
+        var result = await Service.LoginAsync(Request(password: "WrongPass1"), "unknown");
 
         result.AssertFailure("INVALID_CREDENTIALS", ResultErrorType.Unauthorized);
     }
@@ -73,7 +73,7 @@ public class LoginTests : AuthenticationServiceTestBase
         _user.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(5);
         UserManager.Setup(m => m.IsLockedOutAsync(_user)).ReturnsAsync(true);
 
-        var result = await Service.LoginAsync(Request());
+        var result = await Service.LoginAsync(Request(), "");
 
         result.AssertFailure("ACCOUNT_LOCKED", ResultErrorType.Forbidden);
         SignInManager.Verify(s => s.CheckPasswordSignInAsync(It.IsAny<TriplyUser>(), 
@@ -87,7 +87,7 @@ public class LoginTests : AuthenticationServiceTestBase
         SignInManager.Setup(s => s.CheckPasswordSignInAsync(_user, "WrongPass1",
             true)).ReturnsAsync(SignInResult.LockedOut);
 
-        var result = await Service.LoginAsync(Request(password: "WrongPass1"));
+        var result = await Service.LoginAsync(Request(password: "WrongPass1"),"unknown");
 
         result.AssertFailure("ACCOUNT_LOCKED", ResultErrorType.Forbidden);
     }
@@ -99,7 +99,7 @@ public class LoginTests : AuthenticationServiceTestBase
         SignInManager.Setup(s => s.CheckPasswordSignInAsync(_user, "Password123",
             true)).ReturnsAsync(SignInResult.NotAllowed);
 
-        var result = await Service.LoginAsync(Request());
+        var result = await Service.LoginAsync(Request(), "unknown");
 
         result.AssertFailure("EMAIL_NOT_CONFIRMED", ResultErrorType.Forbidden);
         Publisher.Verify(p => p.PublishAsync("email.send", 
@@ -111,7 +111,7 @@ public class LoginTests : AuthenticationServiceTestBase
     {
         _user.IsActive = false;
 
-        var result = await Service.LoginAsync(Request());
+        var result = await Service.LoginAsync(Request(), "unknown");
 
         result.AssertFailure("ACCOUNT_NOT_ACTIVE", ResultErrorType.Forbidden);
         TokenService.VerifyNoOtherCalls();
@@ -124,6 +124,6 @@ public class LoginTests : AuthenticationServiceTestBase
     [InlineData("user!name")]
     public async Task LoginAsync_MalformedIdentifier_ThrowsInvalidFormat(string identifier)
     {
-        await Assert.ThrowsAsync<InvalidFormatException>(() => Service.LoginAsync(Request(identifier)));
+        await Assert.ThrowsAsync<InvalidFormatException>(() => Service.LoginAsync(Request(identifier), "unknown"));
     }
 }

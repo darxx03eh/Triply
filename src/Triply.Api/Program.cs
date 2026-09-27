@@ -85,6 +85,8 @@ public class Program
         app.UseCors("FrontendCORSPolicy");
         // Middleware to handles error
         app.UseMiddleware<ErrorHandlerMiddleware>();
+        // Middleware to handles rate limit for login
+        app.UseMiddleware<RateLimitMiddleware>();
         // Endpoint to check if the backend is healthy
         app.MapHealthChecks("/health");
         app.UseAuthentication();

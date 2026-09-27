@@ -1,9 +1,9 @@
 using Triply.Api.Extensions;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Search;
 using Triply.Application.Features.Search.Queries.SearchHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
-using Triply.Api.Responses;
-using Triply.Application.DTOs.Search;
 
 namespace Triply.Api.Endpoints;
 
@@ -41,7 +41,12 @@ public static class SearchEndpoints
                                  Each result contains the lowest price per night and the total price of the stay.
                                  """)
                 .Produces<ApiResponse<SearchHotelsResponse>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity)
+                .WithRateLimit(
+                    "search-hotels",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Search.HotelsRateLimited);
         }
     }
 }

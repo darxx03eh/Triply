@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { ApiError } from '@/lib/http'
 import { AuthShell } from './AuthShell'
 
-/** Opened from the confirmation e-mail (nginx serves this page for GET /api/v1/auth/confirm-email). */
+/** Opened from the confirmation e-mail; this page completes confirmation through the API. */
 export function ConfirmEmailPage() {
   const [params] = useSearchParams()
   const email = params.get('email') ?? ''

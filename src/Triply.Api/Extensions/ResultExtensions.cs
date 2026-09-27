@@ -1,3 +1,4 @@
+using System.Net;
 using Serilog;
 using Triply.Api.Responses;
 using Triply.Domain.Results;
@@ -63,6 +64,7 @@ public static class ResultExtensions
             ResultErrorType.BusinessRule => Results.BadRequest(errorResponse),
             ResultErrorType.Unauthorized => Results.Json(errorResponse, statusCode: StatusCodes.Status401Unauthorized),
             ResultErrorType.Forbidden => Results.Json(errorResponse ,statusCode: StatusCodes.Status403Forbidden),
+            ResultErrorType.ToManyRequest => Results.Json(errorResponse, statusCode: StatusCodes.Status429TooManyRequests),
             _ => Results.UnprocessableEntity(errorResponse)
         }, error.Code, error.Message);
     }
@@ -77,6 +79,8 @@ public static class ResultExtensions
     {
         public Task ExecuteAsync(HttpContext httpContext)
         {
+            if (string.Equals(code, "FAILED_LOGIN_RATE_LIMITED", StringComparison.OrdinalIgnoreCase))
+                httpContext.Response.Headers.RetryAfter = "60";
             var diagnostic = httpContext.RequestServices.GetService<IDiagnosticContext>();
             if (diagnostic is not null)
             {

@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Triply.Api.Extensions;
+using Triply.Api.Responses;
+using Triply.Application.Common.Models;
+using Triply.Application.DTOs.Rooms;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Application.Features.Rooms.Commands.UpdateRoom;
+using Triply.Application.Features.Rooms.Commands.UploadImage;
 using Triply.Application.Features.Rooms.Queries.GetRooms;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
-using Triply.Api.Responses;
-using Triply.Application.Common.Models;
-using Triply.Application.DTOs.Rooms;
-using Triply.Application.Features.Rooms.Commands.UploadImage;
 
 namespace Triply.Api.Endpoints;
 
@@ -42,7 +42,12 @@ public static class RoomEndpoints
                                  """)
                 .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status201Created)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity)
+                .WithRateLimit(
+                    "create-room",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.CreateRateLimited);
 
             group.MapGet(Router.RoomRoutes.GetAll, async (
                     [AsParameters] GetRoomsRequest request,
@@ -61,7 +66,12 @@ public static class RoomEndpoints
                                  filtering, sorting, and pagination parameters (e.g. filters=HotelId==...).
                                  Deleted rooms are included for administrators.
                                  """)
-                .Produces<ApiResponse<PagedResult<RoomResponse>>>(StatusCodes.Status200OK);
+                .Produces<ApiResponse<PagedResult<RoomResponse>>>(StatusCodes.Status200OK)
+                .WithRateLimit(
+                    "get-all-rooms",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.GetAllRateLimited);
 
             group.MapGet(Router.HotelRoutes.GetRooms, async (
                     Guid id,
@@ -82,10 +92,17 @@ public static class RoomEndpoints
                                  Returns a not found response when the hotel does not exist.
                                  """)
                 .Produces<ApiResponse<PagedResult<RoomResponse>>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "get-hotel-rooms",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.GetHotelRoomsRateLimited);
 
             group.MapGet(Router.RoomRoutes.GetById, async (
-                    Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IRoomService roomService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await roomService.GetByIdAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
@@ -98,10 +115,16 @@ public static class RoomEndpoints
                                  Returns a not found response if the room does not exist.
                                  """)
                 .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "get-room-by-id",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.GetByIdRateLimited);
 
             group.MapPut(Router.RoomRoutes.Update, async (
-                    Guid id, UpdateRoomRequest request,
+                    Guid id,
+                    UpdateRoomRequest request,
                     IRoomService roomService,
                     CancellationToken cancellationToken) =>
                 {
@@ -119,10 +142,17 @@ public static class RoomEndpoints
                                  """)
                 .Produces<ApiResponse<RoomResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
+                .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
+                .WithRateLimit(
+                    "update-room",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.UpdateRateLimited);
 
             group.MapDelete(Router.RoomRoutes.Delete, async (
-                    Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IRoomService roomService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await roomService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
@@ -136,11 +166,18 @@ public static class RoomEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "delete-room",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.DeleteRateLimited);
 
             group.MapPost(Router.RoomRoutes.AddImage, async (
-                    Guid id, [FromForm] UploadRoomImageRequest request,
-                    IRoomService roomService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    [FromForm] UploadRoomImageRequest request,
+                    IRoomService roomService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await roomService.InitiateUploadAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
@@ -159,10 +196,17 @@ public static class RoomEndpoints
                 .Accepts<UploadRoomImageRequest>("multipart/form-data")
                 .Produces<ApiResponse<RoomImageResponse>>(StatusCodes.Status202Accepted)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
+                .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity)
+                .WithRateLimit(
+                    "upload-room-image",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.UploadImageRateLimited);
 
             group.MapGet(Router.RoomRoutes.GetImages, async (
-                    Guid id, IRoomService roomService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IRoomService roomService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await roomService.GetImagesAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
@@ -176,10 +220,18 @@ public static class RoomEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces<ApiResponse<IReadOnlyList<RoomImageResponse>>>(StatusCodes.Status200OK)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "get-room-images",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.GetImagesRateLimited);
 
             group.MapDelete(Router.RoomRoutes.DeleteImage, async (
-                    Guid id, Guid imageId, IRoomService roomService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    Guid imageId,
+                    IRoomService roomService,
+                    CancellationToken cancellationToken) =>
                 {
                     var result = await roomService.DeleteImageAsync(id, imageId, cancellationToken);
                     return result.ToMinimalApiResult();
@@ -194,7 +246,12 @@ public static class RoomEndpoints
                                  This endpoint is restricted to users with the Admin role.
                                  """)
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+                .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+                .WithRateLimit(
+                    "delete-room-image",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Room.DeleteImageRateLimited);
         }
     }
 }
