@@ -1,11 +1,11 @@
 using Triply.Api.Extensions;
+using Triply.Api.Responses;
+using Triply.Application.DTOs.Attractions;
 using Triply.Application.Features.Attractions.Commands.CreateAttraction;
 using Triply.Application.Features.Attractions.Commands.UpdateAttraction;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
-using Triply.Api.Responses;
-using Triply.Application.DTOs.Attractions;
 
 namespace Triply.Api.Endpoints;
 
@@ -21,9 +21,14 @@ public static class AttractionEndpoints
                 .WithTags("Attractions");
 
             group.MapGet(Router.HotelRoutes.Attractions, async (
-                    Guid id, IAttractionService attractionService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IAttractionService attractionService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.GetHotelAttractionsAsync(id, cancellationToken);
+                    var result = await attractionService.GetHotelAttractionsAsync(
+                        id,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetHotelAttractions")
@@ -33,6 +38,11 @@ public static class AttractionEndpoints
                                  Retrieves the attractions near a specific hotel ordered by distance.
                                  Returns a not found response when the hotel does not exist.
                                  """)
+                .WithRateLimit(
+                    "get-hotel-attractions",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Attraction.GetHotelAttractionsRateLimited)
                 .Produces<ApiResponse<IReadOnlyList<AttractionResponse>>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
@@ -43,9 +53,14 @@ public static class AttractionEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     request.HotelId = id;
-                    var result = await attractionService.CreateAsync(request, cancellationToken);
+
+                    var result = await attractionService.CreateAsync(
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("CreateAttraction")
                 .WithDisplayName("Create Attraction")
                 .WithSummary("Adds a nearby attraction to a hotel")
@@ -53,6 +68,11 @@ public static class AttractionEndpoints
                                  Adds a nearby attraction (name, category and distance in km) to a hotel.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "create-attraction",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Attraction.CreateRateLimited)
                 .Produces<ApiResponse<AttractionResponse>>(StatusCodes.Status201Created)
                 .Produces<ApiResponse<object>>(StatusCodes.Status422UnprocessableEntity);
 
@@ -62,9 +82,14 @@ public static class AttractionEndpoints
                     IAttractionService attractionService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.UpdateAsync(id, request, cancellationToken);
+                    var result = await attractionService.UpdateAsync(
+                        id,
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("UpdateAttraction")
                 .WithDisplayName("Update Attraction")
                 .WithSummary("Updates a nearby attraction")
@@ -72,15 +97,26 @@ public static class AttractionEndpoints
                                  Updates the name, category and distance of an attraction.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "update-attraction",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Attraction.UpdateRateLimited)
                 .Produces<ApiResponse<AttractionResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapDelete(Router.AttractionRoutes.Delete, async (
-                    Guid id, IAttractionService attractionService, CancellationToken cancellationToken) =>
+                    Guid id,
+                    IAttractionService attractionService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.DeleteAsync(id, cancellationToken);
+                    var result = await attractionService.DeleteAsync(
+                        id,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
+                })
+                .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
                 .WithName("DeleteAttraction")
                 .WithDisplayName("Delete Attraction")
                 .WithSummary("Deletes a nearby attraction")
@@ -88,6 +124,11 @@ public static class AttractionEndpoints
                                  Deletes an attraction from a hotel.
                                  This endpoint is restricted to users with the Admin role.
                                  """)
+                .WithRateLimit(
+                    "delete-attraction",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Attraction.DeleteRateLimited)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
         }

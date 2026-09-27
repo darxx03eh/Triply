@@ -22,11 +22,17 @@ public static class BookingEndpoints
                 .RequireAuthorization();
 
             group.MapPost(Router.BookingRoutes.Checkout, async (
-                    CheckoutRequest request, ICurrentUserAccessor user, IBookingService bookingService,
+                    CheckoutRequest request,
+                    ICurrentUserAccessor user,
+                    IBookingService bookingService,
                     CancellationToken cancellationToken) =>
                 {
                     request.UserId = user.UserId;
-                    var result = await bookingService.CheckoutAsync(request, cancellationToken);
+
+                    var result = await bookingService.CheckoutAsync(
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("Checkout")
@@ -39,15 +45,26 @@ public static class BookingEndpoints
                                  can not be booked twice for the same dates.
                                  Unpaid pending bookings are cancelled automatically after a while.
                                  """)
+                .WithRateLimit(
+                    "checkout",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Booking.CheckoutRateLimited)
                 .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status201Created)
                 .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
                 .ProducesValidationProblem();
 
             group.MapGet(Router.UserRoutes.Bookings, async (
-                    [AsParameters] GetBookingsRequest request, ICurrentUserAccessor user,
-                    IBookingService bookingService, CancellationToken cancellationToken) =>
+                    [AsParameters] GetBookingsRequest request,
+                    ICurrentUserAccessor user,
+                    IBookingService bookingService,
+                    CancellationToken cancellationToken) =>
                 {
-                    var result = await bookingService.GetUserBookingsAsync(user.UserId, request, cancellationToken);
+                    var result = await bookingService.GetUserBookingsAsync(
+                        user.UserId,
+                        request,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetMyBookings")
@@ -57,14 +74,25 @@ public static class BookingEndpoints
                                  Retrieves a paginated list of the signed-in user's bookings, newest first,
                                  supports filtering and sorting (filters=Status==Confirmed, sorts=CheckIn).
                                  """)
+                .WithRateLimit(
+                    "get-my-bookings",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Booking.GetMyBookingsRateLimited)
                 .Produces<ApiResponse<PagedResult<BookingResponse>>>(StatusCodes.Status200OK);
 
             group.MapGet(Router.BookingRoutes.GetByConfirmationNumber, async (
-                    string confirmationNumber, ICurrentUserAccessor user, IBookingService bookingService,
+                    string confirmationNumber,
+                    ICurrentUserAccessor user,
+                    IBookingService bookingService,
                     CancellationToken cancellationToken) =>
                 {
                     var result = await bookingService.GetByConfirmationNumberAsync(
-                        confirmationNumber, user.UserId, user.IsAdmin, cancellationToken);
+                        confirmationNumber,
+                        user.UserId,
+                        user.IsAdmin,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetBookingByConfirmationNumber")
@@ -74,15 +102,26 @@ public static class BookingEndpoints
                                  Retrieves the guest details, rooms, dates and prices of a booking using its
                                  confirmation number. Users can see their own bookings only.
                                  """)
+                .WithRateLimit(
+                    "get-booking-by-confirmation-number",
+                    60,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Booking.GetByConfirmationNumberRateLimited)
                 .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPost(Router.BookingRoutes.Cancel, async (
-                    string confirmationNumber, ICurrentUserAccessor user, IBookingService bookingService,
+                    string confirmationNumber,
+                    ICurrentUserAccessor user,
+                    IBookingService bookingService,
                     CancellationToken cancellationToken) =>
                 {
                     var result = await bookingService.CancelAsync(
-                        confirmationNumber, user.UserId, user.IsAdmin, cancellationToken);
+                        confirmationNumber,
+                        user.UserId,
+                        user.IsAdmin,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
                 })
                 .WithName("CancelBooking")
@@ -92,6 +131,11 @@ public static class BookingEndpoints
                                  Cancels all the rooms of a booking before the check-in date.
                                  Users can cancel their own bookings and administrators can cancel any booking.
                                  """)
+                .WithRateLimit(
+                    "cancel-booking",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Booking.CancelRateLimited)
                 .Produces<ApiResponse<BookingConfirmationResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
                 .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest);

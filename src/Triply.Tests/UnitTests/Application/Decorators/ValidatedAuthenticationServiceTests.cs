@@ -27,12 +27,12 @@ public class ValidatedAuthenticationServiceTests
 
         await service.RegisterNewUserAsync(new RegisterUserRequest());
         await service.ConfirmationEmailAsync(new ConfirmEmailRequest());
-        await service.LoginAsync(new LoginRequest());
+        await service.LoginAsync(new LoginRequest(), "");
 
         _inner.Verify(s => s.RegisterNewUserAsync(It.IsAny<RegisterUserRequest>(), 
             It.IsAny<CancellationToken>()), Times.Once);
         _inner.Verify(s => s.ConfirmationEmailAsync(It.IsAny<ConfirmEmailRequest>(), It.IsAny<CancellationToken>()), Times.Once);
-        _inner.Verify(s => s.LoginAsync(It.IsAny<LoginRequest>(), 
+        _inner.Verify(s => s.LoginAsync(It.IsAny<LoginRequest>(), "",
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -46,7 +46,7 @@ public class ValidatedAuthenticationServiceTests
         await Assert.ThrowsAsync<UnprocessableEntityException>(() => 
             service.ConfirmationEmailAsync(new ConfirmEmailRequest()));
         await Assert.ThrowsAsync<UnprocessableEntityException>(() => 
-            service.LoginAsync(new LoginRequest()));
+            service.LoginAsync(new LoginRequest(), "unknown"));
 
         _inner.VerifyNoOtherCalls();
     }

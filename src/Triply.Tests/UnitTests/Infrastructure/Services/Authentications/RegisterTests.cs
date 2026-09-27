@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Moq;
 using Triply.Application.Features.Authentications.Commands.Register;
 using Triply.Domain.Constants;
@@ -59,13 +60,19 @@ public class RegisterTests : AuthenticationServiceTestBase
     }
 
     [Fact]
-    public async Task RegisterNewUserAsync_Success_BuildsConfirmationLinkFromRequestHost()
+    public async Task RegisterNewUserAsync_Success_BuildsConfirmationLinkForFrontend()
     {
         await Service.RegisterNewUserAsync(Request());
 
         var link = _email!.TemplateData["confirmation_link"];
-        Assert.StartsWith("http://localhost:3000/api/v1/auth/confirm-email?email=lina@triply.com&token=", link);
-        Assert.EndsWith(Uri.EscapeDataString("confirm-token"), link);
+        var confirmationUri = new Uri(link);
+        var query = QueryHelpers.ParseQuery(confirmationUri.Query);
+
+        Assert.Equal("https", confirmationUri.Scheme);
+        Assert.Equal("triply.example", confirmationUri.Host);
+        Assert.Equal("/confirm-email", confirmationUri.AbsolutePath);
+        Assert.Equal("lina@triply.com", query["email"].Single());
+        Assert.Equal("confirm-token", query["token"].Single());
     }
 
     [Fact]

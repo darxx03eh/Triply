@@ -87,6 +87,25 @@ Copy [`.env.example`](.env.example) to `.env`. Do not commit `.env`.
 For Stripe locally, forward events with: `stripe listen --events checkout.session.completed,payment_intent.succeeded,payment_intent.payment_failed --forward-to http://localhost:8080/api/v1/payments/webhook`. Put the generated `whsec_...` value in `STRIPE_WEBHOOK_SECRET` and restart the API.
 
 ---
+## Rate limiting
+
+Rate limits are stored in Redis and apply independently per client IP address and endpoint policy. A request over its limit returns HTTP `429 Too Many Requests` with the API response `code` for that endpoint.
+
+| Endpoint group | Limit |
+| --- | --- |
+| Authentication — register | 30 requests/minute |
+| Authentication — confirm email | 10 requests/15 minutes |
+| Authentication — login | 10 requests/minute |
+| Authentication — refresh | 30 requests/minute |
+| Authentication — logout | 20 requests/minute |
+| Read operations (search; cities, hotels, rooms, amenities, deals, reviews, attractions, home, cart, and bookings) | 60 requests/minute |
+| Create, update, delete, and image-upload operations | 10 requests/minute |
+| Add or remove a cart item | 30 requests/minute |
+| Clear cart, checkout, cancel booking, and start payment | 10 requests/minute |
+| Booking invoice download | 20 requests/minute |
+| Payment webhook | 30 requests/minute |
+
+---
 ## Using the API
 
 All routes start with `http://localhost:8080/api/v1`. Swagger at http://localhost:8080/swagger has the complete contract in Development. Responses use `data`, `message`, `code`, and `errors` fields.

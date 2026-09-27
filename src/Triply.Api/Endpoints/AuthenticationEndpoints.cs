@@ -42,6 +42,8 @@ public static class AuthenticationEndpoints
                                  Creates a new user account in the system using the provided registration details,
                                  such as username, email, and password. Returns the full name, user id and email.
                                  """)
+                .WithRateLimit("register", 30, TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Authentication.RegisterRateLimited)
                 .Produces<ApiResponse<RegisterUserResponse>>(StatusCodes.Status201Created);
             
             group.MapGet(Router.AuthenticationRoutes.EmailConfirmation, async (
@@ -66,6 +68,8 @@ public static class AuthenticationEndpoints
                              Confirms a user's email address using the email address and
                              confirmation token provided in the verification link.
                              """)
+            .WithRateLimit("email-confirmation", 10, TimeSpan.FromMinutes(15), 
+                ApiResponseMessages.Authentication.EmailConfirmationRateLimited)
             .Produces(StatusCodes.Status200OK);
 
             group.MapPost(Router.AuthenticationRoutes.Login, async (
@@ -78,7 +82,8 @@ public static class AuthenticationEndpoints
                     CancellationToken cancellationToken
                 ) =>
                 {
-                    var result = await authenticationService.LoginAsync(request, cancellationToken);
+                    var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var result = await authenticationService.LoginAsync(request, ip, cancellationToken);
                     if (!result.IsSuccess)
                         return result.ToMinimalApiResult();
 
@@ -103,6 +108,8 @@ public static class AuthenticationEndpoints
                                  Validates the provided credentials (identifier and password) and, if valid,
                                  returns a JWT access token to be used for authenticating subsequent requests.
                                  """)
+                .WithRateLimit("login", 10, TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Authentication.LoginRateLimited)
                 .Produces<ApiResponse<LoginApiResponse>>(StatusCodes.Status200OK);
             
             group.MapPost(Router.AuthenticationRoutes.Refresh, async (
@@ -137,6 +144,8 @@ public static class AuthenticationEndpoints
                                  in the client's HTTP-only cookie. The refresh token is validated
                                  before issuing a new access token.
                                  """)
+                .WithRateLimit("refresh", 30, TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Authentication.RefreshRateLimited)
                 .Produces<ApiResponse<LoginApiResponse>>(StatusCodes.Status200OK);
 
             group.MapDelete(Router.AuthenticationRoutes.Logout, async (
@@ -165,6 +174,8 @@ public static class AuthenticationEndpoints
                              with blacklist redis and removes
                              the refresh token cookie from the client.
                              """)
+            .WithRateLimit("logout", 20, TimeSpan.FromMinutes(1), 
+                ApiResponseMessages.Authentication.LogoutRateLimited)
             .Produces(StatusCodes.Status204NoContent);
         }
 

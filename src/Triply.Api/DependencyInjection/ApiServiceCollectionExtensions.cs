@@ -1,9 +1,13 @@
 using System.Reflection;
 using Microsoft.OpenApi;
+using StackExchange.Redis;
 using Triply.Api.Endpoints;
 using Triply.Api.Responses;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Services.Blacklist;
+using Triply.Infrastructure.Services.RateLimit;
+using Triply.Infrastructure.Services.RateLimit.FailedLoginRateLimit;
+using RedisRateLimitService = Triply.Infrastructure.Services.RateLimit.General.RedisRateLimitService;
 
 namespace Triply.Api.DependencyInjection;
 
@@ -60,13 +64,19 @@ public static class ApiServiceCollectionExtensions
         /// <summary>Registers the Redis service services.</summary>
         public IServiceCollection AddRedisService(IConfiguration configuration)
         {
+            var connectionString = configuration["Redis:ConnectionString"];
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = configuration["Redis:ConnectionString"];
+                options.Configuration = connectionString;
                 options.InstanceName = "hotelbooking:";
             });
+            
+            services.AddSingleton<IConnectionMultiplexer>(
+                _ => ConnectionMultiplexer.Connect(connectionString));
 
             services.AddScoped<ITokenBlacklistService, RedisTokenBlacklistService>();
+            services.AddSingleton<IRateLimitService, RedisRateLimitService>();
+            services.AddScoped<IFailedLoginRateLimitService, FailedLoginRateLimitService>();
             return services;
         }
 

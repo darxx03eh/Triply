@@ -19,12 +19,19 @@ public static class PaymentEndpoints
                 .WithTags("Payments");
 
             group.MapPost(Router.BookingRoutes.Pay, async (
-                    string confirmationNumber, ICurrentUserAccessor user, IPaymentService paymentService,
+                    string confirmationNumber,
+                    ICurrentUserAccessor user,
+                    IPaymentService paymentService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await paymentService.PayAsync(confirmationNumber, user.UserId, cancellationToken);
+                    var result = await paymentService.PayAsync(
+                        confirmationNumber,
+                        user.UserId,
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).RequireAuthorization()
+                })
+                .RequireAuthorization()
                 .WithName("PayBooking")
                 .WithDisplayName("Pay Booking")
                 .WithSummary("Starts the payment of a pending booking")
@@ -33,19 +40,33 @@ public static class PaymentEndpoints
                                  the user is redirected to, the booking is confirmed later by the webhook.
                                  With the Mock provider the booking is paid and confirmed immediately.
                                  """)
+                .WithRateLimit(
+                    "pay-booking",
+                    10,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Payment.PayBookingRateLimited)
                 .Produces<ApiResponse<PaymentResponse>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
 
             group.MapPost(Router.PaymentRoutes.Webhook, async (
-                    HttpRequest request, IPaymentService paymentService, CancellationToken cancellationToken) =>
+                    HttpRequest request,
+                    IPaymentService paymentService,
+                    CancellationToken cancellationToken) =>
                 {
                     using var reader = new StreamReader(request.Body);
-                    var payload = await reader.ReadToEndAsync(cancellationToken);
+
+                    var payload = await reader.ReadToEndAsync(
+                        cancellationToken);
+
                     var result = await paymentService.HandleWebhookAsync(
-                        payload, request.Headers["Stripe-Signature"].ToString(), cancellationToken);
+                        payload,
+                        request.Headers["Stripe-Signature"].ToString(),
+                        cancellationToken);
+
                     return result.ToMinimalApiResult();
-                }).AllowAnonymous()
+                })
+                .AllowAnonymous()
                 .WithName("PaymentWebhook")
                 .WithDisplayName("Payment Webhook")
                 .WithSummary("Receives the payment provider events")
@@ -53,19 +74,35 @@ public static class PaymentEndpoints
                                  Receives the checkout events from the payment provider, verifies the signature,
                                  confirms the paid bookings and sends the booking confirmation email.
                                  """)
+                .WithRateLimit(
+                    "payment-webhook",
+                    30,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Payment.WebhookRateLimited)
                 .Produces<ApiResponse<bool>>(StatusCodes.Status200OK)
                 .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest);
 
             group.MapGet(Router.BookingRoutes.Invoice, async (
-                    string confirmationNumber, ICurrentUserAccessor user, IInvoiceService invoiceService,
+                    string confirmationNumber,
+                    ICurrentUserAccessor user,
+                    IInvoiceService invoiceService,
                     CancellationToken cancellationToken) =>
                 {
                     var result = await invoiceService.GenerateAsync(
-                        confirmationNumber, user.UserId, user.IsAdmin, cancellationToken);
+                        confirmationNumber,
+                        user.UserId,
+                        user.IsAdmin,
+                        cancellationToken);
+
                     if (!result.IsSuccess)
                         return result.ToMinimalApiResult();
-                    return Results.File(result.Value!.Content, "application/pdf", result.Value.FileName);
-                }).RequireAuthorization()
+
+                    return Results.File(
+                        result.Value!.Content,
+                        "application/pdf",
+                        result.Value.FileName);
+                })
+                .RequireAuthorization()
                 .WithName("GetBookingInvoice")
                 .WithDisplayName("Get Booking Invoice")
                 .WithSummary("Downloads the invoice of a paid booking")
@@ -73,8 +110,13 @@ public static class PaymentEndpoints
                                  Generates a PDF invoice for a paid booking with the guest details, rooms,
                                  dates, discounts and the total paid.
                                  """)
+                .WithRateLimit(
+                    "get-booking-invoice",
+                    20,
+                    TimeSpan.FromMinutes(1),
+                    ApiResponseMessages.Payment.GetBookingInvoiceRateLimited)
                 .Produces<ApiResponse<InvoiceFileResponse>>(
-                    StatusCodes.Status200OK, 
+                    StatusCodes.Status200OK,
                     contentType: "application/pdf")
                 .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
                 .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
