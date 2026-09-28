@@ -46,7 +46,7 @@ public abstract class AuthenticationServiceTestBase : IDisposable
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["FrontendUrl"] = "https://triply.example"
+                ["LocalFrontendUrl"] = "https://triply.example"
             })
             .Build();
 

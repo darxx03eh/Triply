@@ -4,6 +4,8 @@ using Triply.Infrastructure.Routes;
 using Triply.Api.Responses;
 using Triply.Application.DTOs.Deals;
 using Triply.Application.DTOs.Home;
+using Triply.Infrastructure.Caching;
+using Triply.Domain.Results;
 
 namespace Triply.Api.Endpoints;
 
@@ -21,11 +23,12 @@ public static class HomeEndpoints
             group.MapGet(Router.DealRoutes.Featured, async (
                     int? count,
                     IHomeService homeService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetFeaturedDealsAsync(
-                        count,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.FeaturedDeals,
+                        CacheKeyBuilder.BuildHomeCountKey(count), TimeSpan.FromMinutes(2),
+                        ct => homeService.GetFeaturedDealsAsync(count, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
@@ -47,11 +50,12 @@ public static class HomeEndpoints
             group.MapGet(Router.CityRoutes.Trending, async (
                     int? count,
                     IHomeService homeService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetTrendingCitiesAsync(
-                        count,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.TrendingCities,
+                        CacheKeyBuilder.BuildHomeCountKey(count), TimeSpan.FromMinutes(5),
+                        ct => homeService.GetTrendingCitiesAsync(count, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
@@ -76,11 +80,7 @@ public static class HomeEndpoints
                     IHomeService homeService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await homeService.GetRecentHotelsAsync(
-                        user.UserId,
-                        count,
-                        cancellationToken);
-
+                    var result = await homeService.GetRecentHotelsAsync(user.UserId, count, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization()

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
 using Triply.Domain.Entities;
+using Triply.Domain.Entities.Identity;
 
 namespace Triply.Infrastructure.Filtering;
 
@@ -76,6 +77,16 @@ public class ApplicationSieveProcessor(IOptions<SieveOptions> options) : SievePr
             .CanFilter().CanSort()
             .HasName("price");
         mapper.Property<Booking>(b => b.CreatedAt).CanSort();
+
+        // Maps the administrative user directory properties.
+        mapper.Property<TriplyUser>(u => u.FirstName).CanFilter().CanSort();
+        mapper.Property<TriplyUser>(u => u.LastName).CanFilter().CanSort();
+        mapper.Property<TriplyUser>(u => u.Email).CanFilter().CanSort();
+        mapper.Property<TriplyUser>(u => u.UserName).CanFilter().CanSort();
+        mapper.Property<TriplyUser>(u => u.IsActive).CanFilter();
+        mapper.Property<TriplyUser>(u => u.IsDeleted).CanFilter();
+        mapper.Property<TriplyUser>(u => u.CreatedAt).CanSort();
+        mapper.Property<TriplyUser>(u => u.LastLoginAt).CanSort();
 
         return mapper;
     }

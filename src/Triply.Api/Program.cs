@@ -87,6 +87,8 @@ public class Program
         app.UseMiddleware<ErrorHandlerMiddleware>();
         // Middleware to handles rate limit for login
         app.UseMiddleware<RateLimitMiddleware>();
+        // Invalidate cached read models after successful create, update, and delete requests.
+        app.UseMiddleware<CacheInvalidationMiddleware>();
         // Endpoint to check if the backend is healthy
         app.MapHealthChecks("/health");
         app.UseAuthentication();
@@ -152,6 +154,8 @@ public class Program
         app.UseHttpsRedirection();
         app.UseMiddleware<ErrorHandlerMiddleware>();
         app.UseRouting();
+        app.UseMiddleware<RateLimitMiddleware>();
+        app.UseMiddleware<CacheInvalidationMiddleware>();
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>

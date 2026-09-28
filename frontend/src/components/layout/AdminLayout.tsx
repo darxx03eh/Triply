@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
-import { BadgePercent, BedDouble, Building2, ChevronsLeft, ChevronsRight, ExternalLink, LayoutDashboard, MapPin, Menu, Sparkles, X } from 'lucide-react'
+import { BadgePercent, BedDouble, Building2, ChevronsLeft, ChevronsRight, ExternalLink, LayoutDashboard, MapPin, Menu, Sparkles, UsersRound, X } from 'lucide-react'
 import { Link } from 'react-router'
 import { cn } from '@/lib/cn'
 import { storage } from '@/lib/storage'
@@ -14,6 +14,7 @@ const links = [
   { to: '/admin/rooms', label: 'Rooms', icon: BedDouble },
   { to: '/admin/amenities', label: 'Amenities', icon: Sparkles },
   { to: '/admin/deals', label: 'Deals', icon: BadgePercent },
+  { to: '/admin/users', label: 'Users', icon: UsersRound },
 ]
 
 export function AdminLayout() {

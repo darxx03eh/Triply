@@ -162,7 +162,10 @@ public static class Router
     /// <summary>Represents the user routes.</summary>
     public static class UserRoutes
     {
+        private const string AdminPrefix = $"{Rule}/users";
         private const string Prefix = $"{Rule}/users/me";
+        /// <summary>The administrative user directory.</summary>
+        public const string GetAll = AdminPrefix;
         /// <summary>The recent hotels.</summary>
         public const string RecentHotels = $"{Prefix}/recent-hotels";
         /// <summary>The get bookings.</summary>

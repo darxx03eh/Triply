@@ -5,6 +5,7 @@ using Triply.Api.Endpoints;
 using Triply.Api.Responses;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Services.Blacklist;
+using Triply.Infrastructure.Services.Cache;
 using Triply.Infrastructure.Services.RateLimit;
 using Triply.Infrastructure.Services.RateLimit.FailedLoginRateLimit;
 using RedisRateLimitService = Triply.Infrastructure.Services.RateLimit.General.RedisRateLimitService;
@@ -68,7 +69,7 @@ public static class ApiServiceCollectionExtensions
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = connectionString;
-                options.InstanceName = "hotelbooking:";
+                options.InstanceName = "triply:";
             });
             
             services.AddSingleton<IConnectionMultiplexer>(
@@ -76,6 +77,7 @@ public static class ApiServiceCollectionExtensions
 
             services.AddScoped<ITokenBlacklistService, RedisTokenBlacklistService>();
             services.AddSingleton<IRateLimitService, RedisRateLimitService>();
+            services.AddSingleton<ICacheService, RedisCacheService>();
             services.AddScoped<IFailedLoginRateLimitService, FailedLoginRateLimitService>();
             return services;
         }
@@ -136,6 +138,7 @@ public static class ApiServiceCollectionExtensions
             app.MapCartEndpoints();
             app.MapBookingEndpoints();
             app.MapPaymentEndpoints();
+            app.MapUserEndpoints();
         }
     }
 

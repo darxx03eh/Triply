@@ -7,6 +7,8 @@ using Triply.Application.Features.Reviews.Commands.UpdateReview;
 using Triply.Application.Features.Reviews.Queries.GetReviews;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
+using Triply.Infrastructure.Caching;
+using Triply.Domain.Results;
 
 namespace Triply.Api.Endpoints;
 
@@ -25,9 +27,14 @@ public static class ReviewEndpoints
                     Guid id,
                     [AsParameters] GetReviewsRequest request,
                     IReviewService reviewService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await reviewService.GetHotelReviewsAsync(id, request, cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Reviews,
+                        CacheKeyBuilder.BuildPagedSieveKey(request.Filters, request.Sorts, 
+                            request.Page, request.PageSize,
+                            isAdmin: false, scope: new { id }), TimeSpan.FromMinutes(2),
+                        ct => reviewService.GetHotelReviewsAsync(id, request, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetHotelReviews")

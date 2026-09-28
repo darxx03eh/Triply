@@ -3,6 +3,16 @@ namespace Triply.Api.Responses;
 /// <summary>The messages of the API response messages feature.</summary>
 public static class ApiResponseMessages
 {
+    /// <summary>Contains user-directory API response messages.</summary>
+    public static class User
+    {
+        /// <summary>Message returned when retrieving users is rate limited.</summary>
+        public static readonly ApiMessage GetAllRateLimited
+            = new(
+                "GET_ALL_USERS_RATE_LIMITED",
+                "Too many requests to retrieve users. Please try again in a few minutes.");
+    }
+
     /// <summary>The authentication messages of the API response messages.</summary>
     public static class Authentication
     {

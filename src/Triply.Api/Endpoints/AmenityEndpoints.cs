@@ -7,6 +7,8 @@ using Triply.Application.Features.Amenities.Commands.UpdateAmenity;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Infrastructure.Caching;
+using Triply.Domain.Results;
 
 namespace Triply.Api.Endpoints;
 
@@ -48,9 +50,12 @@ public static class AmenityEndpoints
 
             group.MapGet(Router.AmenityRoutes.GetAll, async (
                     IAmenityService amenityService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await amenityService.GetAllAsync(cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Amenities, "all", 
+                        TimeSpan.FromMinutes(30),
+                        amenityService.GetAllAsync, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetAllAmenities")
@@ -98,12 +103,7 @@ public static class AmenityEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     request.AmenityId = id;
-
-                    var result = await amenityService.UpdateAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await amenityService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -149,11 +149,12 @@ public static class AmenityEndpoints
             group.MapGet(Router.HotelRoutes.Amenities, async (
                     Guid id,
                     IAmenityService amenityService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await amenityService.GetHotelAmenitiesAsync(
-                        id,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.HotelAmenities,
+                        CacheKeyBuilder.BuildKey(new { id }), TimeSpan.FromMinutes(10),
+                        ct => amenityService.GetHotelAmenitiesAsync(id, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
