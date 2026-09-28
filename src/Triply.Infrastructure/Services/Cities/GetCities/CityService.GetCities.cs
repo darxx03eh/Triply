@@ -4,6 +4,7 @@ using Triply.Application.DTOs.Cities;
 using Triply.Application.Extensions;
 using Triply.Application.Features.Cities.Queries.GetCitiesRequest;
 using Triply.Domain.Results;
+using Triply.Infrastructure.Caching;
 
 namespace Triply.Infrastructure.Services.Cities;
 

@@ -1,4 +1,7 @@
+using Microsoft.Extensions.Options;
+using Sieve.Models;
 using Triply.Infrastructure.Db;
+using Triply.Infrastructure.Filtering;
 using Triply.Infrastructure.Repositories;
 using Triply.Tests.UnitTests.Common.Builders;
 using Triply.Tests.UnitTests.Common.Database;
@@ -12,7 +15,8 @@ public class UserRepositoryTests : IDisposable
 
     public UserRepositoryTests()
     {
-        _repository = new UserRepository(_db);
+        _repository = new UserRepository(_db,
+            new ApplicationSieveProcessor(Options.Create(new SieveOptions())));
         var user = TestData.User("Mahmoud.D", "Mahmoud@Triply.com");
         user.NormalizedUserName = user.UserName!.ToUpperInvariant();
         user.NormalizedEmail = user.Email!.ToUpperInvariant();

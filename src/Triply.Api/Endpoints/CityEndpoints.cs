@@ -10,6 +10,7 @@ using Triply.Infrastructure.Routes;
 using Triply.Api.Responses;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Cities;
+using Triply.Infrastructure.Caching;
 
 namespace Triply.Api.Endpoints;
 
@@ -29,10 +30,7 @@ public static class CityEndpoints
                     ICityService cityService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.CreateAsync(
-                        request,
-                        cancellationToken);
-
+                    var result = await cityService.CreateAsync(request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -55,13 +53,13 @@ public static class CityEndpoints
                     [AsParameters] GetCitiesRequest request,
                     [FromServices] ICurrentUserAccessor currentUser,
                     ICityService cityService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.GetPagedAsync(
-                        request,
-                        currentUser.IsAdmin,
-                        cancellationToken);
-
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Cities,
+                        CacheKeyBuilder.BuildCitiesKey(request, currentUser.IsAdmin),
+                        TimeSpan.FromMinutes(10),
+                        ct => cityService.GetPagedAsync(request, currentUser.IsAdmin, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetAllCities")
@@ -82,12 +80,12 @@ public static class CityEndpoints
             group.MapGet(Router.CityRoutes.GetById, async (
                     Guid id,
                     ICityService cityService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.GetByIdAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Cities,
+                        CacheKeyBuilder.BuildKey(new { id, IsAdmin = true }), TimeSpan.FromMinutes(10),
+                        ct => cityService.GetByIdAsync(id, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -113,12 +111,7 @@ public static class CityEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     request.CityId = id;
-
-                    var result = await cityService.UpdateAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await cityService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -145,10 +138,7 @@ public static class CityEndpoints
                     ICityService cityService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.DeleteAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await cityService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -174,11 +164,7 @@ public static class CityEndpoints
                     ICityService cityService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.UploadThumbnailAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await cityService.UploadThumbnailAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -207,10 +193,7 @@ public static class CityEndpoints
                     ICityService cityService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await cityService.DeleteThumbnailAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await cityService.DeleteThumbnailAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
