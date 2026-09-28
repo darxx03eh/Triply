@@ -6,6 +6,8 @@ using Triply.Application.Features.Attractions.Commands.UpdateAttraction;
 using Triply.Application.Interfaces.Services;
 using Triply.Domain.Constants;
 using Triply.Infrastructure.Routes;
+using Triply.Infrastructure.Caching;
+using Triply.Domain.Results;
 
 namespace Triply.Api.Endpoints;
 
@@ -23,11 +25,12 @@ public static class AttractionEndpoints
             group.MapGet(Router.HotelRoutes.Attractions, async (
                     Guid id,
                     IAttractionService attractionService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.GetHotelAttractionsAsync(
-                        id,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Attractions,
+                        CacheKeyBuilder.BuildKey(new { id }), TimeSpan.FromMinutes(10),
+                        ct => attractionService.GetHotelAttractionsAsync(id, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
@@ -53,11 +56,7 @@ public static class AttractionEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     request.HotelId = id;
-
-                    var result = await attractionService.CreateAsync(
-                        request,
-                        cancellationToken);
-
+                    var result = await attractionService.CreateAsync(request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -82,11 +81,7 @@ public static class AttractionEndpoints
                     IAttractionService attractionService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.UpdateAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await attractionService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -110,10 +105,7 @@ public static class AttractionEndpoints
                     IAttractionService attractionService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await attractionService.DeleteAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await attractionService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))

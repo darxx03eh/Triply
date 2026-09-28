@@ -78,7 +78,7 @@ public partial class AuthenticationService
     private async Task<string> GenerateConfirmationLink(TriplyUser user)
     {
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        var frontendUrl = configuration["FrontendUrl"]?.TrimEnd('/');
+        var frontendUrl = configuration["LocalFrontendUrl"]?.TrimEnd('/');
 
         // The link must open the SPA, not the API endpoint.  The API can be hosted on a
         // different origin (or behind a reverse proxy), in which case deriving its host

@@ -3,6 +3,8 @@ using Triply.Api.Extensions;
 using Triply.Api.Responses;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Rooms;
+using Triply.Domain.Results;
+using Triply.Infrastructure.Caching;
 using Triply.Application.Features.Rooms.Commands.CreateRoom;
 using Triply.Application.Features.Rooms.Commands.UpdateRoom;
 using Triply.Application.Features.Rooms.Commands.UploadImage;
@@ -53,9 +55,13 @@ public static class RoomEndpoints
                     [AsParameters] GetRoomsRequest request,
                     ICurrentUserAccessor user,
                     IRoomService roomService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await roomService.GetPagedAsync(request, user.IsAdmin, cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Rooms,
+                        CacheKeyBuilder.BuildPagedSieveKey(request.Filters, request.Sorts, request.Page, request.PageSize,
+                            user.IsAdmin, new { request.CheckIn, request.CheckOut }), TimeSpan.FromMinutes(1),
+                        ct => roomService.GetPagedAsync(request, user.IsAdmin, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetAllRooms")
@@ -77,9 +83,14 @@ public static class RoomEndpoints
                     Guid id,
                     [AsParameters] GetRoomsRequest request,
                     IRoomService roomService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await roomService.GetHotelRoomsAsync(id, request, cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Rooms,
+                        CacheKeyBuilder.BuildPagedSieveKey(request.Filters, request.Sorts, request.Page, request.PageSize,
+                            isAdmin: false, scope: new { id, request.CheckIn, request.CheckOut }), 
+                        TimeSpan.FromMinutes(1),
+                        ct => roomService.GetHotelRoomsAsync(id, request, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithTags("Hotels")

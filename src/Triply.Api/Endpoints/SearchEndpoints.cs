@@ -4,6 +4,8 @@ using Triply.Application.DTOs.Search;
 using Triply.Application.Features.Search.Queries.SearchHotels;
 using Triply.Application.Interfaces.Services;
 using Triply.Infrastructure.Routes;
+using Triply.Infrastructure.Caching;
+using Triply.Domain.Results;
 
 namespace Triply.Api.Endpoints;
 
@@ -21,9 +23,12 @@ public static class SearchEndpoints
             group.MapGet(Router.SearchRoutes.Hotels, async (
                     [AsParameters] SearchHotelsRequest request,
                     ISearchService searchService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await searchService.SearchHotelsAsync(request, cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.HotelSearch,
+                        CacheKeyBuilder.BuildSearchKey(request), TimeSpan.FromSeconds(30),
+                        ct => searchService.SearchHotelsAsync(request, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("SearchHotels")

@@ -8,6 +8,8 @@ using Triply.Infrastructure.Routes;
 using Triply.Api.Responses;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Deals;
+using Triply.Domain.Results;
+using Triply.Infrastructure.Caching;
 
 namespace Triply.Api.Endpoints;
 
@@ -28,10 +30,7 @@ public static class DealEndpoints
                     IDealService dealService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await dealService.CreateAsync(
-                        request,
-                        cancellationToken);
-
+                    var result = await dealService.CreateAsync(request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("CreateDeal")
@@ -55,11 +54,13 @@ public static class DealEndpoints
             group.MapGet(Router.DealRoutes.GetAll, async (
                     [AsParameters] GetDealsRequest request,
                     IDealService dealService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await dealService.GetPagedAsync(
-                        request,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Deals,
+                        CacheKeyBuilder.BuildPagedSieveKey(request.Filters, request.Sorts, 
+                            request.Page, request.PageSize, isAdmin: true), TimeSpan.FromMinutes(5),
+                        ct => dealService.GetPagedAsync(request, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
@@ -82,12 +83,12 @@ public static class DealEndpoints
             group.MapGet(Router.DealRoutes.GetById, async (
                     Guid id,
                     IDealService dealService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await dealService.GetByIdAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Deals, 
+                        CacheKeyBuilder.BuildKey(new { id }),
+                        TimeSpan.FromMinutes(5), ct => dealService.GetByIdAsync(id, ct), cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetDealById")
@@ -111,11 +112,7 @@ public static class DealEndpoints
                     IDealService dealService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await dealService.UpdateAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await dealService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("UpdateDeal")
@@ -140,10 +137,7 @@ public static class DealEndpoints
                     IDealService dealService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await dealService.DeleteAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await dealService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("DeleteDeal")

@@ -10,6 +10,7 @@ using Triply.Infrastructure.Routes;
 using Triply.Api.Responses;
 using Triply.Application.Common.Models;
 using Triply.Application.DTOs.Hotels;
+using Triply.Infrastructure.Caching;
 
 namespace Triply.Api.Endpoints;
 
@@ -30,11 +31,7 @@ public static class HotelEndpoints
                     IHotelService hotelService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.CreateAsync(
-                        request,
-                        user.UserId,
-                        cancellationToken);
-
+                    var result = await hotelService.CreateAsync(request, user.UserId, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -58,11 +55,13 @@ public static class HotelEndpoints
                     [AsParameters] GetHotelsRequest request,
                     ICurrentUserAccessor user,
                     IHotelService hotelService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.GetPagedAsync(
-                        request,
-                        user.IsAdmin,
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Hotels,
+                        CacheKeyBuilder.BuildPagedSieveKey(request.Filters, request.Sorts, request.Page, 
+                            request.PageSize, user.IsAdmin),
+                        TimeSpan.FromMinutes(5), ct => hotelService.GetPagedAsync(request, user.IsAdmin, ct), 
                         cancellationToken);
 
                     return result.ToMinimalApiResult();
@@ -89,20 +88,14 @@ public static class HotelEndpoints
                     IHotelService hotelService,
                     ICurrentUserAccessor user,
                     IHomeService homeService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.GetByIdAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await cache.GetOrCreateAsync(CacheGroups.Hotels,
+                        CacheKeyBuilder.BuildKey(new { id, IsAdmin = user.IsAdmin }), TimeSpan.FromMinutes(5),
+                        ct => hotelService.GetByIdAsync(id, ct), cancellationToken);
                     if (result.IsSuccess && user.UserId != Guid.Empty)
-                    {
-                        await homeService.RecordVisitAsync(
-                            user.UserId,
-                            id,
-                            cancellationToken);
-                    }
-
+                        await homeService.RecordVisitAsync(user.UserId, id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .WithName("GetHotelById")
@@ -128,12 +121,7 @@ public static class HotelEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     request.HotelId = id;
-
-                    var result = await hotelService.UpdateAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await hotelService.UpdateAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -160,10 +148,7 @@ public static class HotelEndpoints
                     IHotelService hotelService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.DeleteAsync(
-                        id,
-                        cancellationToken);
-
+                    var result = await hotelService.DeleteAsync(id, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -189,11 +174,7 @@ public static class HotelEndpoints
                     IHotelService hotelService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.InitiateUploadAsync(
-                        id,
-                        request,
-                        cancellationToken);
-
+                    var result = await hotelService.InitiateUploadAsync(id, request, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
@@ -221,11 +202,12 @@ public static class HotelEndpoints
             group.MapGet(Router.HotelRoutes.GetImages, async (
                     Guid id,
                     IHotelService hotelService,
+                    ICacheService cache,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.GetImagesAsync(
-                        id,
-                        cancellationToken);
+                    var result = await cache.GetOrCreateAsync(CacheGroups.HotelImages,
+                        CacheKeyBuilder.BuildKey(new { id, IsAdmin = true }), TimeSpan.FromMinutes(10),
+                        ct => hotelService.GetImagesAsync(id, ct), cancellationToken);
 
                     return result.ToMinimalApiResult();
                 })
@@ -253,11 +235,7 @@ public static class HotelEndpoints
                     IHotelService hotelService,
                     CancellationToken cancellationToken) =>
                 {
-                    var result = await hotelService.DeleteImageAsync(
-                        id,
-                        imageId,
-                        cancellationToken);
-
+                    var result = await hotelService.DeleteImageAsync(id, imageId, cancellationToken);
                     return result.ToMinimalApiResult();
                 })
                 .RequireAuthorization(policy => policy.RequireRole(Roles.Admin))
