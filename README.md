@@ -17,6 +17,7 @@ Triply is a production-oriented hotel booking platform built with **ASP.NET Core
 > **Project resources**
 >
 > - **Repository:** [darxx03eh/Triply](https://github.com/darxx03eh/Triply)
+> - **Frontend documentation:** [Frontend](frontend/README.md)
 > - **API documentation:** [Swagger](http://localhost:8080/swagger) when running locally
 > - **Database schema:** [Triply ERD](docs/imgs/triply.svg)
 
@@ -110,7 +111,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-When the containers are healthy, open [the web app](http://localhost:3000), [API health](http://localhost:8080/health), or [Swagger](http://localhost:8080/swagger) (Development only). RabbitMQ Management is available at [localhost:15672](http://localhost:15672), and Kibana at [localhost:5601](http://localhost:5601).
+When the containers are healthy, open [the web app](http://localhost:3000), [API health](http://localhost:8080/health), or [Swagger](http://localhost:8080/swagger) (Development only). RabbitMQ Management is available at [RabbitMQ](http://localhost:15672), and Kibana at [Kibana](http://localhost:5601).
 
 Stop the stack with `docker compose down`.
 
