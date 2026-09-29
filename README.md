@@ -71,7 +71,7 @@ Feature requests and validation live under `Application/Features`, while the inf
 | Messaging and workers | RabbitMQ, EmailWorker, ImageUploader worker, pending-booking expiry worker |
 | External services | Stripe Checkout and webhooks, Cloudinary image hosting, SMTP email, QuestPDF invoice generation |
 | Observability | Serilog structured logging, Elasticsearch, Kibana, request correlation IDs, health checks |
-| Testing | xUnit, Moq, EF Core InMemory/SQLite, ASP.NET Core `WebApplicationFactory`, Coverlet |
+| Testing | xUnit, Moq, EF Core InMemory/SQL Server, ASP.NET Core `WebApplicationFactory`, Coverlet |
 | Local orchestration | Docker, Docker Compose, SQL Server, Redis, RabbitMQ Management, Elasticsearch, Kibana |
 
 ---
