@@ -20,6 +20,7 @@ Triply is a production-oriented hotel booking platform built with **ASP.NET Core
 > - **Frontend documentation:** [Frontend](frontend/README.md)
 > - **API documentation:** [Swagger](http://localhost:8080/swagger) when running locally
 > - **Database schema:** [Triply ERD](docs/imgs/triply.svg)
+> - **Project roadmap:** [Jira](https://darxx03eh.atlassian.net/jira/software/projects/TRIPLY/boards/35?filter=assignee+IN+%28empty%2C+712020%3Af0f35d51-41b4-48af-978f-1dac8d32422d%29&groupBy=none&atlOrigin=eyJpIjoiOWMyODVhM2Y0MWVjNDFjZDg0MzBmZGVlMTFlNWViYjgiLCJwIjoiaiJ9)
 
 ---
 ## Table of contents
@@ -34,6 +35,7 @@ Triply is a production-oriented hotel booking platform built with **ASP.NET Core
 - [Rate limiting](#rate-limiting)
 - [Response caching](#response-caching)
 - [API documentation](#using-the-api)
+- [Project roadmap](#project-roadmap)
 - [Testing](#testing)
 - [Project structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
